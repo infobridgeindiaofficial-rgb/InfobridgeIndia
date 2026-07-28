@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+    <title>Flipkart GST Generator | InfoBridgeIndia</title>
+ 
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+ 
+<body>
+ 
+    <header class="meesho-header">
+        <a href="../index.html" class="meesho-logo">
+            <img src="../images/logo.png" alt="InfoBridgeIndia Logo">
+            <span>InfoBridgeIndia</span>
+        </a>
+ 
+        <nav class="meesho-nav">
+            <a href="../index.html">Home</a>
+            <a href="meesho.html">Meesho GST</a>
+            <a href="flipkart.html">Flipkart GST</a>
+        </nav>
+    </header>
+ 
+    <main class="upload-page">
+ 
+        <h1>Flipkart GST Report Generator</h1>
+ 
+        <p>
+            Upload your Flipkart Sales Report.
+            The GST Engine will prepare your GST workbook automatically.
+        </p>
+ 
+        <div class="upload-box">
+            <h3>1. Sales Report</h3>
+            <input type="file" id="salesReport" accept=".xlsx,.xls">
+        </div>
+ 
+        <div class="upload-actions">
+            <button type="button" id="validateBtn">
+                Validate Report
+            </button>
+ 
+            <button type="button" id="generateBtn" disabled>
+                Generate GST Report
+            </button>
+        </div>
+ 
+        <div id="statusBox"></div>
+ 
+    </main>
+ 
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="../js/flipkart.js"></script>
+ 
+</body>
+</html>
+ 
