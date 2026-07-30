@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Free HSN Code Search with GST Rate | InfoBridgeIndia</title>
+
+    <meta name="description"
+        content="Search HSN codes and GST rates by product name or HSN number. A free HSN search tool for Indian online sellers.">
+
+    <link rel="canonical" href="https://infobridgeindia.online/pages/hsn-search.html">
+    <link rel="icon" type="image/png" href="../images/logo.png">
+    <meta name="theme-color" content="#071426">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/hsn-search.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+
+        <div class="container nav-container">
+
+            <a href="../index.html" class="brand" aria-label="InfoBridgeIndia Home">
+
+                <img src="../images/logo.png" alt="InfoBridgeIndia Logo">
+
+                <span class="brand-name">
+                    <span class="brand-dark">InfoBridge</span>
+                    <span class="brand-blue">India</span>
+                </span>
+
+            </a>
+
+            <button class="menu-button" id="menuButton" aria-label="Open navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="../index.html">Home</a>
+                <a href="../index.html#tools">GST Tools</a>
+                <a href="hsn-search.html" class="active">HSN Search</a>
+                <a href="../index.html#about">About Us</a>
+                <a href="../index.html#contact">Contact</a>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <section class="hero">
+
+            <div class="hero-grid-background"></div>
+            <div class="hero-glow hero-glow-left"></div>
+            <div class="hero-glow hero-glow-right"></div>
+
+            <div class="container hero-container">
+
+                <div class="hero-content">
+
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        Free HSN Search for Indian Online Sellers
+                    </div>
+
+                    <h1>
+                        Find the right
+                        <span>HSN Code</span>
+                        in seconds
+                    </h1>
+
+                    <p>
+                        Search by product name or HSN number and instantly view the
+                        matching HSN code and GST rate.
+                    </p>
+
+                    <div class="hero-stats">
+
+                        <div class="stat-item">
+                            <strong>1,800+</strong>
+                            <span>Fixed-rate HSN records</span>
+                        </div>
+
+                        <div class="stat-item">
+                            <strong>Instant</strong>
+                            <span>Live search results</span>
+                        </div>
+
+                        <div class="stat-item">
+                            <strong>100%</strong>
+                            <span>Free to use</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="search-panel">
+
+                    <div class="panel-header">
+
+                        <div class="panel-title">
+
+                            <span class="status-dot"></span>
+
+                            <div>
+                                <strong>HSN Intelligence Search</strong>
+                                <small>InfoBridgeIndia Seller Toolkit</small>
+                            </div>
+
+                        </div>
+
+                        <span class="panel-status">LIVE</span>
+
+                    </div>
+
+
+                    <div class="search-area">
+
+                        <label for="hsnSearch">
+                            Product name or HSN code
+                        </label>
+
+                        <div class="search-box">
+
+                            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z">
+                                </path>
+                            </svg>
+
+                            <input
+                                type="search"
+                                id="hsnSearch"
+                                placeholder="Search bottle, comb, steel plate..."
+                                autocomplete="off"
+                                spellcheck="false">
+
+                            <button
+                                type="button"
+                                id="clearSearch"
+                                class="clear-button"
+                                aria-label="Clear search">
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <div class="popular-searches">
+
+                            <span>Popular searches</span>
+
+                            <button type="button" data-search="bottle">Bottle</button>
+                            <button type="button" data-search="comb">Comb</button>
+                            <button type="button" data-search="steel plate">Steel Plate</button>
+                            <button type="button" data-search="plastic">Plastic</button>
+
+                        </div>
+
+
+                        <div class="search-message" id="searchMessage">
+
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M12 8v4m0 4h.01M10.27 3.7 2.6 17a2 2 0 0 0 1.73 3h15.34a2 2 0 0 0 1.73-3L13.73 3.7a2 2 0 0 0-3.46 0Z">
+                                </path>
+                            </svg>
+
+                            Select the closest matching product description before using the HSN code.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="results-section">
+
+            <div class="container">
+
+                <div class="results-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            SEARCH RESULTS
+                        </span>
+
+                        <h2 id="resultsTitle">
+                            Start typing to search
+                        </h2>
+
+                    </div>
+
+                    <span class="result-count" id="resultCount">
+                        0 Results
+                    </span>
+
+                </div>
+
+
+                <div class="empty-state" id="emptyState">
+
+                    <div class="empty-icon">
+
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z">
+                            </path>
+                        </svg>
+
+                    </div>
+
+                    <h3>Search your product</h3>
+
+                    <p>
+                        Enter a product name such as “bottle” or type an HSN code.
+                    </p>
+
+                </div>
+
+
+                <div class="results-grid" id="resultsGrid" aria-live="polite"></div>
+
+
+                <button type="button" class="show-more-button" id="showMoreButton" hidden>
+                    Show More Results
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <section class="how-it-works">
+
+            <div class="container">
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        BUILT FOR SIMPLICITY
+                    </span>
+
+                    <h2>One search. Clear result.</h2>
+
+                    <p>
+                        A simple HSN search experience designed for online sellers.
+                    </p>
+
+                </div>
+
+
+                <div class="steps-grid">
+
+                    <article class="step-card">
+
+                        <span class="step-number">01</span>
+
+                        <div class="step-icon">
+
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z">
+                                </path>
+                            </svg>
+
+                        </div>
+
+                        <h3>Type a product</h3>
+
+                        <p>
+                            Search using a normal product name or an HSN number.
+                        </p>
+
+                    </article>
+
+
+                    <article class="step-card">
+
+                        <span class="step-number">02</span>
+
+                        <div class="step-icon">
+
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M4 6h16M4 12h16M4 18h10">
+                                </path>
+                            </svg>
+
+                        </div>
+
+                        <h3>Compare matches</h3>
+
+                        <p>
+                            Review the closest product descriptions and GST rates.
+                        </p>
+
+                    </article>
+
+
+                    <article class="step-card">
+
+                        <span class="step-number">03</span>
+
+                        <div class="step-icon">
+
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="m5 12 4 4L19 6">
+                                </path>
+                            </svg>
+
+                        </div>
+
+                        <h3>Use the code</h3>
+
+                        <p>
+                            Select the correct classification for your product.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="disclaimer-section">
+
+            <div class="container">
+
+                <div class="disclaimer-box">
+
+                    <div class="disclaimer-icon">
+
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M12 8v4m0 4h.01M10.27 3.7 2.6 17a2 2 0 0 0 1.73 3h15.34a2 2 0 0 0 1.73-3L13.73 3.7a2 2 0 0 0-3.46 0Z">
+                            </path>
+                        </svg>
+
+                    </div>
+
+                    <div>
+
+                        <h3>Important information</h3>
+
+                        <p>
+                            This tool is provided for educational and reference purposes.
+                            HSN classification may depend on material, use and product
+                            specification. Verify the final classification before GST filing.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer id="contact">
+
+        <div class="container footer-container">
+
+            <a href="../index.html" class="brand footer-brand">
+
+                <img src="../images/logo.png" alt="InfoBridgeIndia Logo">
+
+                <span class="brand-name">
+                    <span class="brand-dark">InfoBridge</span>
+                    <span class="brand-blue">India</span>
+                </span>
+
+            </a>
+
+            <p>
+                Free GST tools and practical resources for Indian online sellers.
+            </p>
+
+            <p>
+                © 2026 InfoBridgeIndia. All Rights Reserved.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <script src="../js/hsn-search.js"></script>
+
+</body>
+</html>
