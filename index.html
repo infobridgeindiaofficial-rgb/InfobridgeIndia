@@ -8,7 +8,7 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
+ 
   gtag('config', 'G-WDV9HEL5DX');
 </script>
  <script type="application/ld+json">
@@ -23,10 +23,10 @@
     <meta charset="UTF-8">
  <!-- Canonical URL -->
 <link rel="canonical" href="https://infobridgeindia.online/">
-
+ 
 <!-- Favicon -->
 <link rel="icon" type="image/png" href="/images/logo.png">
-
+ 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="InfoBridgeIndia | Free GST Excel Builder">
@@ -34,13 +34,13 @@
 <meta property="og:url" content="https://infobridgeindia.online/">
 <meta property="og:image" content="https://infobridgeindia.online/images/logo.png">
 <meta property="og:site_name" content="InfoBridgeIndia">
-
+ 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="InfoBridgeIndia | Free GST Excel Builder">
 <meta name="twitter:description" content="Free GST Excel Builder for Meesho, Flipkart and Amazon.">
 <meta name="twitter:image" content="https://infobridgeindia.online/images/logo.png">
-
+ 
 <!-- Theme Color -->
 <meta name="theme-color" content="#0d6efd">
  
@@ -60,7 +60,7 @@
         rel="stylesheet">
  
     <link rel="stylesheet" href="css/style.css">
-
+ 
     <style>
         .tool-icon.platform-logo {display:flex;align-items:center;justify-content:center;overflow:hidden;padding:7px;background:#fff;border:1px solid #e5e7eb;}
         .tool-icon.platform-logo img {width:100%;height:100%;object-fit:contain;display:block;}
@@ -75,9 +75,23 @@
         .navbar .brand .brand-blue {color:#2563eb !important;}
         footer .footer-logo .brand-dark {color:#ffffff !important;}
         footer .footer-logo .brand-blue {color:#3b82f6 !important;}
+        .seller-toolkit-section {background:#f8fbff;}
+        .seller-toolkit-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:34px;}
+        .seller-toolkit-card {position:relative;background:#fff;border:1px solid #dfe7f3;border-radius:20px;padding:28px 22px;box-shadow:0 14px 35px rgba(15,23,42,.07);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+        .seller-toolkit-card:hover {transform:translateY(-5px);box-shadow:0 20px 45px rgba(15,23,42,.12);border-color:#bfdbfe;}
+        .seller-toolkit-icon {width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:#eff6ff;font-size:28px;margin-bottom:20px;}
+        .seller-toolkit-card h3 {margin:0 0 12px;color:#0f172a;font-size:20px;line-height:1.35;}
+        .seller-toolkit-card p {margin:0 0 22px;color:#64748b;line-height:1.7;font-size:15px;}
+        .seller-toolkit-link {display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px 16px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;font-weight:700;transition:background .2s ease;}
+        .seller-toolkit-link:hover {background:#1d4ed8;}
+        .seller-toolkit-link.disabled {background:#e2e8f0;color:#64748b;cursor:not-allowed;pointer-events:none;}
+        .seller-toolkit-badge {position:absolute;top:18px;right:18px;padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:12px;font-weight:700;}
+        .seller-toolkit-badge.soon {background:#fff7ed;color:#c2410c;}
         @media (max-width:768px){.about-content{padding:26px 20px;text-align:left;}}
+        @media (max-width:1050px){.seller-toolkit-grid{grid-template-columns:repeat(2,1fr);}}
+        @media (max-width:600px){.seller-toolkit-grid{grid-template-columns:1fr;}.seller-toolkit-card{padding:24px 20px;}}
     </style>
-
+ 
 </head>
  
 <body>
@@ -109,6 +123,8 @@
                 <a href="#home">Home</a>
  
                 <a href="#tools">Downloads</a>
+ 
+                <a href="#seller-toolkit">Calculators</a>
  
                 <a href="#how-it-works">GST Guide</a>
  
@@ -204,6 +220,66 @@
                     <span>Flipkart</span>
  
                     <span>Amazon</span>
+ 
+                </div>
+ 
+            </div>
+ 
+        </section>
+ 
+ 
+        <!-- Seller Toolkit -->
+ 
+        <section class="section seller-toolkit-section" id="seller-toolkit">
+ 
+            <div class="container">
+ 
+                <div class="section-heading">
+ 
+                    <span class="section-label">FREE ONLINE TOOLS</span>
+ 
+                    <h2>Seller GST Toolkit</h2>
+ 
+                    <p>
+                        Use these free calculators to check GST-inclusive prices,
+                        delayed-payment interest and return-filing late fees.
+                    </p>
+ 
+                </div>
+ 
+                <div class="seller-toolkit-grid">
+ 
+                    <article class="seller-toolkit-card">
+                        <span class="seller-toolkit-badge">Available</span>
+                        <div class="seller-toolkit-icon" aria-hidden="true">%</div>
+                        <h3>GST Inclusive / Exclusive Calculator</h3>
+                        <p>Find taxable value, GST amount and final price for inclusive or exclusive GST calculations.</p>
+                        <a href="pages/gst-calculator.html" class="seller-toolkit-link">Open Calculator</a>
+                    </article>
+ 
+                    <article class="seller-toolkit-card">
+                        <span class="seller-toolkit-badge">Available</span>
+                        <div class="seller-toolkit-icon" aria-hidden="true">₹</div>
+                        <h3>GST Interest Calculator</h3>
+                        <p>Estimate interest payable when GST tax payment is made after the applicable due date.</p>
+                        <a href="pages/interest-calculator.html" class="seller-toolkit-link">Open Calculator</a>
+                    </article>
+ 
+                    <article class="seller-toolkit-card">
+                        <span class="seller-toolkit-badge">Available</span>
+                        <div class="seller-toolkit-icon" aria-hidden="true">⌛</div>
+                        <h3>GST Late Fee Calculator</h3>
+                        <p>Estimate late fee for delayed GSTR-1 or GSTR-3B filing using return and delay details.</p>
+                        <a href="pages/late-fee-calculator.html" class="seller-toolkit-link">Open Calculator</a>
+                    </article>
+ 
+                    <article class="seller-toolkit-card">
+                        <span class="seller-toolkit-badge soon">Coming Soon</span>
+                        <div class="seller-toolkit-icon" aria-hidden="true">⌕</div>
+                        <h3>HSN Search</h3>
+                        <p>Search product descriptions and quickly identify relevant HSN codes for GST classification.</p>
+                        <a href="#" class="seller-toolkit-link disabled" aria-disabled="true">Coming Soon</a>
+                    </article>
  
                 </div>
  
@@ -603,41 +679,41 @@
         </section>
  
  
-
-
+ 
+ 
         <!-- About Us -->
-
+ 
         <section class="section about-section" id="about">
-
+ 
             <div class="container about-box">
-
+ 
                 <div class="section-heading about-heading">
-
+ 
                     <span class="section-label">ABOUT US</span>
-
+ 
                     <h2>About InfoBridgeIndia</h2>
-
+ 
                     <p class="about-lead">Making GST filing simple for every online seller.</p>
-
+ 
                 </div>
-
+ 
                 <div class="about-content">
-
+ 
                     <p>InfoBridgeIndia was created with one simple goal — to make GST filing easier for every online seller.</p>
-
+ 
                     <p>We provide free GST tools, practical resources and easy-to-follow guides for Meesho, Flipkart and Amazon sellers.</p>
-
+ 
                     <p>Our mission is to support the seller community by saving time, reducing confusion and helping sellers prepare their GST reports with confidence.</p>
-
+ 
                     <strong>Your success is the true success of InfoBridgeIndia.</strong>
-
+ 
                 </div>
-
+ 
             </div>
-
+ 
         </section>
-
-
+ 
+ 
         <!-- FAQ -->
  
         <section class="section faq-section">
@@ -820,6 +896,8 @@
                 <h3>Resources</h3>
  
                 <a href="#tools">Downloads</a>
+ 
+                <a href="#seller-toolkit">GST Calculators</a>
  
                 <a href="#how-it-works">GST Guide</a>
  
