@@ -137,40 +137,36 @@
                             Product name or HSN code
                         </label>
 
-                        <div class="search-box">
+                        <div class="search-row">
 
-                            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                <path
-                                    d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z">
-                                </path>
-                            </svg>
+                            <div class="search-box">
 
-                            <input
-                                type="search"
-                                id="hsnSearch"
-                                placeholder="Search bottle, comb, steel plate..."
-                                autocomplete="off"
-                                spellcheck="false">
+                                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M21 21l-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z">
+                                    </path>
+                                </svg>
 
-                            <button
-                                type="button"
-                                id="clearSearch"
-                                class="clear-button"
-                                aria-label="Clear search">
-                                ×
+                                <input
+                                    type="search"
+                                    id="hsnSearch"
+                                    placeholder="Enter product name or HSN code"
+                                    autocomplete="off"
+                                    spellcheck="false">
+
+                                <button
+                                    type="button"
+                                    id="clearSearch"
+                                    class="clear-button"
+                                    aria-label="Clear search">
+                                    ×
+                                </button>
+
+                            </div>
+
+                            <button type="button" class="search-button" id="searchButton">
+                                Search
                             </button>
-
-                        </div>
-
-
-                        <div class="popular-searches">
-
-                            <span>Popular searches</span>
-
-                            <button type="button" data-search="bottle">Bottle</button>
-                            <button type="button" data-search="comb">Comb</button>
-                            <button type="button" data-search="steel plate">Steel Plate</button>
-                            <button type="button" data-search="plastic">Plastic</button>
 
                         </div>
 

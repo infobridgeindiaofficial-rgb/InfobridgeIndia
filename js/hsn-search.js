@@ -2,23 +2,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const DATA_URL = "../data/hsn-data.json";
     const INITIAL_LIMIT = 12;
     const LOAD_MORE_COUNT = 12;
-    const DEBOUNCE_DELAY = 120;
 
     const searchInput = document.getElementById("hsnSearch");
+    const searchButton = document.getElementById("searchButton");
     const clearButton = document.getElementById("clearSearch");
     const resultsGrid = document.getElementById("resultsGrid");
     const emptyState = document.getElementById("emptyState");
     const resultsTitle = document.getElementById("resultsTitle");
     const resultCount = document.getElementById("resultCount");
     const showMoreButton = document.getElementById("showMoreButton");
-    const popularButtons = document.querySelectorAll("[data-search]");
     const menuButton = document.getElementById("menuButton");
     const navMenu = document.getElementById("navMenu");
 
     let hsnData = [];
     let currentResults = [];
     let visibleCount = INITIAL_LIMIT;
-    let debounceTimer;
 
     function normalizeText(value) {
         return String(value ?? "")
@@ -30,6 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
             .trim();
     }
 
+    function tokenize(value) {
+        return normalizeText(value)
+            .split(" ")
+            .filter(Boolean);
+    }
+
     function escapeHtml(value) {
         return String(value ?? "")
             .replaceAll("&", "&amp;")
@@ -39,45 +43,33 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll("'", "&#039;");
     }
 
-    function getRecordValue(record, possibleKeys) {
-        for (const key of possibleKeys) {
+    function getValue(record, keys) {
+        for (const key of keys) {
             if (record[key] !== undefined && record[key] !== null) {
                 return String(record[key]).trim();
             }
         }
-
         return "";
     }
 
     function prepareRecord(record, index) {
-        const hsn = getRecordValue(record, [
-            "hsn",
-            "HSN",
-            "hsn_code",
-            "HSN_CD",
-            "code"
-        ]);
-
-        const productName = getRecordValue(record, [
+        const hsn = getValue(record, ["hsn", "HSN", "hsn_code", "HSN_CD", "code"]);
+        const productName = getValue(record, [
             "product_name",
             "Product_Name",
             "product",
             "description",
             "name"
         ]);
-
-        const gstRate = getRecordValue(record, [
-            "gst_rate",
-            "GST_Rate",
-            "gst",
-            "rate"
-        ]);
-
-        const keywords = getRecordValue(record, [
+        const gstRate = getValue(record, ["gst_rate", "GST_Rate", "gst", "rate"]);
+        const keywords = getValue(record, [
             "keywords",
             "Search_Keywords",
             "search_keywords"
         ]);
+
+        const productText = normalizeText(productName);
+        const keywordText = normalizeText(keywords);
 
         return {
             id: index,
@@ -86,33 +78,27 @@ document.addEventListener("DOMContentLoaded", () => {
             gstRate,
             keywords,
             normalizedHsn: normalizeText(hsn).replace(/\s/g, ""),
-            normalizedProduct: normalizeText(productName),
-            normalizedKeywords: normalizeText(keywords),
-            searchableText: normalizeText(
-                `${hsn} ${productName} ${keywords}`
-            )
+            productText,
+            keywordText,
+            productTokens: new Set(tokenize(productName)),
+            keywordTokens: new Set(tokenize(keywords))
         };
     }
 
     function isValidRecord(record) {
-        if (!record.hsn || !record.productName || !record.gstRate) {
-            return false;
-        }
-
-        if (normalizeText(record.gstRate) === "varies") {
-            return false;
-        }
-
-        return true;
+        return Boolean(
+            record.hsn &&
+            record.productName &&
+            record.gstRate &&
+            normalizeText(record.gstRate) !== "varies"
+        );
     }
 
     async function loadHsnData() {
         setLoadingState();
 
         try {
-            const response = await fetch(DATA_URL, {
-                cache: "no-store"
-            });
+            const response = await fetch(DATA_URL, { cache: "no-store" });
 
             if (!response.ok) {
                 throw new Error(`Unable to load HSN data: ${response.status}`);
@@ -124,17 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("HSN data must be a JSON array.");
             }
 
-            hsnData = rawData
-                .map(prepareRecord)
-                .filter(isValidRecord);
-
+            hsnData = rawData.map(prepareRecord).filter(isValidRecord);
             setReadyState();
-
-            const initialQuery = searchInput.value.trim();
-
-            if (initialQuery) {
-                runSearch(initialQuery);
-            }
         } catch (error) {
             console.error(error);
             showDataError();
@@ -143,27 +120,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setLoadingState() {
         searchInput.disabled = true;
+        searchButton.disabled = true;
         searchInput.placeholder = "Loading HSN data...";
         resultsTitle.textContent = "Loading HSN database";
         resultCount.textContent = "Loading";
-        emptyState.hidden = false;
         resultsGrid.innerHTML = "";
         showMoreButton.hidden = true;
-
-        emptyState.innerHTML = `
-            <div class="empty-icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"></path>
-                </svg>
-            </div>
-            <h3>Loading HSN data</h3>
-            <p>Please wait a moment.</p>
-        `;
     }
 
     function setReadyState() {
         searchInput.disabled = false;
-        searchInput.placeholder = "Search bottle, comb, steel plate...";
+        searchButton.disabled = false;
+        searchInput.placeholder = "Enter product name or HSN code";
         resultsTitle.textContent = "Start typing to search";
         resultCount.textContent = "0 Results";
         restoreDefaultEmptyState();
@@ -179,19 +147,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 </svg>
             </div>
             <h3>Search your product</h3>
-            <p>Enter a product name such as “bottle” or type an HSN code.</p>
+            <p>Enter a product name or type an HSN code, then click Search.</p>
         `;
     }
 
     function showDataError() {
         searchInput.disabled = true;
+        searchButton.disabled = true;
         searchInput.placeholder = "HSN data could not be loaded";
         resultsTitle.textContent = "Unable to load HSN data";
         resultCount.textContent = "Error";
         resultsGrid.innerHTML = "";
         showMoreButton.hidden = true;
         emptyState.hidden = false;
-
         emptyState.innerHTML = `
             <div class="empty-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -199,99 +167,55 @@ document.addEventListener("DOMContentLoaded", () => {
                 </svg>
             </div>
             <h3>HSN data not loaded</h3>
-            <p>Check that data/hsn-data.json is saved correctly, then refresh the page.</p>
+            <p>Check data/hsn-data.json and refresh the page.</p>
         `;
+    }
+
+    function tokenMatches(record, word) {
+        return (
+            record.productTokens.has(word) ||
+            record.keywordTokens.has(word)
+        );
     }
 
     function scoreRecord(record, query, queryWords, numericQuery) {
         let score = 0;
 
-        const product = record.normalizedProduct;
-        const keywords = record.normalizedKeywords;
-        const hsn = record.normalizedHsn;
-        const searchable = record.searchableText;
-
         if (numericQuery) {
-            if (hsn === numericQuery) {
-                score += 1000;
-            } else if (hsn.startsWith(numericQuery)) {
-                score += 700;
-            } else if (hsn.includes(numericQuery)) {
-                score += 500;
-            }
-        }
-
-        if (product === query) {
-            score += 900;
-        }
-
-        if (product.startsWith(query)) {
-            score += 650;
-        }
-
-        if (product.includes(query)) {
-            score += 500;
-        }
-
-        if (keywords === query) {
-            score += 450;
-        }
-
-        if (keywords.startsWith(query)) {
-            score += 350;
-        }
-
-        if (keywords.includes(query)) {
-            score += 260;
-        }
-
-        if (searchable.includes(query)) {
-            score += 180;
-        }
-
-        let matchedWords = 0;
-
-        for (const word of queryWords) {
-            if (!word) {
-                continue;
-            }
-
-            if (product.split(" ").includes(word)) {
-                score += 90;
-                matchedWords += 1;
-            } else if (product.includes(word)) {
-                score += 60;
-                matchedWords += 1;
-            } else if (keywords.includes(word)) {
-                score += 40;
-                matchedWords += 1;
-            } else if (hsn.includes(word)) {
-                score += 35;
-                matchedWords += 1;
-            }
-        }
-
-        if (queryWords.length > 1 && matchedWords === queryWords.length) {
-            score += 220;
-        }
-
-        if (matchedWords === 0 && score === 0) {
+            if (record.normalizedHsn === numericQuery) return 10000;
+            if (record.normalizedHsn.startsWith(numericQuery)) return 8000;
+            if (record.normalizedHsn.includes(numericQuery)) return 6000;
             return 0;
         }
 
-        score -= Math.min(product.length, 250) * 0.03;
+        const allWordsMatch = queryWords.every((word) => tokenMatches(record, word));
 
+        if (!allWordsMatch) {
+            return 0;
+        }
+
+        if (record.productText === query) score += 5000;
+        if (record.productText.startsWith(query)) score += 3500;
+        if (record.productText.includes(query)) score += 2500;
+        if (record.keywordText === query) score += 2200;
+        if (record.keywordText.includes(query)) score += 1800;
+
+        for (const word of queryWords) {
+            if (record.productTokens.has(word)) score += 500;
+            if (record.keywordTokens.has(word)) score += 250;
+        }
+
+        score -= Math.min(record.productName.length, 300) * 0.05;
         return score;
     }
 
     function searchRecords(queryValue) {
         const query = normalizeText(queryValue);
         const numericQuery = query.replace(/\D/g, "");
-        const queryWords = query
-            .split(" ")
-            .filter((word) => word.length > 0);
+        const isNumericSearch = /^\d+$/.test(query);
+        const queryWords = tokenize(query).filter((word) => word.length >= 2);
 
-        if (!query) {
+        if (!query || (!isNumericSearch && queryWords.length === 0)) {
             return [];
         }
 
@@ -302,22 +226,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     record,
                     query,
                     queryWords,
-                    numericQuery
+                    isNumericSearch ? numericQuery : ""
                 )
             }))
             .filter((item) => item.score > 0)
             .sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-
+                if (b.score !== a.score) return b.score - a.score;
                 if (a.record.productName.length !== b.record.productName.length) {
-                    return (
-                        a.record.productName.length -
-                        b.record.productName.length
-                    );
+                    return a.record.productName.length - b.record.productName.length;
                 }
-
                 return a.record.hsn.localeCompare(
                     b.record.hsn,
                     undefined,
@@ -327,87 +244,60 @@ document.addEventListener("DOMContentLoaded", () => {
             .map((item) => item.record);
     }
 
+    function formatGstRate(rate) {
+        const cleanRate = String(rate ?? "").trim();
+        if (!cleanRate) return "";
+        if (cleanRate.includes("%")) return cleanRate;
+        if (/^\d+(\.\d+)?$/.test(cleanRate)) return `${cleanRate}%`;
+        return cleanRate;
+    }
+
     function createResultCard(record, index) {
-        const safeProductName = escapeHtml(record.productName);
-        const safeHsn = escapeHtml(record.hsn);
-        const safeGstRate = escapeHtml(formatGstRate(record.gstRate));
-
         return `
-            <article
-                class="result-card"
-                style="animation-delay: ${Math.min(index, 10) * 35}ms"
-            >
+            <article class="result-card"
+                style="animation-delay:${Math.min(index, 10) * 35}ms">
                 <span class="card-label">Product Name</span>
-
-                <h3>${safeProductName}</h3>
-
+                <h3>${escapeHtml(record.productName)}</h3>
                 <div class="result-details">
-
                     <div class="detail-box">
                         <span>HSN Code</span>
-                        <strong>${safeHsn}</strong>
+                        <strong>${escapeHtml(record.hsn)}</strong>
                     </div>
-
                     <div class="detail-box gst">
                         <span>GST Rate</span>
-                        <strong>${safeGstRate}</strong>
+                        <strong>${escapeHtml(formatGstRate(record.gstRate))}</strong>
                     </div>
-
                 </div>
             </article>
         `;
     }
 
-    function formatGstRate(rate) {
-        const cleanRate = String(rate ?? "").trim();
-
-        if (!cleanRate) {
-            return "";
-        }
-
-        if (cleanRate.includes("%")) {
-            return cleanRate;
-        }
-
-        if (/^\d+(\.\d+)?$/.test(cleanRate)) {
-            return `${cleanRate}%`;
-        }
-
-        return cleanRate;
-    }
-
     function renderResults() {
-        const totalResults = currentResults.length;
-        const visibleResults = currentResults.slice(0, visibleCount);
+        const total = currentResults.length;
+        const visible = currentResults.slice(0, visibleCount);
 
-        if (totalResults === 0) {
+        if (total === 0) {
             showNoResults();
             return;
         }
 
         emptyState.hidden = true;
-
-        resultsGrid.innerHTML = visibleResults
-            .map(createResultCard)
-            .join("");
-
+        resultsGrid.innerHTML = visible.map(createResultCard).join("");
         resultsTitle.textContent =
-            totalResults === 1
-                ? "1 matching HSN record"
-                : `${totalResults.toLocaleString()} matching HSN records`;
-
+            total === 1 ? "1 matching HSN record" : `${total} matching HSN records`;
         resultCount.textContent =
-            totalResults === 1
-                ? "1 Result"
-                : `${totalResults.toLocaleString()} Results`;
-
-        showMoreButton.hidden = visibleCount >= totalResults;
+            total === 1 ? "1 Result" : `${total} Results`;
+        showMoreButton.hidden = visibleCount >= total;
 
         if (!showMoreButton.hidden) {
-            const remaining = totalResults - visibleCount;
             showMoreButton.textContent =
-                `Show More Results (${remaining.toLocaleString()} remaining)`;
+                `Show More Results (${total - visibleCount} remaining)`;
         }
+
+        document.querySelector(".results-section")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
     }
 
     function showNoResults() {
@@ -416,7 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resultCount.textContent = "0 Results";
         showMoreButton.hidden = true;
         emptyState.hidden = false;
-
         emptyState.innerHTML = `
             <div class="empty-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -424,11 +313,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 </svg>
             </div>
             <h3>No result found</h3>
-            <p>Try a shorter product name, another spelling or an HSN number.</p>
+            <p>Try the exact product name, material name or HSN code.</p>
         `;
+        document.querySelector(".results-section")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
     }
 
-    function resetSearchResults() {
+    function resetSearch() {
         currentResults = [];
         visibleCount = INITIAL_LIMIT;
         resultsGrid.innerHTML = "";
@@ -438,74 +331,48 @@ document.addEventListener("DOMContentLoaded", () => {
         restoreDefaultEmptyState();
     }
 
-    function updateClearButton() {
-        clearButton.classList.toggle(
-            "visible",
-            searchInput.value.trim().length > 0
-        );
-    }
-
-    function runSearch(queryValue) {
-        const query = queryValue.trim();
-
-        updateClearButton();
-        visibleCount = INITIAL_LIMIT;
+    function runSearch() {
+        const query = searchInput.value.trim();
+        clearButton.classList.toggle("visible", query.length > 0);
 
         if (!query) {
-            resetSearchResults();
+            resetSearch();
+            searchInput.focus();
             return;
         }
 
+        visibleCount = INITIAL_LIMIT;
         currentResults = searchRecords(query);
         renderResults();
     }
 
-    function scheduleSearch() {
-        window.clearTimeout(debounceTimer);
-
-        debounceTimer = window.setTimeout(() => {
-            runSearch(searchInput.value);
-        }, DEBOUNCE_DELAY);
-    }
-
-    function setSearchValue(value) {
-        searchInput.value = value;
-        searchInput.focus();
-        runSearch(value);
-
-        document
-            .querySelector(".results-section")
-            ?.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-    }
-
-    searchInput.addEventListener("input", scheduleSearch);
-
-    searchInput.addEventListener("search", () => {
-        runSearch(searchInput.value);
-    });
+    searchButton.addEventListener("click", runSearch);
 
     searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            runSearch();
+        }
+
         if (event.key === "Escape") {
             searchInput.value = "";
-            updateClearButton();
-            resetSearchResults();
+            clearButton.classList.remove("visible");
+            resetSearch();
         }
+    });
+
+    searchInput.addEventListener("input", () => {
+        clearButton.classList.toggle(
+            "visible",
+            searchInput.value.trim().length > 0
+        );
     });
 
     clearButton.addEventListener("click", () => {
         searchInput.value = "";
-        updateClearButton();
-        resetSearchResults();
+        clearButton.classList.remove("visible");
+        resetSearch();
         searchInput.focus();
-    });
-
-    popularButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            setSearchValue(button.dataset.search || "");
-        });
     });
 
     showMoreButton.addEventListener("click", () => {
@@ -522,15 +389,6 @@ document.addEventListener("DOMContentLoaded", () => {
             link.addEventListener("click", () => {
                 navMenu.classList.remove("open");
             });
-        });
-
-        document.addEventListener("click", (event) => {
-            const clickedInsideMenu = navMenu.contains(event.target);
-            const clickedMenuButton = menuButton.contains(event.target);
-
-            if (!clickedInsideMenu && !clickedMenuButton) {
-                navMenu.classList.remove("open");
-            }
         });
     }
 
