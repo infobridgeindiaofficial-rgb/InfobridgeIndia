@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Calculate Amazon, Flipkart and Meesho marketplace fees, shipping charges, settlement amount and estimated profit." />
+  <title>Marketplace Profit Calculator | InfoBridgeIndia</title>
+ 
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+    :root {
+      --primary: #4338ca;
+      --secondary: #7c3aed;
+      --background: #f7f8fc;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d9dce5;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+ 
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+    }
+ 
+    .site-header {
+      width: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      padding: 18px 20px;
+      box-shadow: 0 4px 18px rgba(67, 56, 202, 0.18);
+    }
+ 
+    .header-inner {
+      width: min(1180px, 100%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+ 
+    .brand {
+      color: white;
+      text-decoration: none;
+      font-size: 22px;
+      font-weight: 800;
+    }
+ 
+    .back-link {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,.35);
+      padding: 9px 14px;
+      border-radius: 9px;
+    }
+ 
+    .page-container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 40px auto 60px;
+    }
+ 
+    .page-heading {
+      text-align: center;
+      margin-bottom: 34px;
+    }
+ 
+    .page-heading h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      color: #1e1b4b;
+      margin-bottom: 12px;
+    }
+ 
+    .page-heading p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+ 
+    .calculator-layout {
+      display: grid;
+      grid-template-columns: .85fr 1.35fr;
+      gap: 24px;
+      align-items: start;
+    }
+ 
+    .card {
+      background: var(--card);
+      border: 1px solid #eceef4;
+      border-radius: 16px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+ 
+    .card-title {
+      font-size: 21px;
+      color: #1e1b4b;
+      margin-bottom: 24px;
+    }
+ 
+    .form-group { margin-bottom: 18px; }
+ 
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+ 
+    .form-control {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: white;
+      padding: 0 13px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+    }
+ 
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67,56,202,.12);
+    }
+ 
+    select.form-control { cursor: pointer; }
+ 
+    .input-note {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+ 
+    .calculate-btn {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 9px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+ 
+    .error-message {
+      display: none;
+      margin-top: 14px;
+      padding: 11px 12px;
+      border-radius: 8px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+ 
+    .result-placeholder {
+      min-height: 450px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 30px;
+    }
+ 
+    .result-placeholder-icon { font-size: 44px; margin-bottom: 14px; }
+    .result-placeholder h3 { color: #374151; font-size: 18px; margin-bottom: 8px; }
+    .result-placeholder p { line-height: 1.6; font-size: 14px; }
+    .result-content { display: none; }
+    .table-wrapper { width: 100%; overflow-x: auto; }
+ 
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 610px;
+      font-size: 14px;
+    }
+ 
+    .result-table th,
+    .result-table td {
+      padding: 13px 11px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: right;
+      white-space: nowrap;
+    }
+ 
+    .result-table th:first-child,
+    .result-table td:first-child { text-align: left; }
+ 
+    .result-table thead th {
+      background: #f3f4ff;
+      color: #312e81;
+      font-size: 13px;
+      font-weight: 800;
+    }
+ 
+    .result-table tbody td:first-child {
+      color: #4b5563;
+      font-weight: 600;
+    }
+ 
+    .total-row td { font-weight: 800; background: #fafafa; }
+    .settlement-row td { color: #312e81; font-weight: 800; }
+ 
+    .profit-row td {
+      font-weight: 900;
+      color: var(--success);
+      background: #f0fdf4;
+      border-bottom: none;
+    }
+ 
+    .loss-value { color: var(--danger) !important; }
+ 
+    .summary-box {
+      margin-top: 22px;
+      background: var(--success-bg);
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 18px;
+    }
+ 
+    .summary-box h3 { color: #166534; font-size: 16px; margin-bottom: 13px; }
+ 
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+ 
+    .summary-item {
+      background: rgba(255,255,255,.7);
+      border-radius: 9px;
+      padding: 13px 8px;
+      text-align: center;
+    }
+ 
+    .summary-item span {
+      display: block;
+      font-size: 12px;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+ 
+    .summary-item strong { color: #166534; font-size: 18px; }
+ 
+    .calculation-note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+ 
+    .site-footer {
+      background: #111827;
+      color: #d1d5db;
+      text-align: center;
+      padding: 22px 16px;
+      font-size: 13px;
+    }
+ 
+    @media (max-width: 850px) {
+      .calculator-layout { grid-template-columns: 1fr; }
+      .page-container { margin-top: 28px; }
+      .result-placeholder { min-height: 280px; }
+    }
+ 
+    @media (max-width: 520px) {
+      .site-header { padding: 15px 14px; }
+      .brand { font-size: 18px; }
+      .back-link { font-size: 12px; padding: 8px 10px; }
+      .page-container { width: min(100% - 20px, 1180px); }
+      .card { padding: 19px 15px; border-radius: 13px; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+ 
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="brand">InfoBridgeIndia</a>
+      <a href="../index.html" class="back-link">← Back to Tools</a>
+    </div>
+  </header>
+ 
+  <main class="page-container">
+    <section class="page-heading">
+      <h1>Marketplace Profit Calculator</h1>
+      <p>Compare Amazon, Flipkart and Meesho Local, Regional and National delivery fees, settlement amounts and estimated profit.</p>
+    </section>
+ 
+    <section class="calculator-layout">
+      <div class="card">
+        <h2 class="card-title">Enter Details</h2>
+ 
+        <form id="amazonCalculatorForm" novalidate>
+          <div class="form-group">
+            <label for="marketplace">Marketplace</label>
+            <select id="marketplace" class="form-control" required>
+              <option value="amazon">Amazon</option>
+              <option value="flipkart">Flipkart</option>
+              <option value="meesho">Meesho</option>
+            </select>
+          </div>
+ 
+          <div class="form-group" id="categoryGroup">
+            <label for="productCategory">Product Category</label>
+            <select id="productCategory" class="form-control" required>
+              <option value="">Select product category</option>
+            </select>
+          </div>
+ 
+          <div class="form-group">
+            <label for="sellingPrice">Selling Price (₹)</label>
+            <input type="number" id="sellingPrice" class="form-control" placeholder="Example: 250" min="0.01" step="0.01" required />
+          </div>
+ 
+          <div class="form-group">
+            <label for="productCost">Product Cost (₹)</label>
+            <input type="number" id="productCost" class="form-control" placeholder="Example: 100" min="0" step="0.01" required />
+          </div>
+ 
+          <div class="form-group">
+            <label for="gstRate">Product GST Rate</label>
+            <select id="gstRate" class="form-control" required>
+              <option value="">Select GST rate</option>
+              <option value="0">0%</option>
+              <option value="3">3%</option>
+              <option value="5">5%</option>
+              <option value="12">12%</option>
+              <option value="18">18%</option>
+              <option value="28">28%</option>
+            </select>
+          </div>
+ 
+          <div class="form-group">
+            <label for="productWeight">Product Weight (kg)</label>
+            <input type="number" id="productWeight" class="form-control" placeholder="Example: 0.5" min="0.01" step="0.01" required />
+            <small class="input-note">Enter packed product weight including packing material.</small>
+          </div>
+ 
+          <button type="submit" class="calculate-btn">Calculate Profit</button>
+          <div id="errorMessage" class="error-message" role="alert"></div>
+        </form>
+      </div>
+ 
+      <div class="card">
+        <h2 class="card-title" id="resultTitle">Amazon Fee Calculation Result</h2>
+ 
+        <div id="resultPlaceholder" class="result-placeholder">
+          <div>
+            <div class="result-placeholder-icon">📊</div>
+            <h3>Your result will appear here</h3>
+            <p>Enter the product details and click Calculate Profit.</p>
+          </div>
+        </div>
+ 
+        <div id="resultContent" class="result-content">
+          <div class="table-wrapper">
+            <table class="result-table">
+              <thead>
+                <tr><th>Fee Details</th><th>Local</th><th>Regional</th><th>National</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Selling Price</td><td id="localSellingPrice">₹0.00</td><td id="regionalSellingPrice">₹0.00</td><td id="nationalSellingPrice">₹0.00</td></tr>
+                <tr><td>Product Cost</td><td id="localProductCost">₹0.00</td><td id="regionalProductCost">₹0.00</td><td id="nationalProductCost">₹0.00</td></tr>
+                <tr><td>Shipping Fee</td><td id="localShippingFee">₹0.00</td><td id="regionalShippingFee">₹0.00</td><td id="nationalShippingFee">₹0.00</td></tr>
+                <tr><td id="commissionLabel">Referral Fee</td><td id="localReferralFee">₹0.00</td><td id="regionalReferralFee">₹0.00</td><td id="nationalReferralFee">₹0.00</td></tr>
+                <tr><td id="fixedFeeLabel">Closing Fee</td><td id="localClosingFee">₹0.00</td><td id="regionalClosingFee">₹0.00</td><td id="nationalClosingFee">₹0.00</td></tr>
+                <tr><td id="gstFeeLabel">GST on Amazon Fees</td><td id="localFeeGst">₹0.00</td><td id="regionalFeeGst">₹0.00</td><td id="nationalFeeGst">₹0.00</td></tr>
+                <tr><td>TCS</td><td id="localTcs">₹0.00</td><td id="regionalTcs">₹0.00</td><td id="nationalTcs">₹0.00</td></tr>
+                <tr><td>TDS</td><td id="localTds">₹0.00</td><td id="regionalTds">₹0.00</td><td id="nationalTds">₹0.00</td></tr>
+                <tr class="total-row"><td>Total Deduction</td><td id="localTotalDeduction">₹0.00</td><td id="regionalTotalDeduction">₹0.00</td><td id="nationalTotalDeduction">₹0.00</td></tr>
+                <tr class="settlement-row"><td>Bank Settlement</td><td id="localSettlement">₹0.00</td><td id="regionalSettlement">₹0.00</td><td id="nationalSettlement">₹0.00</td></tr>
+                <tr class="profit-row"><td>Net Profit</td><td id="localProfit">₹0.00</td><td id="regionalProfit">₹0.00</td><td id="nationalProfit">₹0.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+ 
+          <div class="summary-box">
+            <h3>Estimated Net Profit</h3>
+            <div class="summary-grid">
+              <div class="summary-item"><span>Local</span><strong id="localProfitSummary">₹0.00</strong></div>
+              <div class="summary-item"><span>Regional</span><strong id="regionalProfitSummary">₹0.00</strong></div>
+              <div class="summary-item"><span>National</span><strong id="nationalProfitSummary">₹0.00</strong></div>
+            </div>
+          </div>
+ 
+          <p class="calculation-note"><span id="calculationNoteText">This calculator provides an estimated result based on the selected category, selling price, product weight and available Amazon fee structure. Actual settlement may vary.</span></p>
+        </div>
+      </div>
+    </section>
+  </main>
+ 
+  <footer class="site-footer">© 2026 InfoBridgeIndia. Free tools for Indian online sellers.</footer>
+  <script src="../js/marketplace-calculator.js"></script>
+</body>
+</html>
+ 
