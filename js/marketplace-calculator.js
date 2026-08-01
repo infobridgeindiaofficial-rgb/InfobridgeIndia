@@ -1,8 +1,8 @@
 'use strict';
- 
+
 /*
   InfoBridgeIndia - Marketplace Profit Calculator
- 
+
   Assumptions used in this version:
   - Referral fee: category and selling-price slab from the supplied Amazon fee list.
   - Closing fee (Easy Ship): supplied fee list.
@@ -12,7 +12,7 @@
   - Meesho uses estimated baseline logistics slabs supplied for Version 1.
   - Net Profit excludes recoverable TCS/TDS from business expense.
 */
- 
+
 const AMAZON_CATEGORIES = [
   {
     "name": "School Textbook Bundles",
@@ -3755,12 +3755,12 @@ const AMAZON_CATEGORIES = [
     ]
   }
 ];
- 
+
 const AMAZON_SETTINGS = {
   feeGstRate: 18,
   gstTcsRate: 1,
   incomeTaxTdsRate: 1,
- 
+
   // Easy Ship closing fee from the supplied Amazon fee list.
   closingFeeSlabs: [
     { max: 300, fee: 1 },
@@ -3768,7 +3768,7 @@ const AMAZON_SETTINGS = {
     { max: 1000, fee: 45 },
     { max: Infinity, fee: 76 }
   ],
- 
+
   /*
     Standard-size Easy Ship weight handling fee.
     First 500 g + additional 500 g up to 1 kg +
@@ -3780,13 +3780,13 @@ const AMAZON_SETTINGS = {
     national: { first500: 65, next500: 25, eachKgAfter1: 27 }
   }
 };
- 
+
 const FLIPKART_SETTINGS = {
   feeGstRate: 18,
   tcsRate: 1,
   tdsRate: 1,
   maximumSupportedPrice: 1000,
- 
+
   // Bronze seller fixed-fee slabs supplied from the Flipkart rate card.
   fixedFeeSlabs: [
     { max: 200, fee: 13 },
@@ -3794,7 +3794,7 @@ const FLIPKART_SETTINGS = {
     { max: 500, fee: 16 },
     { max: 1000, fee: 20 }
   ],
- 
+
   shipping: {
     local: {
       upTo500: 109,
@@ -3834,13 +3834,13 @@ const FLIPKART_SETTINGS = {
     }
   }
 };
- 
- 
+
+
 const MEESHO_SETTINGS = {
   feeGstRate: 18,
   tcsRate: 1,
   tdsRate: 1,
- 
+
   // Version 1 estimated baseline logistics slabs.
   shipping: {
     local: {
@@ -3866,11 +3866,13 @@ const MEESHO_SETTINGS = {
     }
   }
 };
- 
+
 const form = document.getElementById('amazonCalculatorForm');
 const marketplaceSelect = document.getElementById('marketplace');
 const categoryGroup = document.getElementById('categoryGroup');
 const categorySelect = document.getElementById('productCategory');
+const categorySearchInput = document.getElementById('productCategorySearch');
+const categorySuggestions = document.getElementById('categorySuggestions');
 const sellingPriceInput = document.getElementById('sellingPrice');
 const productCostInput = document.getElementById('productCost');
 const gstRateSelect = document.getElementById('gstRate');
@@ -3883,23 +3885,140 @@ const commissionLabel = document.getElementById('commissionLabel');
 const fixedFeeLabel = document.getElementById('fixedFeeLabel');
 const gstFeeLabel = document.getElementById('gstFeeLabel');
 const calculationNoteText = document.getElementById('calculationNoteText');
- 
-function populateCategories() {
-  const fragment = document.createDocumentFragment();
- 
-  AMAZON_CATEGORIES.forEach((category, index) => {
-    const option = document.createElement('option');
-    option.value = String(index);
-    option.textContent = category.name;
-    fragment.appendChild(option);
-  });
- 
-  categorySelect.appendChild(fragment);
+
+let filteredCategoryIndexes = [];
+let activeSuggestionPosition = -1;
+
+function normalizeSearchText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[–—]/g, '-')
+    .replace(/[^a-z0-9%+&/() .-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
- 
+
+function closeCategorySuggestions() {
+  categorySuggestions.classList.remove('open');
+  categorySearchInput.setAttribute('aria-expanded', 'false');
+  activeSuggestionPosition = -1;
+}
+
+function chooseCategory(categoryIndex) {
+  const category = AMAZON_CATEGORIES[categoryIndex];
+  if (!category) return;
+
+  categorySelect.value = String(categoryIndex);
+  categorySearchInput.value = category.name;
+  categorySearchInput.setCustomValidity('');
+  closeCategorySuggestions();
+}
+
+function renderCategorySuggestions(query = '') {
+  const normalizedQuery = normalizeSearchText(query);
+
+  filteredCategoryIndexes = AMAZON_CATEGORIES
+    .map((category, index) => ({
+      index,
+      searchText: normalizeSearchText(category.name)
+    }))
+    .filter((item) => !normalizedQuery || item.searchText.includes(normalizedQuery))
+    .slice(0, 60)
+    .map((item) => item.index);
+
+  categorySuggestions.innerHTML = '';
+  activeSuggestionPosition = -1;
+
+  if (filteredCategoryIndexes.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'category-empty';
+    empty.textContent = 'No matching category found.';
+    categorySuggestions.appendChild(empty);
+  } else {
+    const fragment = document.createDocumentFragment();
+
+    filteredCategoryIndexes.forEach((categoryIndex) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'category-option';
+      option.setAttribute('role', 'option');
+      option.dataset.categoryIndex = String(categoryIndex);
+      option.textContent = AMAZON_CATEGORIES[categoryIndex].name;
+      option.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        chooseCategory(categoryIndex);
+      });
+      fragment.appendChild(option);
+    });
+
+    categorySuggestions.appendChild(fragment);
+  }
+
+  categorySuggestions.classList.add('open');
+  categorySearchInput.setAttribute('aria-expanded', 'true');
+}
+
+function updateActiveCategorySuggestion(nextPosition) {
+  const options = categorySuggestions.querySelectorAll('.category-option');
+  if (!options.length) return;
+
+  activeSuggestionPosition = Math.max(0, Math.min(nextPosition, options.length - 1));
+
+  options.forEach((option, index) => {
+    option.classList.toggle('active', index === activeSuggestionPosition);
+  });
+
+  options[activeSuggestionPosition].scrollIntoView({ block: 'nearest' });
+}
+
+function populateCategories() {
+  categorySearchInput.addEventListener('focus', () => {
+    renderCategorySuggestions(categorySearchInput.value);
+  });
+
+  categorySearchInput.addEventListener('input', () => {
+    categorySelect.value = '';
+    categorySearchInput.setCustomValidity('');
+    renderCategorySuggestions(categorySearchInput.value);
+  });
+
+  categorySearchInput.addEventListener('keydown', (event) => {
+    if (!categorySuggestions.classList.contains('open')) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        renderCategorySuggestions(categorySearchInput.value);
+        updateActiveCategorySuggestion(0);
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      updateActiveCategorySuggestion(activeSuggestionPosition + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      updateActiveCategorySuggestion(activeSuggestionPosition - 1);
+    } else if (event.key === 'Enter') {
+      if (activeSuggestionPosition >= 0) {
+        event.preventDefault();
+        chooseCategory(filteredCategoryIndexes[activeSuggestionPosition]);
+      }
+    } else if (event.key === 'Escape') {
+      closeCategorySuggestions();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!categoryGroup.contains(event.target)) {
+      closeCategorySuggestions();
+    }
+  });
+}
+
 function money(value) {
   const safeValue = Number.isFinite(value) ? value : 0;
- 
+
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -3907,118 +4026,118 @@ function money(value) {
     maximumFractionDigits: 2
   }).format(safeValue);
 }
- 
+
 function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
- 
+
 function getAmazonReferralRate(categoryIndex, sellingPrice) {
   const category = AMAZON_CATEGORIES[categoryIndex];
- 
+
   if (!category) {
     throw new Error('Please select a valid product category.');
   }
- 
+
   const tier = category.tiers.find((item) => {
     const aboveMinimum = sellingPrice > item.min || item.min === 0;
     const withinMaximum = item.max === null || sellingPrice <= item.max;
     return aboveMinimum && withinMaximum;
   });
- 
+
   if (!tier) {
     throw new Error('Referral fee slab was not found for this selling price.');
   }
- 
+
   return tier.rate;
 }
- 
+
 function getAmazonClosingFee(sellingPrice) {
   const slab = AMAZON_SETTINGS.closingFeeSlabs.find(
     (item) => sellingPrice <= item.max
   );
- 
+
   return slab ? slab.fee : 0;
 }
- 
+
 function getAmazonShippingFee(weightInKg, zone) {
   const rates = AMAZON_SETTINGS.shipping[zone];
- 
+
   if (!rates) {
     throw new Error('Invalid shipping zone.');
   }
- 
+
   const weightInGrams = weightInKg * 1000;
- 
+
   if (weightInGrams <= 500) return rates.first500;
   if (weightInGrams <= 1000) return rates.first500 + rates.next500;
- 
+
   const extraKgAfterOne = Math.ceil((weightInGrams - 1000) / 1000);
- 
+
   return rates.first500 + rates.next500 +
     extraKgAfterOne * rates.eachKgAfter1;
 }
- 
+
 function getFlipkartFixedFee(sellingPrice) {
   const slab = FLIPKART_SETTINGS.fixedFeeSlabs.find(
     (item) => sellingPrice <= item.max
   );
- 
+
   if (!slab) {
     throw new Error('Flipkart currently supports selling prices up to ₹1,000 only.');
   }
- 
+
   return slab.fee;
 }
- 
+
 function getFlipkartShippingFee(weightInKg, zone) {
   const rates = FLIPKART_SETTINGS.shipping[zone];
- 
+
   if (!rates) {
     throw new Error('Invalid shipping zone.');
   }
- 
+
   if (weightInKg <= 0.5) return rates.upTo500;
   if (weightInKg <= 1) return rates.upTo1000;
   if (weightInKg <= 1.5) return rates.upTo1500;
   if (weightInKg <= 2) return rates.upTo2000;
- 
+
   if (weightInKg <= 3) {
     const extraHalfKg = Math.ceil((weightInKg - 2) / 0.5);
     return rates.twoKgBase + extraHalfKg * rates.twoToThreeIncrement;
   }
- 
+
   if (weightInKg <= 12) {
     const extraKg = Math.ceil(weightInKg - 3);
     return rates.threeKgBase + extraKg * rates.threeToTwelveIncrement;
   }
- 
+
   const extraKgAboveTwelve = Math.ceil(weightInKg - 12);
   return rates.twelveKgBase +
     extraKgAboveTwelve * rates.aboveTwelveIncrement;
 }
- 
- 
+
+
 function getMeeshoShippingFee(weightInKg, zone) {
   const rates = MEESHO_SETTINGS.shipping[zone];
- 
+
   if (!rates) {
     throw new Error('Invalid shipping zone.');
   }
- 
+
   if (weightInKg <= 0.5) return rates.upTo500;
   if (weightInKg <= 1) return rates.upTo1000;
   if (weightInKg <= 2) return rates.upTo2000;
   if (weightInKg <= 3) return rates.upTo3000;
- 
+
   const extraKg = Math.ceil(weightInKg - 3);
   return rates.upTo3000 + extraKg * rates.extraKgAfter3;
 }
- 
+
 function calculateAmazonZone(inputs, zone) {
   const taxableValue = inputs.gstRate === 0
     ? inputs.sellingPrice
     : inputs.sellingPrice / (1 + inputs.gstRate / 100);
- 
+
   const referralRate = getAmazonReferralRate(
     inputs.categoryIndex,
     inputs.sellingPrice
@@ -4031,7 +4150,7 @@ function calculateAmazonZone(inputs, zone) {
   const tcs = taxableValue * (AMAZON_SETTINGS.gstTcsRate / 100);
   const tds = inputs.sellingPrice *
     (AMAZON_SETTINGS.incomeTaxTdsRate / 100);
- 
+
   return createResult(
     inputs,
     shippingFee,
@@ -4042,18 +4161,18 @@ function calculateAmazonZone(inputs, zone) {
     tds
   );
 }
- 
+
 function calculateFlipkartZone(inputs, zone) {
   if (inputs.sellingPrice > FLIPKART_SETTINGS.maximumSupportedPrice) {
     throw new Error(
       'Flipkart calculator currently supports products priced up to ₹1,000 only.'
     );
   }
- 
+
   const taxableValue = inputs.gstRate === 0
     ? inputs.sellingPrice
     : inputs.sellingPrice / (1 + inputs.gstRate / 100);
- 
+
   const commissionFee = 0;
   const fixedFee = getFlipkartFixedFee(inputs.sellingPrice);
   const shippingFee = getFlipkartShippingFee(inputs.weight, zone);
@@ -4061,7 +4180,7 @@ function calculateFlipkartZone(inputs, zone) {
   const feeGst = feesBeforeGst * (FLIPKART_SETTINGS.feeGstRate / 100);
   const tcs = taxableValue * (FLIPKART_SETTINGS.tcsRate / 100);
   const tds = inputs.sellingPrice * (FLIPKART_SETTINGS.tdsRate / 100);
- 
+
   return createResult(
     inputs,
     shippingFee,
@@ -4072,13 +4191,13 @@ function calculateFlipkartZone(inputs, zone) {
     tds
   );
 }
- 
- 
+
+
 function calculateMeeshoZone(inputs, zone) {
   const taxableValue = inputs.gstRate === 0
     ? inputs.sellingPrice
     : inputs.sellingPrice / (1 + inputs.gstRate / 100);
- 
+
   const commissionFee = 0;
   const fixedFee = 0;
   const shippingFee = getMeeshoShippingFee(inputs.weight, zone);
@@ -4086,7 +4205,7 @@ function calculateMeeshoZone(inputs, zone) {
   const feeGst = feesBeforeGst * (MEESHO_SETTINGS.feeGstRate / 100);
   const tcs = taxableValue * (MEESHO_SETTINGS.tcsRate / 100);
   const tds = inputs.sellingPrice * (MEESHO_SETTINGS.tdsRate / 100);
- 
+
   return createResult(
     inputs,
     shippingFee,
@@ -4097,7 +4216,7 @@ function calculateMeeshoZone(inputs, zone) {
     tds
   );
 }
- 
+
 function createResult(
   inputs,
   shippingFee,
@@ -4110,11 +4229,11 @@ function createResult(
   const feesBeforeGst = marketplaceFee + fixedFee + shippingFee;
   const totalDeduction = feesBeforeGst + feeGst + tcs + tds;
   const bankSettlement = inputs.sellingPrice - totalDeduction;
- 
+
   // TCS and TDS affect bank settlement, but are not treated as permanent expense.
   const netProfit = inputs.sellingPrice - inputs.productCost -
     feesBeforeGst - feeGst;
- 
+
   return {
     sellingPrice: round2(inputs.sellingPrice),
     productCost: round2(inputs.productCost),
@@ -4129,20 +4248,20 @@ function createResult(
     netProfit: round2(netProfit)
   };
 }
- 
+
 function setText(id, value) {
   const element = document.getElementById(id);
   if (element) element.textContent = money(value);
 }
- 
+
 function setProfit(id, value) {
   const element = document.getElementById(id);
   if (!element) return;
- 
+
   element.textContent = money(value);
   element.classList.toggle('loss-value', value < 0);
 }
- 
+
 function renderZone(prefix, result) {
   setText(`${prefix}SellingPrice`, result.sellingPrice);
   setText(`${prefix}ProductCost`, result.productCost);
@@ -4157,27 +4276,31 @@ function renderZone(prefix, result) {
   setProfit(`${prefix}Profit`, result.netProfit);
   setProfit(`${prefix}ProfitSummary`, result.netProfit);
 }
- 
+
 function showError(message) {
   errorMessage.textContent = message;
   errorMessage.style.display = 'block';
   resultPlaceholder.style.display = 'flex';
   resultContent.style.display = 'none';
 }
- 
+
 function clearError() {
   errorMessage.textContent = '';
   errorMessage.style.display = 'none';
 }
- 
+
 function updateMarketplaceView() {
   const marketplace = marketplaceSelect.value;
   const isAmazon = marketplace === 'amazon';
   const isFlipkart = marketplace === 'flipkart';
- 
+
   categoryGroup.style.display = isAmazon ? 'block' : 'none';
-  categorySelect.required = isAmazon;
- 
+  categorySearchInput.required = isAmazon;
+
+  if (!isAmazon) {
+    closeCategorySuggestions();
+  }
+
   if (isAmazon) {
     resultTitle.textContent = 'Amazon Fee Calculation Result';
     commissionLabel.textContent = 'Referral Fee';
@@ -4200,12 +4323,12 @@ function updateMarketplaceView() {
     calculationNoteText.textContent =
       'Meesho uses 0% commission and estimated baseline logistics slabs for Local, Regional and National delivery. Actual shipping deductions may vary by courier partner, pickup location and billable weight.';
   }
- 
+
   clearError();
   resultPlaceholder.style.display = 'flex';
   resultContent.style.display = 'none';
 }
- 
+
 function validateInputs() {
   const marketplace = marketplaceSelect.value;
   const categoryIndex = Number(categorySelect.value);
@@ -4213,15 +4336,19 @@ function validateInputs() {
   const productCost = Number(productCostInput.value);
   const gstRate = Number(gstRateSelect.value);
   const weight = Number(weightInput.value);
- 
+
   if (marketplace === 'amazon' && categorySelect.value === '') {
-    throw new Error('Please select the product category.');
+    categorySearchInput.setCustomValidity('Please select a category from the suggestions.');
+    categorySearchInput.focus();
+    throw new Error('Type and select the product category from the suggestions.');
   }
- 
+
+  categorySearchInput.setCustomValidity('');
+
   if (!Number.isFinite(sellingPrice) || sellingPrice <= 0) {
     throw new Error('Please enter a valid selling price.');
   }
- 
+
   if (
     marketplace === 'flipkart' &&
     sellingPrice > FLIPKART_SETTINGS.maximumSupportedPrice
@@ -4230,19 +4357,19 @@ function validateInputs() {
       'Flipkart calculator currently supports products priced up to ₹1,000 only.'
     );
   }
- 
+
   if (!Number.isFinite(productCost) || productCost < 0) {
     throw new Error('Please enter a valid product cost.');
   }
- 
+
   if (gstRateSelect.value === '' || !Number.isFinite(gstRate)) {
     throw new Error('Please select the product GST rate.');
   }
- 
+
   if (!Number.isFinite(weight) || weight <= 0) {
     throw new Error('Please enter a valid packed product weight in kg.');
   }
- 
+
   return {
     marketplace,
     categoryIndex,
@@ -4252,15 +4379,15 @@ function validateInputs() {
     weight
   };
 }
- 
+
 function handleCalculate(event) {
   event.preventDefault();
   clearError();
- 
+
   try {
     const inputs = validateInputs();
     let calculator;
- 
+
     if (inputs.marketplace === 'amazon') {
       calculator = calculateAmazonZone;
     } else if (inputs.marketplace === 'flipkart') {
@@ -4268,15 +4395,15 @@ function handleCalculate(event) {
     } else {
       calculator = calculateMeeshoZone;
     }
- 
+
     const local = calculator(inputs, 'local');
     const regional = calculator(inputs, 'regional');
     const national = calculator(inputs, 'national');
- 
+
     renderZone('local', local);
     renderZone('regional', regional);
     renderZone('national', national);
- 
+
     resultPlaceholder.style.display = 'none';
     resultContent.style.display = 'block';
   } catch (error) {
@@ -4287,9 +4414,10 @@ function handleCalculate(event) {
     );
   }
 }
- 
+
 populateCategories();
 marketplaceSelect.addEventListener('change', updateMarketplaceView);
 form.addEventListener('submit', handleCalculate);
 updateMarketplaceView();
- 
+
+

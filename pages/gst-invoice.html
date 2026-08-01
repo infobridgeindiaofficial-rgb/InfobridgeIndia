@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17206b">
+  <title>GST Invoice Generator | InfoBridgeIndia</title>
+  <meta name="description" content="Create, preview, print and download a GST invoice with automatic CGST, SGST or IGST calculation.">
+ 
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+ 
+  <link rel="stylesheet" href="../css/gst-invoice.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script defer src="../js/gst-invoice.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="page-container nav-row">
+      <a class="brand" href="../index.html">
+        <img src="../images/logo.png" alt="InfoBridgeIndia logo">
+        <span><b>InfoBridge</b><strong>India</strong></span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../index.html">Home</a>
+        <a href="tools.html">Free Tools</a>
+        <a href="../index.html#workbooks">Marketplace</a>
+        <a href="../index.html#about">About</a>
+      </nav>
+      <a class="back-button" href="tools.html">← Back to Tools</a>
+    </div>
+  </header>
+ 
+  <main>
+    <section class="page-heading">
+      <div class="page-container heading-row">
+        <div class="heading-icon">🧾</div>
+        <div>
+          <span>FREE SELLER TOOL</span>
+          <h1>GST Invoice Generator</h1>
+          <p>Create a clean GST invoice with automatic tax calculation and live preview.</p>
+        </div>
+      </div>
+    </section>
+ 
+    <section class="workspace-section">
+      <div class="page-container workspace-grid">
+        <form id="invoiceForm" class="form-panel" novalidate>
+          <div class="privacy-note">
+            <b>Your data stays in this browser.</b>
+            <span>Nothing is uploaded.</span>
+          </div>
+ 
+          <section class="form-section">
+            <div class="section-title"><b>1</b><div><h2>Seller Details</h2><p>Enter supplier details exactly as they should appear.</p></div></div>
+            <div class="form-grid two-col">
+              <label class="field"><span>Business / Seller Name *</span><input id="sellerName" type="text" placeholder="ABC Enterprises" required></label>
+              <label class="field"><span>Seller GSTIN / Reference *</span><input id="sellerGstin" type="text" maxlength="40" placeholder="Enter any GSTIN or reference" required><small>No format validation. Your exact text will appear.</small></label>
+              <label class="field full"><span>Business Address *</span><textarea id="sellerAddress" rows="3" placeholder="Door number, street, city and PIN code" required></textarea></label>
+              <label class="field searchable-state"><span>Seller State *</span><input id="sellerState" list="stateList" type="text" placeholder="Type state name, e.g. Tamil Nadu" autocomplete="off" required><small>Tap and type to search on mobile.</small></label>
+              <label class="field"><span>Phone / Email</span><input id="sellerContact" type="text" placeholder="+91 98765 43210 / seller@email.com"></label>
+            </div>
+          </section>
+ 
+          <section class="form-section">
+            <div class="section-title"><b>2</b><div><h2>Invoice & Customer Details</h2><p>Enter invoice identity, buyer and place of supply.</p></div></div>
+            <div class="form-grid two-col">
+              <label class="field"><span>Invoice Number *</span><input id="invoiceNumber" type="text" maxlength="16" placeholder="INV-2026-0001" required><small>Maximum 16 characters</small></label>
+              <label class="field"><span>Invoice Date *</span><input id="invoiceDate" type="date" required></label>
+              <label class="field"><span>Customer Name *</span><input id="customerName" type="text" placeholder="XYZ Retailers" required></label>
+              <label class="field"><span>Customer GSTIN / UIN</span><input id="customerGstin" type="text" maxlength="40" placeholder="Optional - any text accepted"><small>Your exact text will appear.</small></label>
+              <label class="field full"><span>Customer Address *</span><textarea id="customerAddress" rows="3" placeholder="Customer address with city and PIN code" required></textarea></label>
+              <label class="field searchable-state"><span>Place of Supply *</span><input id="placeOfSupply" list="stateList" type="text" placeholder="Type state name, e.g. Karnataka" autocomplete="off" required><small>Tap and type to search on mobile.</small></label>
+              <label class="field"><span>Reverse Charge</span><select id="reverseCharge"><option>No</option><option>Yes</option></select></label>
+            </div>
+          </section>
+ 
+          <datalist id="stateList"></datalist>
+ 
+          <section class="form-section">
+            <div class="section-title"><b>3</b><div><h2>Product / Service Details</h2><p>Large fields make item entry easy on desktop and mobile.</p></div></div>
+            <div class="item-entry">
+              <div class="item-grid">
+                <label class="field item-name"><span>Product / Service Description *</span><input id="itemDescription" type="text" placeholder="Wireless Mouse"></label>
+                <label class="field"><span>HSN / SAC *</span><input id="itemHsn" type="text" inputmode="numeric" maxlength="8" placeholder="84716060"></label>
+                <label class="field"><span>Quantity *</span><input id="itemQty" type="number" inputmode="decimal" min="0.001" step="0.001" value="1"></label>
+                <label class="field"><span>Unit</span><select id="itemUnit"><option>NOS</option><option>PCS</option><option>KGS</option><option>LTR</option><option>MTR</option><option>BOX</option><option>SET</option><option>OTH</option></select></label>
+                <label class="field"><span>Rate (₹) *</span><input id="itemRate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="650.00"></label>
+                <label class="field"><span>Discount %</span><input id="itemDiscount" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="0"></label>
+                <label class="field"><span>GST Rate *</span><select id="itemGstRate"><option value="0">0%</option><option value="0.1">0.1%</option><option value="0.25">0.25%</option><option value="1.5">1.5%</option><option value="3">3%</option><option value="5">5%</option><option value="6">6%</option><option value="7.5">7.5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option></select></label>
+                <button id="addItemButton" class="add-item-button" type="button">＋ Add Product</button>
+              </div>
+              <p id="itemError" class="error-message"></p>
+            </div>
+ 
+            <div class="item-table-wrap">
+              <table class="item-table">
+                <thead><tr><th>#</th><th>Product / Service</th><th>HSN/SAC</th><th>Qty</th><th>Rate</th><th>Disc.</th><th>GST</th><th>Taxable</th><th>Action</th></tr></thead>
+                <tbody id="addedItemsBody"><tr><td colspan="9" class="empty-cell">No products added yet.</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+ 
+          <section class="form-section">
+            <div class="section-title"><b>4</b><div><h2>Payment & Other Details</h2><p>Optional information shown at the invoice bottom.</p></div></div>
+            <div class="form-grid two-col">
+              <label class="field"><span>Bank Name</span><input id="bankName" type="text" placeholder="HDFC Bank"></label>
+              <label class="field"><span>Account Number</span><input id="bankAccount" type="text" placeholder="50200012345678"></label>
+              <label class="field"><span>IFSC Code</span><input id="bankIfsc" type="text" placeholder="HDFC0001234"></label>
+              <label class="field"><span>Authorized Signatory</span><input id="signatoryName" type="text" placeholder="Owner / Authorized Person"></label>
+              <label class="field full"><span>Terms & Conditions</span><textarea id="terms" rows="3" placeholder="Payment is due within 15 days."></textarea></label>
+              <label class="field full"><span>Additional Notes</span><textarea id="notes" rows="2" placeholder="Thank you for your business."></textarea></label>
+            </div>
+          </section>
+ 
+          <p id="formError" class="form-error"></p>
+          <div class="form-actions"><button id="previewButton" class="primary-button" type="button">👁 Preview Invoice</button><button id="clearButton" class="secondary-button" type="button">↻ Clear All</button></div>
+        </form>
+ 
+        <aside class="preview-panel">
+          <div class="preview-sticky">
+            <div class="preview-top"><div><b>LIVE PREVIEW</b><span>Updates automatically</span></div><em id="taxModeBadge">Select states</em></div>
+ 
+            <article id="invoicePreview" class="invoice-sheet">
+              <header class="invoice-header">
+                <div><h2 id="previewSellerName">YOUR BUSINESS NAME</h2><p id="previewSellerAddress">Business address will appear here.</p><p id="previewSellerContact"></p><p><b>GSTIN / Ref:</b> <span id="previewSellerGstin">—</span></p></div>
+                <div class="invoice-title"><h2>TAX INVOICE</h2><span>ORIGINAL FOR RECIPIENT</span><dl><div><dt>Invoice No.</dt><dd id="previewInvoiceNumber">—</dd></div><div><dt>Invoice Date</dt><dd id="previewInvoiceDate">—</dd></div><div><dt>Place of Supply</dt><dd id="previewPlaceOfSupply">—</dd></div><div><dt>Reverse Charge</dt><dd id="previewReverseCharge">No</dd></div></dl></div>
+              </header>
+ 
+              <section class="bill-to"><small>BILL TO</small><h3 id="previewCustomerName">CUSTOMER NAME</h3><p id="previewCustomerAddress">Customer address will appear here.</p><p><b>GSTIN / UIN:</b> <span id="previewCustomerGstin">Unregistered</span></p></section>
+ 
+              <div class="preview-table-wrap"><table class="preview-table"><thead><tr><th>#</th><th>Product / Service Description</th><th>HSN/SAC</th><th>Qty</th><th>Rate (₹)</th><th>Disc.</th><th>Taxable (₹)</th><th>GST</th><th>Total (₹)</th></tr></thead><tbody id="previewItemsBody"><tr><td colspan="9" class="preview-empty">Add a product to generate the invoice.</td></tr></tbody></table></div>
+ 
+              <section class="summary-area">
+                <div><b>Amount in Words</b><p id="amountInWords">Rupees Zero Only</p></div>
+                <div class="totals"><div><span>Total Value</span><b id="previewGrossTotal">₹0.00</b></div><div><span>Discount</span><b id="previewDiscountTotal">₹0.00</b></div><div><span>Total Taxable Value</span><b id="previewTaxableTotal">₹0.00</b></div><div class="cgst-row"><span>CGST</span><b id="previewCgst">₹0.00</b></div><div class="sgst-row"><span>SGST / UTGST</span><b id="previewSgst">₹0.00</b></div><div class="igst-row"><span>IGST</span><b id="previewIgst">₹0.00</b></div><div class="grand"><span>Grand Total</span><b id="previewGrandTotal">₹0.00</b></div></div>
+              </section>
+ 
+              <section class="invoice-bottom">
+                <div><small>NOTES</small><p id="previewNotes" class="keep-lines">Thank you for your business.</p><small class="top-gap">TERMS & CONDITIONS</small><p id="previewTerms" class="keep-lines">Payment terms will appear here.</p></div>
+                <div><small>BANK DETAILS</small><p><b>Bank:</b> <span id="previewBankName">—</span></p><p><b>A/C No.:</b> <span id="previewBankAccount">—</span></p><p><b>IFSC:</b> <span id="previewBankIfsc">—</span></p></div>
+                <div class="signature"><p>For <b id="previewSignatureBusiness">Your Business</b></p><div></div><p id="previewSignatoryName">Authorized Signatory</p></div>
+              </section>
+              <footer class="invoice-note">Generated using InfoBridgeIndia. Verify all details before issuing the invoice.</footer>
+            </article>
+ 
+            <div class="preview-actions"><button id="downloadPdfButton" class="download-button" type="button">⬇ Download PDF</button><button id="printButton" class="print-button" type="button">🖨 Print Invoice</button></div>
+            <p id="pdfStatus" class="pdf-status"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+ 
+  <footer class="site-footer"><div class="page-container"><p>© 2026 InfoBridgeIndia. All Rights Reserved.</p><p>Verify invoice details before use.</p></div></footer>
+</body>
+</html>
