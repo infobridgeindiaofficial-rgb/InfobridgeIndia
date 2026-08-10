@@ -6,13 +6,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const validateBtn = document.getElementById("validateBtn");
     const generateBtn = document.getElementById("generateBtn");
     const statusBox = document.getElementById("statusBox");
- 
+    const downloadSection = document.getElementById("downloadSection");
+    const downloadExcelBtn = document.getElementById("downloadExcelBtn");
+    const downloadJsonBtn = document.getElementById("downloadJsonBtn");
+
     if (
         !salesInput ||
         !returnInput ||
         !validateBtn ||
         !generateBtn ||
-        !statusBox
+        !statusBox ||
+        !downloadSection ||
+        !downloadExcelBtn ||
+        !downloadJsonBtn
     ) {
         console.error("Required Meesho page elements were not found.");
         return;
@@ -39,7 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let validatedSales = [];
     let validatedReturns = [];
     let reportPeriod = "";
- 
+    let lastWorkbook = null;
+    let lastGeneratedFileName = "";
+
     generateBtn.disabled = true;
  
     salesInput.addEventListener("change", resetEngine);
@@ -60,17 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
  
-            if (!returnFile) {
-                showStatus(
-                    "Please select the Meesho Return Report.",
-                    "error"
-                );
-                return;
-            }
- 
             if (
                 !isExcelFile(salesFile.name) ||
-                !isExcelFile(returnFile.name)
+                (returnFile && !isExcelFile(returnFile.name))
             ) {
                 showStatus(
                     "Only .xlsx and .xls files are supported.",
@@ -96,24 +96,30 @@ document.addEventListener("DOMContentLoaded", () => {
  
             const [salesResult, returnResult] = await Promise.all([
                 readExcelFile(salesFile),
-                readExcelFile(returnFile)
+                returnFile ?
+                    readExcelFile(returnFile) :
+                    Promise.resolve(null)
             ]);
- 
+
             const salesRows = normalizeRows(salesResult.rows);
-            const returnRows = normalizeRows(returnResult.rows);
- 
+            const returnRows = returnResult ?
+                normalizeRows(returnResult.rows) :
+                [];
+
             validateReport(
                 salesRows,
                 SALES_REQUIRED,
                 "Sales"
             );
- 
-            validateReport(
-                returnRows,
-                RETURN_REQUIRED,
-                "Return"
-            );
- 
+
+            if (returnResult) {
+                validateReport(
+                    returnRows,
+                    RETURN_REQUIRED,
+                    "Return"
+                );
+            }
+
             validatedSales = salesRows;
             validatedReturns = returnRows;
  
@@ -123,28 +129,38 @@ document.addEventListener("DOMContentLoaded", () => {
             );
  
             generateBtn.disabled = false;
- 
+
+            const returnSummaryHtml = returnResult ?
+                `
+                Return sheet:
+                <strong>${escapeHtml(returnResult.sheetName)}</strong>
+                <br>
+
+                Return rows:
+                <strong>${returnRows.length}</strong>
+                <br><br>
+                ` :
+                `
+                Return report:
+                <strong>Not provided (returns = 0)</strong>
+                <br><br>
+                `;
+
             showStatus(
                 `
                 <strong>Reports validated successfully.</strong>
                 <br><br>
- 
+
                 Sales sheet:
                 <strong>${escapeHtml(salesResult.sheetName)}</strong>
                 <br>
- 
+
                 Sales rows:
                 <strong>${salesRows.length}</strong>
                 <br><br>
- 
-                Return sheet:
-                <strong>${escapeHtml(returnResult.sheetName)}</strong>
-                <br>
- 
-                Return rows:
-                <strong>${returnRows.length}</strong>
-                <br><br>
- 
+
+                ${returnSummaryHtml}
+
                 Report period:
                 <strong>${escapeHtml(reportPeriod)}</strong>
                 <br><br>
@@ -170,74 +186,79 @@ document.addEventListener("DOMContentLoaded", () => {
  
     generateBtn.addEventListener("click", () => {
         try {
-            if (
-                !validatedSales.length ||
-                !validatedReturns.length
-            ) {
+            if (!validatedSales.length) {
                 showStatus(
-                    "Validate both reports before generating the workbook.",
+                    "Validate the Sales Report before generating the workbook.",
                     "error"
                 );
                 return;
             }
- 
+
             generateBtn.disabled = true;
- 
+
+            downloadSection.hidden = true;
+            downloadExcelBtn.disabled = true;
+            lastWorkbook = null;
+            lastGeneratedFileName = "";
+
             showStatus(
-                "Preparing the GST workbook...",
+                "Preparing the GST report...",
                 "loading"
             );
- 
+
             const result = calculateGST(
                 validatedSales,
                 validatedReturns
             );
- 
+
             const workbook = buildWorkbook(result);
- 
+
             const safePeriod = (
                 reportPeriod || "Report"
             )
                 .replace(/\s+/g, "_")
                 .replace(/[^A-Za-z0-9_-]/g, "");
- 
-            const fileName =
+
+            lastWorkbook = workbook;
+            lastGeneratedFileName =
                 `InfoBridgeIndia_Meesho_GST_${safePeriod}.xlsx`;
- 
-            XLSX.writeFile(
-                workbook,
-                fileName
-            );
- 
+
+            downloadSection.hidden = false;
+            downloadExcelBtn.disabled = false;
+
             showStatus(
                 `
-                <strong>GST workbook generated successfully.</strong>
+                <strong>GST Report Ready.</strong>
                 <br><br>
- 
+
                 Net taxable value:
                 <strong>₹${formatMoney(result.summary.netTaxable)}</strong>
                 <br>
- 
+
                 Net IGST:
                 <strong>₹${formatMoney(result.summary.netIGST)}</strong>
                 <br>
- 
+
                 Net CGST:
                 <strong>₹${formatMoney(result.summary.netCGST)}</strong>
                 <br>
- 
+
                 Net SGST:
                 <strong>₹${formatMoney(result.summary.netSGST)}</strong>
                 <br><br>
- 
-                Download started:
-                <strong>${escapeHtml(fileName)}</strong>
+
+                Choose a format below to download your report.
                 `,
                 "success"
             );
         } catch (error) {
             console.error(error);
- 
+
+            downloadSection.hidden = true;
+            downloadExcelBtn.disabled = true;
+            lastWorkbook = null;
+            lastGeneratedFileName = "";
+
             showStatus(
                 error.message ||
                 "The GST workbook could not be generated.",
@@ -246,6 +267,28 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             generateBtn.disabled = false;
         }
+    });
+
+    downloadExcelBtn.addEventListener("click", () => {
+        if (!lastWorkbook || !lastGeneratedFileName) {
+            showStatus(
+                "Generate the GST report before downloading.",
+                "error"
+            );
+            return;
+        }
+
+        XLSX.writeFile(
+            lastWorkbook,
+            lastGeneratedFileName
+        );
+    });
+
+    downloadJsonBtn.addEventListener("click", () => {
+        showStatus(
+            "GST JSON export is pending the official GSTN GSTR-1 schema and is not available yet.",
+            "error"
+        );
     });
  
     async function readExcelFile(file) {
@@ -384,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
  
-        if (!returns.length) {
+        if (!returns.length && returnRows.length) {
             throw new Error(
                 "No usable return transactions were found."
             );
@@ -1693,9 +1736,14 @@ document.addEventListener("DOMContentLoaded", () => {
         validatedSales = [];
         validatedReturns = [];
         reportPeriod = "";
- 
+        lastWorkbook = null;
+        lastGeneratedFileName = "";
+
         generateBtn.disabled = true;
- 
+
+        downloadSection.hidden = true;
+        downloadExcelBtn.disabled = true;
+
         statusBox.className = "";
         statusBox.innerHTML = "";
         statusBox.style.display = "none";

@@ -5,8 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const validateBtn = document.getElementById("validateBtn");
     const generateBtn = document.getElementById("generateBtn");
     const statusBox = document.getElementById("statusBox");
- 
-    if (!salesInput || !validateBtn || !generateBtn || !statusBox) {
+    const downloadSection = document.getElementById("downloadSection");
+    const downloadExcelBtn = document.getElementById("downloadExcelBtn");
+    const downloadJsonBtn = document.getElementById("downloadJsonBtn");
+
+    if (
+        !salesInput ||
+        !validateBtn ||
+        !generateBtn ||
+        !statusBox ||
+        !downloadSection ||
+        !downloadExcelBtn ||
+        !downloadJsonBtn
+    ) {
         console.error("Required Flipkart page elements were not found.");
         return;
     }
@@ -39,7 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let validatedRows = [];
     let reportPeriod = "";
     let selectedSheetName = "";
- 
+    let lastWorkbook = null;
+    let lastGeneratedFileName = "";
+
     generateBtn.disabled = true;
  
     salesInput.addEventListener("change", resetEngine);
@@ -117,24 +130,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 showStatus("Validate the report before generating the workbook.", "error");
                 return;
             }
- 
+
             generateBtn.disabled = true;
-            showStatus("Preparing the GST workbook...", "loading");
- 
+
+            downloadSection.hidden = true;
+            downloadExcelBtn.disabled = true;
+            lastWorkbook = null;
+            lastGeneratedFileName = "";
+
+            showStatus("Preparing the GST report...", "loading");
+
             const result = calculateGST(validatedRows);
             const workbook = buildWorkbook(result);
- 
+
             const safePeriod = (reportPeriod || "Report")
                 .replace(/\s+/g, "_")
                 .replace(/[^A-Za-z0-9_-]/g, "");
- 
-            const fileName = `InfoBridgeIndia_Flipkart_GST_${safePeriod}.xlsx`;
- 
-            XLSX.writeFile(workbook, fileName);
- 
+
+            lastWorkbook = workbook;
+            lastGeneratedFileName = `InfoBridgeIndia_Flipkart_GST_${safePeriod}.xlsx`;
+
+            downloadSection.hidden = false;
+            downloadExcelBtn.disabled = false;
+
             showStatus(
                 `
-                <strong>GST workbook generated successfully.</strong>
+                <strong>GST Report Ready.</strong>
                 <br><br>
                 Net taxable value: <strong>₹${formatMoney(result.summary.netTaxable)}</strong>
                 <br>
@@ -144,12 +165,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 <br>
                 Net SGST: <strong>₹${formatMoney(result.summary.netSGST)}</strong>
                 <br><br>
-                Download started: <strong>${escapeHtml(fileName)}</strong>
+                Choose a format below to download your report.
                 `,
                 "success"
             );
         } catch (error) {
             console.error(error);
+
+            downloadSection.hidden = true;
+            downloadExcelBtn.disabled = true;
+            lastWorkbook = null;
+            lastGeneratedFileName = "";
+
             showStatus(
                 error.message || "The GST workbook could not be generated.",
                 "error"
@@ -157,6 +184,22 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             generateBtn.disabled = false;
         }
+    });
+
+    downloadExcelBtn.addEventListener("click", () => {
+        if (!lastWorkbook || !lastGeneratedFileName) {
+            showStatus("Generate the GST report before downloading.", "error");
+            return;
+        }
+
+        XLSX.writeFile(lastWorkbook, lastGeneratedFileName);
+    });
+
+    downloadJsonBtn.addEventListener("click", () => {
+        showStatus(
+            "GST JSON export is pending the official GSTN GSTR-1 schema and is not available yet.",
+            "error"
+        );
     });
  
     async function readFlipkartReport(file) {
@@ -843,7 +886,11 @@ document.addEventListener("DOMContentLoaded", () => {
         validatedRows = [];
         reportPeriod = "";
         selectedSheetName = "";
+        lastWorkbook = null;
+        lastGeneratedFileName = "";
         generateBtn.disabled = true;
+        downloadSection.hidden = true;
+        downloadExcelBtn.disabled = true;
         statusBox.className = "";
         statusBox.innerHTML = "";
         statusBox.style.display = "none";

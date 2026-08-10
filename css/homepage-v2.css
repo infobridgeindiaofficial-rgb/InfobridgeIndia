@@ -441,6 +441,54 @@ a.ibi-mini-tool:hover{
   color:#111827;
   background:var(--amazon);
 }
+.ibi-market-card.combined-card{
+  grid-column:1/-1;
+  min-height:auto;
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:18px;
+  padding:26px 28px;
+  background:linear-gradient(135deg,#eff6ff,#f5f8ff);
+  border-color:#bfdbfe;
+}
+.ibi-market-card.combined-card::before{
+  background:linear-gradient(90deg,var(--ibi-blue),var(--flipkart));
+}
+.ibi-market-card.combined-card .ibi-market-card-top{flex:1 1 260px}
+.ibi-market-card.combined-card .combined-logo{
+  font-size:26px;
+  background:#fff;
+}
+.ibi-market-card.combined-card .combined-badge{
+  color:var(--ibi-blue-dark);
+  background:#dbeafe;
+}
+.ibi-market-card.combined-card p{
+  flex:2 1 260px;
+  margin:0;
+}
+.ibi-market-card.combined-card .combined-formats{
+  display:flex;
+  gap:8px;
+  flex:0 0 auto;
+}
+.ibi-market-card.combined-card .combined-formats span{
+  padding:6px 12px;
+  border-radius:999px;
+  color:var(--ibi-blue-dark);
+  background:#fff;
+  border:1px solid #bfdbfe;
+  font-size:11px;
+  font-weight:800;
+}
+.ibi-market-card.combined-card>a{
+  flex:0 0 auto;
+  margin-top:0;
+  padding:12px 22px;
+  background:linear-gradient(135deg,var(--ibi-blue),var(--flipkart));
+  white-space:nowrap;
+}
 .ibi-trust-strip{
   margin-top:24px;
   padding:20px;
@@ -646,6 +694,8 @@ a.ibi-mini-tool:hover{
   .ibi-trust-row,.ibi-hero-actions{justify-content:center}
   .ibi-laptop-area{margin:12px 0 8px}
   .ibi-marketplace-grid{grid-template-columns:1fr}
+  .ibi-market-card.combined-card{flex-direction:column;align-items:flex-start}
+  .ibi-market-card.combined-card>a{width:100%;text-align:center}
   .ibi-tool-grid{grid-template-columns:repeat(2,1fr)}
   .ibi-video-section,.ibi-about-box{grid-template-columns:1fr}
   .ibi-benefit-grid{grid-template-columns:repeat(2,1fr)}

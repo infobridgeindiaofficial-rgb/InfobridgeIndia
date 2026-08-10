@@ -22,37 +22,63 @@
             <a href="../index.html">Home</a>
             <a href="meesho.html">Meesho GST</a>
             <a href="flipkart.html">Flipkart GST</a>
+            <a href="combined-gstr1.html">Combined GSTR-1</a>
         </nav>
     </header>
- 
+
     <main class="upload-page">
- 
-        <h1>Flipkart GST Report Generator</h1>
- 
-        <p>
-            Upload your Flipkart Sales Report.
-            The GST Engine will prepare your GST workbook automatically.
-        </p>
- 
-        <div class="upload-box">
-            <h3>1. Sales Report</h3>
-            <input type="file" id="salesReport" accept=".xlsx,.xls">
+
+        <div class="gst-card">
+            <h1>Flipkart GST Report</h1>
+            <p class="gst-subtitle">
+                Upload your Sales Report and the GST Engine will prepare your GST workbook.
+            </p>
+
+            <div class="upload-row">
+                <div class="upload-field">
+                    <label for="salesReport">Sales Report</label>
+                    <input type="file" id="salesReport" accept=".xlsx,.xls">
+                </div>
+            </div>
+
+            <div class="upload-actions">
+                <button type="button" id="validateBtn">
+                    Validate Report
+                </button>
+
+                <button type="button" id="generateBtn" disabled>
+                    Generate GST Report
+                </button>
+            </div>
+
+            <div id="statusBox"></div>
+
+            <div id="downloadSection" class="download-section" hidden>
+                <h3>GST Report Ready</h3>
+
+                <div class="download-actions">
+                    <button type="button" id="downloadExcelBtn" disabled>
+                        Download Excel
+                    </button>
+
+                    <button
+                        type="button"
+                        id="downloadJsonBtn"
+                        disabled
+                        title="Pending the official GSTN GSTR-1 JSON schema"
+                    >
+                        Download JSON
+                    </button>
+                </div>
+
+                <p class="json-note">
+                    GST JSON export will be enabled once the official GSTN GSTR-1 schema is finalized.
+                </p>
+            </div>
         </div>
- 
-        <div class="upload-actions">
-            <button type="button" id="validateBtn">
-                Validate Report
-            </button>
- 
-            <button type="button" id="generateBtn" disabled>
-                Generate GST Report
-            </button>
-        </div>
- 
-        <div id="statusBox"></div>
- 
+
     </main>
- 
+
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="../js/flipkart.js"></script>
  
