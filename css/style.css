@@ -29,7 +29,7 @@ html {
 }
 
 body {
-    font-family: "Poppins", sans-serif;
+    font-family: "Montserrat", Arial, sans-serif;
     color: var(--dark);
     background: var(--background);
     line-height: 1.7;
@@ -1280,17 +1280,720 @@ footer {
         width: 100%;
     }
 }
-/* MEESHO PAGE HEADER */
 
-.meesho-header {
-    width: 100%;
-    min-height: 82px;
-    padding: 12px 7%;
+/* =========================
+   GST REPORT HERO CARD
+   (Meesho & Flipkart visual redesign only —
+   scoped entirely under .gst-hero-card so the
+   Combined GSTR-1 page, which reuses the plain
+   .gst-card / #validateBtn / #statusBox / etc.
+   styling above, is completely unaffected)
+========================= */
+
+.gst-hero-card {
+    --gst-pink-1: #65004f;
+    --gst-pink-2: #4f003e;
+    --gst-purple: #a855f7;
+    --gst-blue: #2563eb;
+    --gst-navy: #0f172a;
+    --gst-fk-1: #2874f0;
+    --gst-fk-2: #1d4ed8;
+    --gst-fk-yellow: #ffc200;
+
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 44px 36px;
+    background: #ffffff;
+    border-radius: 26px;
+    box-shadow:
+        0 24px 60px rgba(20, 33, 61, 0.10),
+        0 4px 14px rgba(20, 33, 61, 0.04);
+    text-align: left;
+}
+
+.gst-hero-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    color: #ffffff;
+}
+
+.gst-hero-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.gst-hero-icon--meesho {
+    background: linear-gradient(135deg, var(--gst-pink-1), var(--gst-pink-2));
+    box-shadow: 0 10px 24px rgba(101, 0, 79, 0.32);
+}
+
+.gst-hero-icon--flipkart {
+    background: linear-gradient(135deg, var(--gst-fk-1), var(--gst-fk-2));
+    box-shadow: 0 10px 24px rgba(40, 116, 240, 0.32);
+}
+
+.gst-hero-icon--combined {
+    background: linear-gradient(135deg, var(--gst-blue), var(--gst-fk-1));
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.32);
+}
+
+.gst-hero-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin: 4px 0 12px;
+}
+
+.gst-hero-title-accent {
+    background: linear-gradient(135deg, var(--gst-pink-1), var(--gst-pink-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.gst-hero-title-accent--flipkart {
+    background: linear-gradient(135deg, var(--gst-fk-1), var(--gst-fk-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.gst-hero-title-accent--combined {
+    background: linear-gradient(135deg, var(--gst-blue), var(--gst-fk-1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.gst-hero-title-dark {
+    margin-left: 9px;
+    color: var(--gst-navy);
+}
+
+.gst-hero-subtitle {
+    max-width: 540px;
+    margin: 0 auto 30px;
+    color: #5f6b7a;
+    font-size: 14.5px;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.gst-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.gst-upload-grid.single {
+    grid-template-columns: minmax(0, 480px);
+    justify-content: center;
+}
+
+.gst-upload-card {
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+}
+
+.gst-upload-card--pink {
+    background: linear-gradient(160deg, #fff1f8, #fdfbfb);
+    border-color: #e8cfe1;
+}
+
+.gst-upload-card--blue {
+    background: linear-gradient(160deg, #eff6ff, #fbfdff);
+    border-color: #bfdbfe;
+}
+
+.gst-upload-card--flipkart {
+    background: linear-gradient(160deg, #eff6ff, #fffdf6);
+    border-color: #bfdbfe;
+}
+
+.gst-upload-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.gst-upload-card-icon {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+}
+
+.gst-upload-card-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.gst-upload-card--pink .gst-upload-card-icon {
+    color: #65004f;
+    box-shadow: 0 4px 10px rgba(101, 0, 79, 0.15);
+}
+
+.gst-upload-card--blue .gst-upload-card-icon {
+    color: #2563eb;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.gst-upload-card--flipkart .gst-upload-card-icon {
+    color: #2874f0;
+    box-shadow: 0 4px 10px rgba(40, 116, 240, 0.15);
+}
+
+.gst-upload-card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gst-upload-card-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.gst-optional-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.gst-upload-card-desc {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.gst-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 26px 16px;
+    border-radius: 14px;
+    border: 1.5px dashed;
+    cursor: pointer;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    transition: 0.2s ease;
+}
+
+.gst-dropzone:hover {
+    background: #ffffff;
+}
+
+.gst-upload-card--pink .gst-dropzone {
+    border-color: #d9a8c9;
+}
+
+.gst-upload-card--blue .gst-dropzone,
+.gst-upload-card--flipkart .gst-dropzone {
+    border-color: #93c5fd;
+}
+
+.gst-dropzone-icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 2px;
+}
+
+.gst-upload-card--pink .gst-dropzone-icon {
+    color: #65004f;
+}
+
+.gst-upload-card--blue .gst-dropzone-icon,
+.gst-upload-card--flipkart .gst-dropzone-icon {
+    color: #2563eb;
+}
+
+.gst-dropzone-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.gst-dropzone-subtext {
+    margin-bottom: 8px;
+    font-size: 11.5px;
+    color: #8a94a6;
+}
+
+.gst-choose-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border: 1.5px solid;
+    background: #ffffff;
+    transition: 0.2s ease;
+}
+
+.gst-choose-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.gst-upload-card--pink .gst-choose-btn {
+    color: #65004f;
+    border-color: #d9a8c9;
+}
+
+.gst-upload-card--blue .gst-choose-btn,
+.gst-upload-card--flipkart .gst-choose-btn {
+    color: #2563eb;
+    border-color: #93c5fd;
+}
+
+.gst-upload-card--pink .gst-dropzone:hover .gst-choose-btn {
+    color: #ffffff;
+    background: linear-gradient(135deg, #65004f, #4f003e);
+    border-color: transparent;
+}
+
+.gst-upload-card--blue .gst-dropzone:hover .gst-choose-btn,
+.gst-upload-card--flipkart .gst-dropzone:hover .gst-choose-btn {
+    color: #ffffff;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: transparent;
+}
+
+.gst-dropzone-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.gst-format-note {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #8a94a6;
+    text-align: center;
+}
+
+.gst-info-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    border-radius: 10px;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #1d4ed8;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.gst-info-strip svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.gst-marketplace-block {
+    margin-bottom: 22px;
+}
+
+.gst-marketplace-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+.gst-marketplace-label img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.gst-marketplace-label--meesho {
+    color: #65004f;
+}
+
+.gst-marketplace-label--flipkart {
+    color: #2874f0;
+}
+
+.gst-dev-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    font-size: 12.5px;
+    line-height: 1.7;
+}
+
+.gst-dev-note svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.gst-hero-card .gst-actions {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.gst-hero-card #validateBtn,
+.gst-hero-card #generateBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.25s ease;
+}
+
+.gst-hero-card .gst-btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gst-hero-card .gst-btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.gst-hero-card .gst-btn-text strong {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 800;
+}
+
+.gst-hero-card .gst-btn-text small {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.gst-hero-card #validateBtn {
+    background: #ffffff;
+    border: 1.5px solid #e2e2ea;
+    color: #0f172a;
+}
+
+.gst-hero-card #validateBtn .gst-btn-icon {
+    background: #f3e8ff;
+    color: #9333ea;
+}
+
+.gst-hero-card #validateBtn:hover {
+    border-color: #c4b5fd;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(147, 51, 234, 0.12);
+}
+
+.gst-hero-card #generateBtn {
+    border: none;
+    color: #ffffff;
+}
+
+.gst-hero-card #generateBtn .gst-btn-icon {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.gst-hero-card--meesho #generateBtn {
+    background: linear-gradient(120deg, #65004f, #4f003e);
+    box-shadow: 0 14px 30px rgba(101, 0, 79, 0.32);
+}
+
+.gst-hero-card--flipkart #generateBtn {
+    background: linear-gradient(120deg, #2874f0, #1d4ed8);
+    box-shadow: 0 14px 30px rgba(40, 116, 240, 0.32);
+}
+
+.gst-hero-card--combined #generateBtn {
+    background: linear-gradient(120deg, var(--gst-blue), var(--gst-fk-1));
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.32);
+}
+
+.gst-hero-card--flipkart #generateBtn .gst-btn-icon {
+    background: rgba(255, 194, 0, 0.3);
+    color: #fff3cd;
+}
+
+.gst-hero-card #generateBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.gst-hero-card #generateBtn:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+    color: #ffffff;
+}
+
+.gst-hero-card #generateBtn:disabled .gst-btn-icon {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.gst-hero-card #statusBox {
+    margin: 22px 0 0;
+    padding: 18px 20px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.7;
+}
+
+.gst-hero-card #statusBox.status-loading {
+    text-align: center;
+    background: #eef5ff;
+    color: #1f5fa8;
+    border: 1px solid #bfd7ff;
+}
+
+.gst-hero-card #statusBox.status-error {
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+}
+
+.gst-hero-card #statusBox.status-success {
+    background: linear-gradient(160deg, #f0fdf4, #ffffff);
+    border: 1px solid #bbf7d0;
+}
+
+.gst-hero-card #statusBox.status-success:has(+ #downloadSection:not([hidden])) {
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: -1px;
+    padding-bottom: 20px;
+}
+
+.gst-hero-card .result-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #15803d;
+}
+
+.gst-hero-card .result-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #16a34a;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.gst-hero-card .result-check svg {
+    width: 15px;
+    height: 15px;
+}
+
+.gst-hero-card .result-rows {
+    display: grid;
+    gap: 8px;
+}
+
+.gst-hero-card .result-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 13px;
+}
+
+.gst-hero-card .result-row span {
+    color: #5f6b7a;
+    font-weight: 600;
+}
+
+.gst-hero-card .result-row strong {
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.gst-hero-card .download-section {
+    margin-top: 0;
+    padding: 20px;
+    border: 1px solid #bbf7d0;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
     background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
+}
+
+.gst-hero-card .download-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gst-hero-card .download-actions button {
+    flex: 1 1 160px;
+    padding: 12px 16px;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: 0.2s ease;
+}
+
+.gst-hero-card #downloadExcelBtn {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+}
+
+.gst-hero-card #downloadExcelBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.3);
+}
+
+.gst-hero-card #downloadJsonBtn {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.gst-hero-card #downloadJsonBtn::after {
+    content: "🔒";
+    margin-left: 6px;
+    font-size: 10px;
+}
+
+.gst-hero-card .json-note {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #8a94a6;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    .gst-hero-card {
+        padding: 34px 26px 30px;
+    }
+
+    .gst-hero-title {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 700px) {
+    .gst-hero-card .gst-upload-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .gst-hero-card {
+        padding: 26px 18px 24px;
+        border-radius: 20px;
+    }
+
+    .gst-hero-title {
+        font-size: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .gst-hero-title-dark {
+        margin-left: 0;
+    }
+
+    .gst-hero-card .gst-actions {
+        flex-direction: column;
+    }
+
+    .gst-hero-card #validateBtn,
+    .gst-hero-card #generateBtn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .gst-hero-card .download-actions button {
+        flex: 1 1 100%;
+    }
+}
+
+/* MEESHO PAGE HEADER */
+
+.meesho-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    min-height: 82px;
+    padding: 12px max(36px, calc((100% - 1440px) / 2 + 36px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid #e8eef7;
+    backdrop-filter: blur(14px);
 }
 
 .meesho-logo {
@@ -1298,29 +2001,58 @@ footer {
     align-items: center;
     gap: 12px;
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 700;
     color: #0f172a;
 }
 
 .meesho-logo img {
-    width: 58px;
-    height: 58px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
     display: block;
+}
+
+.meesho-logo strong {
+    color: #2563eb;
+    font-weight: 700;
 }
 
 .meesho-nav {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 42px;
 }
 
 .meesho-nav a {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
-    color: #334155;
+    color: #172033;
 }
 
 .meesho-nav a:hover {
     color: #2563eb;
+}
+
+@media (max-width: 760px) {
+    .meesho-header {
+        min-height: 68px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .meesho-logo {
+        font-size: 19px;
+    }
+
+    .meesho-logo img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .meesho-nav {
+        gap: 18px;
+        flex-wrap: wrap;
+    }
 }

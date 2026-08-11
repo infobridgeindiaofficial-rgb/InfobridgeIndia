@@ -155,17 +155,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
             showStatus(
                 `
-                <strong>GST Report Ready.</strong>
-                <br><br>
-                Net taxable value: <strong>₹${formatMoney(result.summary.netTaxable)}</strong>
-                <br>
-                Net IGST: <strong>₹${formatMoney(result.summary.netIGST)}</strong>
-                <br>
-                Net CGST: <strong>₹${formatMoney(result.summary.netCGST)}</strong>
-                <br>
-                Net SGST: <strong>₹${formatMoney(result.summary.netSGST)}</strong>
-                <br><br>
-                Choose a format below to download your report.
+                <div class="result-heading">
+                    <span class="result-check">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    </span>
+                    GST Report Ready
+                </div>
+                <div class="result-rows">
+                    <div class="result-row"><span>Net Taxable Value</span><strong>₹${formatMoney(result.summary.netTaxable)}</strong></div>
+                    <div class="result-row"><span>IGST</span><strong>₹${formatMoney(result.summary.netIGST)}</strong></div>
+                    <div class="result-row"><span>CGST</span><strong>₹${formatMoney(result.summary.netCGST)}</strong></div>
+                    <div class="result-row"><span>SGST</span><strong>₹${formatMoney(result.summary.netSGST)}</strong></div>
+                </div>
                 `,
                 "success"
             );
