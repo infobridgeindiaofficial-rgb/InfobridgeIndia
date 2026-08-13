@@ -675,6 +675,8 @@ a.ibi-mini-tool:hover{
   color:#64748b;
   font-size:12px;
 }
+.ibi-footer-bottom a{color:#94a3b8;text-decoration:none}
+.ibi-footer-bottom a:hover{color:#fff}
 
 /* Tablet */
 @media(max-width:1180px){
