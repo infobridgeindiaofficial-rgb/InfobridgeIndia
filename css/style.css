@@ -1242,10 +1242,20 @@ footer {
     background: #146241;
 }
 
-#downloadJsonBtn {
+#downloadJsonBtn:disabled {
     color: #94a3b8;
     background: #e2e8f0;
     cursor: not-allowed;
+}
+
+#downloadJsonBtn:not(:disabled) {
+    color: #ffffff;
+    background: #2563eb;
+    cursor: pointer;
+}
+
+#downloadJsonBtn:not(:disabled):hover {
+    background: #1d4ed8;
 }
 
 .json-note {
@@ -1383,6 +1393,53 @@ footer {
     font-size: 14.5px;
     line-height: 1.7;
     text-align: center;
+}
+
+.gst-meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.gst-meta-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gst-meta-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.gst-meta-field input {
+    padding: 11px 14px;
+    border: 1.5px solid #dfe7f3;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 13.5px;
+    text-transform: uppercase;
+}
+
+.gst-meta-field input:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #ffffff;
+}
+
+.gst-meta-field input::placeholder {
+    text-transform: none;
+    color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+    .gst-meta-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .gst-upload-grid {
@@ -1911,17 +1968,29 @@ footer {
     box-shadow: 0 10px 22px rgba(22, 163, 74, 0.3);
 }
 
-.gst-hero-card #downloadJsonBtn {
+.gst-hero-card #downloadJsonBtn:disabled {
     background: #f1f5f9;
     color: #94a3b8;
     border-color: #e2e8f0;
     cursor: not-allowed;
 }
 
-.gst-hero-card #downloadJsonBtn::after {
+.gst-hero-card #downloadJsonBtn:disabled::after {
     content: "🔒";
     margin-left: 6px;
     font-size: 10px;
+}
+
+.gst-hero-card #downloadJsonBtn:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border-color: transparent;
+    cursor: pointer;
+}
+
+.gst-hero-card #downloadJsonBtn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
 }
 
 .gst-hero-card .json-note {

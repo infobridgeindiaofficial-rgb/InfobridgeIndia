@@ -47,6 +47,18 @@
                 prepare your GST workbook in just a few clicks.
             </p>
 
+            <div class="gst-meta-row">
+                <div class="gst-meta-field">
+                    <label for="gstin">Your GSTIN</label>
+                    <input type="text" id="gstin" maxlength="15" placeholder="e.g. 33AACCF0683K1CZ" autocomplete="off" spellcheck="false">
+                </div>
+
+                <div class="gst-meta-field">
+                    <label for="filingPeriod">Filing Period</label>
+                    <input type="month" id="filingPeriod">
+                </div>
+            </div>
+
             <div class="gst-upload-grid single">
                 <div class="gst-upload-card gst-upload-card--flipkart">
                     <div class="gst-upload-card-head">
@@ -106,14 +118,14 @@
                         type="button"
                         id="downloadJsonBtn"
                         disabled
-                        title="Pending the official GSTN GSTR-1 JSON schema"
+                        title="Download the GSTR-1 JSON file"
                     >
-                        Download JSON
+                        Download GSTR-1 JSON
                     </button>
                 </div>
 
                 <p class="json-note">
-                    GST JSON export will be enabled once the official GSTN GSTR-1 schema is finalized.
+                    JSON follows the official GSTR-1 offline utility schema (b2cs, hsn, supeco). Review it on the GST portal before filing.
                 </p>
             </div>
         </div>

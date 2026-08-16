@@ -1,5 +1,4 @@
-(() => {
-  "use strict";
+(() => { "use strict";
  
   /* =========================================================
      INFOBRIDGEINDIA GST INVOICE - COMPLETE JAVASCRIPT V3

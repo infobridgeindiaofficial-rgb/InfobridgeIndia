@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "use strict";
  
     const salesInput = document.getElementById("salesReport");
+    const gstinInput = document.getElementById("gstin");
+    const periodInput = document.getElementById("filingPeriod");
     const validateBtn = document.getElementById("validateBtn");
     const generateBtn = document.getElementById("generateBtn");
     const statusBox = document.getElementById("statusBox");
@@ -11,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (
         !salesInput ||
+        !gstinInput ||
+        !periodInput ||
         !validateBtn ||
         !generateBtn ||
         !statusBox ||
@@ -52,10 +56,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedSheetName = "";
     let lastWorkbook = null;
     let lastGeneratedFileName = "";
+    let resolvedGSTIN = "";
+    let resolvedPeriod = { fp: "", label: "" };
+    let lastJson = null;
+    let lastJsonFileName = "";
 
     generateBtn.disabled = true;
- 
+
     salesInput.addEventListener("change", resetEngine);
+    gstinInput.addEventListener("input", resetEngine);
+    periodInput.addEventListener("change", resetEngine);
  
     validateBtn.addEventListener("click", async () => {
         try {
@@ -80,7 +90,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
                 return;
             }
- 
+
+            const gstin = normalizeGSTIN(gstinInput.value);
+
+            if (!gstin) {
+                showStatus(
+                    "Please enter a valid 15-character GSTIN (e.g. 33AACCF0683K1CZ).",
+                    "error"
+                );
+                return;
+            }
+
+            const period = toFilingPeriod(periodInput.value);
+
+            if (!period) {
+                showStatus(
+                    "Please select the filing period (month and year).",
+                    "error"
+                );
+                return;
+            }
+
             validateBtn.disabled = true;
             showStatus("Validating Flipkart report...", "loading");
  
@@ -92,6 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
             validatedRows = rows;
             selectedSheetName = result.sheetName;
             reportPeriod = detectPeriod(rows);
+            resolvedGSTIN = gstin;
+            resolvedPeriod = period;
             generateBtn.disabled = false;
  
             const counts = countEvents(rows);
@@ -135,8 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             downloadSection.hidden = true;
             downloadExcelBtn.disabled = true;
+            downloadJsonBtn.disabled = true;
             lastWorkbook = null;
             lastGeneratedFileName = "";
+            lastJson = null;
+            lastJsonFileName = "";
 
             showStatus("Preparing the GST report...", "loading");
 
@@ -150,8 +185,18 @@ document.addEventListener("DOMContentLoaded", () => {
             lastWorkbook = workbook;
             lastGeneratedFileName = `InfoBridgeIndia_Flipkart_GST_${safePeriod}.xlsx`;
 
+            lastJson = buildGstr1Json(
+                result.b2c,
+                result.hsn,
+                result.eco,
+                resolvedGSTIN,
+                resolvedPeriod.fp
+            );
+            lastJsonFileName = `GSTR1_${resolvedGSTIN}_${resolvedPeriod.fp}_Flipkart.json`;
+
             downloadSection.hidden = false;
             downloadExcelBtn.disabled = false;
+            downloadJsonBtn.disabled = false;
 
             showStatus(
                 `
@@ -175,8 +220,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             downloadSection.hidden = true;
             downloadExcelBtn.disabled = true;
+            downloadJsonBtn.disabled = true;
             lastWorkbook = null;
             lastGeneratedFileName = "";
+            lastJson = null;
+            lastJsonFileName = "";
 
             showStatus(
                 error.message || "The GST workbook could not be generated.",
@@ -197,10 +245,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     downloadJsonBtn.addEventListener("click", () => {
-        showStatus(
-            "GST JSON export is pending the official GSTN GSTR-1 schema and is not available yet.",
-            "error"
-        );
+        if (!lastJson || !lastJsonFileName) {
+            showStatus("Generate the GST report before downloading.", "error");
+            return;
+        }
+
+        downloadJsonFile(lastJsonFileName, lastJson);
     });
  
     async function readFlipkartReport(file) {
@@ -408,22 +458,33 @@ document.addEventListener("DOMContentLoaded", () => {
  
     function groupB2C(transactions) {
         const groups = new Map();
- 
+
         transactions.forEach((row) => {
-            const key = `${row.stateCode}|${row.state}|${row.gstRate}`;
- 
+            const supplyType = Math.abs(row.signedIGST) > 0 ? "INTER" : "INTRA";
+            const key = `${row.stateCode}|${row.state}|${row.gstRate}|${supplyType}`;
+
             if (!groups.has(key)) {
                 groups.set(key, {
                     stateCode: row.stateCode,
                     state: row.state,
                     gstRate: row.gstRate,
-                    taxableValue: 0
+                    supplyType,
+                    taxableValue: 0,
+                    igst: 0,
+                    cgst: 0,
+                    sgst: 0,
+                    cess: 0
                 });
             }
- 
-            groups.get(key).taxableValue += row.signedTaxable;
+
+            const group = groups.get(key);
+            group.taxableValue += row.signedTaxable;
+            group.igst += row.signedIGST;
+            group.cgst += row.signedCGST;
+            group.sgst += row.signedSGST;
+            group.cess += row.signedCess;
         });
- 
+
         return Array.from(groups.values())
             .map((group) => ({
                 placeOfSupply: formatPlaceOfSupply(
@@ -432,7 +493,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 ),
                 taxableValue: round2(group.taxableValue),
                 gstRate: group.gstRate,
-                status: "ENTER IN PORTAL"
+                status: "ENTER IN PORTAL",
+                // Additional fields below are only used for GSTR-1 JSON
+                // mapping and are ignored by the existing Excel sheet.
+                stateCode: group.stateCode,
+                supplyType: group.supplyType,
+                igst: round2(group.igst),
+                cgst: round2(group.cgst),
+                sgst: round2(group.sgst),
+                cess: round2(group.cess)
             }))
             .filter((row) => Math.abs(row.taxableValue) >= 0.01)
             .sort((a, b) =>
@@ -443,10 +512,10 @@ document.addEventListener("DOMContentLoaded", () => {
  
     function groupHSN(transactions) {
         const groups = new Map();
- 
+
         transactions.forEach((row) => {
             const key = `${row.hsnCode}|${row.gstRate}|${row.uqc}`;
- 
+
             if (!groups.has(key)) {
                 groups.set(key, {
                     hsnCode: row.hsnCode,
@@ -456,18 +525,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     taxableValue: 0,
                     igst: 0,
                     cgst: 0,
-                    sgst: 0
+                    sgst: 0,
+                    cess: 0
                 });
             }
- 
+
             const group = groups.get(key);
             group.quantity += row.signedQuantity;
             group.taxableValue += row.signedTaxable;
             group.igst += row.signedIGST;
             group.cgst += row.signedCGST;
             group.sgst += row.signedSGST;
+            group.cess += row.signedCess;
         });
- 
+
         return Array.from(groups.values())
             .map((group) => ({
                 hsnCode: group.hsnCode || "Missing",
@@ -478,7 +549,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 igst: round2(group.igst),
                 cgst: round2(group.cgst),
                 sgst: round2(group.sgst),
-                status: "ENTER IN PORTAL"
+                status: "ENTER IN PORTAL",
+                // Used only for GSTR-1 JSON mapping; ignored by the Excel sheet.
+                cess: round2(group.cess)
             }))
             .filter((row) =>
                 [
@@ -837,6 +910,120 @@ document.addEventListener("DOMContentLoaded", () => {
         return "";
     }
  
+    /* ---------------------------------------------------------------
+       GSTR-1 JSON (structure follows the official reference GSTR-1
+       JSON file supplied for this feature). Built from the same
+       result.b2c / result.hsn / result.eco used for the Excel workbook.
+       --------------------------------------------------------------- */
+
+    function buildGstr1Json(b2cRows, hsnRows, ecoRows, gstin, fp) {
+        return {
+            gstin,
+            fp,
+            version: "GST3.1.6",
+            hash: "",
+            b2cs: toJsonB2CS(b2cRows),
+            hsn: {
+                hsn_b2c: toJsonHSN(hsnRows),
+                hsn_b2b: []
+            },
+            nil: {
+                inv: [
+                    { sply_ty: "INTRB2B", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+                    { sply_ty: "INTRAB2B", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+                    { sply_ty: "INTRB2C", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 },
+                    { sply_ty: "INTRAB2C", nil_amt: 0, expt_amt: 0, ngsup_amt: 0 }
+                ]
+            },
+            supeco: {
+                clttx: toJsonSupEco(ecoRows)
+            },
+            doc_issue: {
+                doc_det: []
+            }
+        };
+    }
+
+    function toJsonB2CS(rows) {
+        return rows.map((row) => {
+            const entry = {
+                sply_ty: row.supplyType,
+                rt: row.gstRate,
+                typ: "OE",
+                pos: row.stateCode || "97",
+                txval: row.taxableValue
+            };
+
+            if (row.supplyType === "INTER") {
+                entry.iamt = row.igst;
+            } else {
+                entry.camt = row.cgst;
+                entry.samt = row.sgst;
+            }
+
+            entry.csamt = row.cess;
+            return entry;
+        });
+    }
+
+    function toJsonHSN(rows) {
+        return rows.map((row, index) => ({
+            num: index + 1,
+            hsn_sc: row.hsnCode === "Missing" ? "" : row.hsnCode,
+            uqc: shortUQC(row.uqc),
+            qty: row.totalQuantity,
+            rt: row.gstRate,
+            txval: row.totalTaxableValue,
+            iamt: row.igst,
+            samt: row.sgst,
+            camt: row.cgst,
+            csamt: row.cess
+        }));
+    }
+
+    function toJsonSupEco(rows) {
+        return rows.map((row) => ({
+            etin: row.ecoGSTIN,
+            suppval: row.netTaxable,
+            igst: row.igst,
+            cgst: row.cgst,
+            sgst: row.sgst,
+            cess: row.cess,
+            flag: "N"
+        }));
+    }
+
+    function downloadJsonFile(fileName, dataObject) {
+        const blob = new Blob([JSON.stringify(dataObject)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function toFilingPeriod(monthValue) {
+        const text = cleanText(monthValue);
+        const match = text.match(/^(\d{4})-(\d{2})$/);
+        if (!match) return null;
+
+        const year = match[1];
+        const month = match[2];
+        const label = new Date(Number(year), Number(month) - 1, 1)
+            .toLocaleString("en-US", { month: "long", year: "numeric" });
+
+        return { fp: `${month}${year}`, label };
+    }
+
+    function shortUQC(value) {
+        const text = cleanText(value).toUpperCase();
+        const code = text.split(/[-\s]/)[0];
+        return code || "OTH";
+    }
+
     function normalizeGSTIN(value) {
         const gstin = cleanText(value)
             .toUpperCase()
@@ -889,9 +1076,14 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSheetName = "";
         lastWorkbook = null;
         lastGeneratedFileName = "";
+        resolvedGSTIN = "";
+        resolvedPeriod = { fp: "", label: "" };
+        lastJson = null;
+        lastJsonFileName = "";
         generateBtn.disabled = true;
         downloadSection.hidden = true;
         downloadExcelBtn.disabled = true;
+        downloadJsonBtn.disabled = true;
         statusBox.className = "";
         statusBox.innerHTML = "";
         statusBox.style.display = "none";
