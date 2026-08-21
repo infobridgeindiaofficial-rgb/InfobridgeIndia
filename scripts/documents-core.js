@@ -1,0 +1,3 @@
+export function documentStatus(doc,warningDays=30,today=new Date().toISOString().slice(0,10)){if(!doc.expiryDate)return{label:"No Expiry",tone:"neutral",days:null};const days=Math.ceil((new Date(doc.expiryDate)-new Date(today))/86400000);if(days<0)return{label:"Expired",tone:"danger",days};if(days<=Number(warningDays))return{label:"Expiring Soon",tone:"warning",days};return{label:"Valid",tone:"success",days}}
+export const csvEscape=v=>/[",\n]/.test(String(v??""))?`"${String(v??"").replaceAll('"','""')}"`:String(v??"");
+export const toCsv=(rows,columns)=>[columns.map(c=>c[1]).join(","),...rows.map(r=>columns.map(c=>csvEscape(r[c[0]])).join(","))].join("\n");

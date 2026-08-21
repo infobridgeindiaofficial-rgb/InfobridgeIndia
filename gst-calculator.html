@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InfoBridgeIndia</title>
-  <meta name="description" content="InfoBridgeIndia is a complete business management, accounting, GST compliance and office operations platform for Indian businesses — from local shops to multi-branch enterprises." />
+  <title>GST Calculator — InfoBridgeIndia</title>
+  <meta name="description" content="Free GST Inclusive and Exclusive Calculator. Calculate taxable value, GST amount, CGST, SGST and IGST instantly." />
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />
@@ -12,9 +12,9 @@
   <script src="/vendor/supabase.js"></script>
   <script src="/supabase-config.js"></script>
   <script type="module" src="/scripts/auth-gate.js"></script>
-<link rel="stylesheet" href="/styles/home-story.css" />
+<link rel="stylesheet" href="/gst-calculator/styles.css" />
 </head>
-<body class="">
+<body>
 <header class="site-header">
     <div class="container">
       <a href="/index.html" class="brand">
@@ -263,128 +263,86 @@
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-office" aria-hidden="true">
-      <img src="/infobridgeindia-office-hero.png" alt="" />
-    </div>
-    <div class="container hero-inner">
-      <div class="hero-copy">
-        <span class="eyebrow">BUSINESS MANAGEMENT PLATFORM FOR INDIA</span>
-        <h1 class="h-display">Your Entire Business.<br/>One Connected Platform.</h1>
-        <p class="text-lead">Manage accounting, GST, sales, purchases, inventory, banking, HR, e-commerce, import &amp; export and business operations from one connected platform.</p>
-        <p class="text-lead hero-subline">Built for local businesses, online sellers, growing companies and enterprises across India.</p>
-      </div>
-    </div>
-  </section>
-  <div class="story">
-    <section class="story-block story-intro">
-    <div class="container story-intro-inner">
-      <span class="eyebrow">InfoBridgeIndia</span>
-      <h2 class="h-2">One company.<br/>Every digital solution.</h2>
-      <p class="story-taglist">Mobile Apps<span class="dot">&bull;</span>Business Software<span class="dot">&bull;</span>Websites<span class="dot">&bull;</span>Cloud Systems</p>
-      <p class="text-lead">We create connected digital products designed for modern businesses.</p>
-    </div>
-  </section>
-    <section class="story-pin-wrap" id="phoneStory">
-    <div class="story-pin">
-      <div class="container story-pin-grid">
-        <div class="story-pin-copy">
-          <span class="eyebrow">Mobile</span>
-          <h2 class="h-2">Apps built for every screen.</h2>
-          <p class="text-lead">InfoBridgeIndia creates business applications for iPhone and Android.</p>
-          <div class="story-app-list">
-            <div class="story-app-item is-active" data-app-item="0">
-              <span class="story-app-mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1.5M13.5 7H15M9 11h1.5M13.5 11H15M9 15h1.5M13.5 15H15"/><path d="M10 21v-3.5h4V21"/></svg></span>
-              <div><strong>IB Civil</strong><p>Practical tools for civil and construction workflows.</p></div>
-            </div><div class="story-app-item" data-app-item="1">
-              <span class="story-app-mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.4 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.4-3.6-8.5s1.2-6.1 3.6-8.5z"/></svg></span>
-              <div><strong>IB Lingo</strong><p>A smarter way to learn and communicate.</p></div>
-            </div><div class="story-app-item" data-app-item="2">
-              <span class="story-app-mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/><path d="M2.5 3h2.4L7 15.2h11l2-8.4H6.2"/></svg></span>
-              <div><strong>IB Commerce</strong><p>Digital tools for modern selling and business.</p></div>
-            </div>
-          </div>
-          <p class="story-note">More InfoBridgeIndia apps are preparing for launch.</p>
-        </div>
-        <div class="story-phone-stage">
-          <div class="story-phone" data-story-phone>
-            <img class="story-device-img" data-phone-face="0" src="/app-showcase/ib-civil-mobile.png" width="700" height="1050" alt="IB Civil mobile app" loading="lazy" decoding="async" /><img class="story-device-img" data-phone-face="1" src="/app-showcase/ib-lingo-mobile.png" width="700" height="1050" alt="IB Lingo mobile app" loading="lazy" decoding="async" /><img class="story-device-img" data-phone-face="2" src="/app-showcase/ib-commerce-mobile.png" width="700" height="1050" alt="IB Commerce mobile app" loading="lazy" decoding="async" />
-          </div>
-          <div class="story-product-quick-info" data-civil-quick-info>
-            <span>Quantity surveying made simple.</span>
-            <span>Easy to use, even without prior experience.</span>
-            <span>Create BOQs and generate complete or floor-wise reports.</span>
-          </div>
-          <div class="story-product-quick-info" data-lingo-quick-info>
-            <span>Internet video and audio calls with live translation.</span>
-            <span>Communicate easily, even when you don’t share the same language.</span>
-          </div>
-          <div class="story-product-quick-info" data-commerce-quick-info>
-            <span>Manage your entire e-commerce business in one app.</span>
-            <span>Track products, orders, accounts and budgets together.</span>
-            <span>See your business performance clearly as you grow.</span>
-          </div>
-          <div class="story-tablet" data-story-tablet>
-            <img class="story-device-img" src="/app-showcase/ib-commerce-tablet.png" width="1100" height="733" alt="IB Commerce tablet app" loading="lazy" decoding="async" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-    <section class="story-pin-wrap" id="laptopStory">
-    <div class="story-pin">
-      <div class="container story-pin-grid">
-        <div class="story-laptop-stage">
-          <div class="story-laptop-glow" aria-hidden="true"></div>
-          <div class="story-laptop-base"></div>
-          <div class="story-laptop-photo" data-laptop-photo>
-            <div class="story-laptop-screen">
-              <img src="/app-showcase/infobridgeindia-dashboard-screen.png" width="1033" height="608" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-            </div>
-            <img class="story-device-img story-laptop-frame" src="/app-showcase/infobridgeindia-laptop-frame.png" width="1300" height="867" alt="InfoBridgeIndia business dashboard open on a laptop" loading="lazy" decoding="async" />
-          </div>
-        </div>
-        <div class="story-pin-copy">
-          <span class="eyebrow">Platform</span>
-          <h2 class="h-2">Your business, connected.</h2>
-          <p class="text-lead">Finance, GST, Sales, Inventory, HR and operations &mdash; working together.</p>
-          <p class="story-taglist">Web Platforms<span class="dot">&bull;</span>Desktop Software<span class="dot">&bull;</span>Cloud Systems</p>
-          <p class="story-note">Built around the way your business works.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-    <section class="story-block story-services">
-    <div class="container story-services-grid">
-      <div class="story-service">
-        <span class="story-service-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l8 4.2-8 4.2-8-4.2 8-4.2z"/><path d="M4 12l8 4.2 8-4.2M4 15.8L12 20l8-4.2"/></svg></span>
-        <strong>Mobile Apps</strong>
-        <span>iPhone & Android</span>
-      </div><div class="story-service">
-        <span class="story-service-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="9" rx="1.4"/><rect x="13.5" y="3.5" width="7" height="5.5" rx="1.4"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.4"/><rect x="3.5" y="15" width="7" height="5.5" rx="1.4"/></svg></span>
-        <strong>Business Software</strong>
-        <span>Desktop & Cloud</span>
-      </div><div class="story-service">
-        <span class="story-service-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.4 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.4-3.6-8.5s1.2-6.1 3.6-8.5z"/></svg></span>
-        <strong>Web Design</strong>
-        <span>Company & E-commerce</span>
-      </div><div class="story-service">
-        <span class="story-service-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5l5-5"/><path d="M12.5 6.5l1.4-1.4a3.5 3.5 0 015 5L17.5 11.5M11.5 17.5l-1.4 1.4a3.5 3.5 0 01-5-5L6.5 12.5"/></svg></span>
-        <strong>Connected Systems</strong>
-        <span>Finance, CRM & Operations</span>
-      </div>
-    </div>
-  </section>
-    <section class="story-block story-youtube">
-    <div class="container story-youtube-inner">
-      <a class="story-yt-poster" href="https://www.youtube.com/@infobridgeindia" target="_blank" rel="noopener" aria-label="Watch InfoBridgeIndia on YouTube"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a>
-      <div>
-        <p class="story-yt-text">See InfoBridgeIndia in action</p>
-        <a class="btn btn-on-dark" href="https://www.youtube.com/@infobridgeindia" target="_blank" rel="noopener">Watch on YouTube</a>
-      </div>
-    </div>
-  </section>
+  <section class="service-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+    <a href="/index.html">Home</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><a href="/solutions.html">Business Tools</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><span class="current">GST Calculator</span>
   </div>
+      <div style="margin-top:18px; max-width:640px;">
+        <span class="eyebrow">Business Tools</span>
+        <h1 class="h-1">GST Calculator</h1>
+        <p class="text-lead">Calculate GST inclusive, exclusive, CGST, SGST and IGST instantly.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="max-width:960px;">
+      <div class="tool-grid">
+
+        <div class="card">
+          <h2 class="h-3" style="margin-bottom:var(--sp-5);">Enter Details</h2>
+          <div class="form-grid">
+            <label class="field full">
+              <span>Amount &#8377;</span>
+              <input class="input" type="number" id="amount" placeholder="Example: 150000" min="0" step="0.01" />
+            </label>
+
+            <label class="field full">
+              <span>GST Rate</span>
+              <select class="input" id="gstRate">
+                <option value="">Select GST Rate</option>
+                <option value="0">0%</option>
+                <option value="0.25">0.25%</option>
+                <option value="3">3%</option>
+                <option value="5">5%</option>
+                <option value="12">12%</option>
+                <option value="18">18%</option>
+                <option value="28">28%</option>
+              </select>
+            </label>
+
+            <label class="field full">
+              <span>Calculation Type</span>
+              <div class="option-grid">
+                <label class="option-box"><input type="radio" name="calculationType" value="exclusive" checked /> GST Exclusive</label>
+                <label class="option-box"><input type="radio" name="calculationType" value="inclusive" /> GST Inclusive</label>
+              </div>
+            </label>
+
+            <label class="field full">
+              <span>Transaction Type</span>
+              <div class="option-grid">
+                <label class="option-box"><input type="radio" name="transactionType" value="same" checked /> Same State</label>
+                <label class="option-box"><input type="radio" name="transactionType" value="interstate" /> Other State</label>
+              </div>
+            </label>
+          </div>
+
+          <button type="button" class="btn btn-accent btn-block" id="calculateBtn" style="margin-top:var(--sp-5);">Calculate GST</button>
+          <div class="banner banner-danger hidden" id="errorMessage" style="margin-top:var(--sp-4);"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="h-3" style="margin-bottom:var(--sp-5);">GST Calculation Result</h2>
+          <div class="kv-list">
+            <div class="kv-row"><span class="k">Taxable Value</span><span class="v" id="taxableValue">&#8377;0.00</span></div>
+            <div class="kv-row"><span class="k">Total GST</span><span class="v" id="gstAmount">&#8377;0.00</span></div>
+            <div id="sameStateResults">
+              <div class="kv-row"><span class="k" id="cgstLabel">CGST</span><span class="v" id="cgstAmount">&#8377;0.00</span></div>
+              <div class="kv-row"><span class="k" id="sgstLabel">SGST</span><span class="v" id="sgstAmount">&#8377;0.00</span></div>
+            </div>
+            <div id="interstateResults" class="hidden">
+              <div class="kv-row"><span class="k" id="igstLabel">IGST</span><span class="v" id="igstAmount">&#8377;0.00</span></div>
+            </div>
+            <div class="kv-row final"><span class="k">Final Amount</span><span class="v" id="finalAmount">&#8377;0.00</span></div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-block" id="resetBtn" style="margin-top:var(--sp-5);">Reset</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
   
 <footer class="site-footer">
     <div class="container">
@@ -422,6 +380,6 @@
     </div>
   </footer>
 <script src="/scripts/site.js"></script>
-<script type="module" src="/scripts/home-story.js"></script>
+<script type="module" src="/gst-calculator/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,131 @@
+/* ============================================================
+   INFOBRIDGEINDIA â€” Base / Reset / Typography / Utilities
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-16);
+  line-height: var(--lh-normal);
+  color: var(--ink-800);
+  background: var(--surface-50);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg { display: block; max-width: 100%; }
+/* Safety default so any icon rendered without an explicit size (or a more
+   specific component rule) still renders at a sane, text-relative size
+   instead of the browser's intrinsic replaced-element default. */
+svg { width: 1em; height: 1em; flex-shrink: 0; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, h5, h6, p { margin: 0; }
+
+h1, h2, h3, h4 {
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: var(--ink-950);
+  line-height: var(--lh-tight);
+}
+
+.h-display  { font-size: var(--fs-60); line-height: 1.05; letter-spacing: -0.02em; font-weight: 680; }
+.h-1        { font-size: var(--fs-48); letter-spacing: -0.018em; font-weight: 660; }
+.h-2        { font-size: var(--fs-40); letter-spacing: -0.016em; font-weight: 650; }
+.h-3        { font-size: var(--fs-32); font-weight: 640; }
+.h-4        { font-size: var(--fs-28); font-weight: 630; }
+.h-5        { font-size: var(--fs-24); font-weight: 620; }
+.h-6        { font-size: var(--fs-20); font-weight: 600; }
+
+.text-lead  { font-size: var(--fs-20); line-height: var(--lh-relaxed); color: var(--ink-500); font-weight: 420; }
+.text-body  { font-size: var(--fs-16); line-height: var(--lh-normal); color: var(--ink-600); }
+.text-small { font-size: var(--fs-14); line-height: var(--lh-normal); color: var(--ink-500); }
+.text-micro { font-size: var(--fs-12); line-height: var(--lh-normal); color: var(--ink-400); }
+.text-muted { color: var(--ink-400); }
+.text-brand { color: var(--brand-600); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-13);
+  font-weight: 620;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-700);
+}
+.eyebrow::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--brand-500);
+}
+
+.mono, .figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Layout ---- */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--sp-6);
+}
+@media (max-width: 640px) {
+  .container { padding: 0 var(--sp-4); }
+}
+
+.section { padding: var(--sp-24) 0; }
+.section-tight { padding: var(--sp-16) 0; }
+@media (max-width: 900px) {
+  .section { padding: var(--sp-16) 0; }
+}
+
+.stack-2 > * + * { margin-top: var(--sp-2); }
+.stack-3 > * + * { margin-top: var(--sp-3); }
+.stack-4 > * + * { margin-top: var(--sp-4); }
+.stack-6 > * + * { margin-top: var(--sp-6); }
+.stack-8 > * + * { margin-top: var(--sp-8); }
+
+.grid { display: grid; gap: var(--sp-6); }
+.g-2 { grid-template-columns: repeat(2, 1fr); }
+.g-3 { grid-template-columns: repeat(3, 1fr); }
+.g-4 { grid-template-columns: repeat(4, 1fr); }
+.g-12 { grid-template-columns: repeat(12, 1fr); }
+@media (max-width: 980px) {
+  .g-4 { grid-template-columns: repeat(2, 1fr); }
+  .g-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .g-2, .g-3, .g-4 { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .g-12 > * { grid-column: span 12 !important; }
+}
+
+.row { display: flex; align-items: center; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+.row-gap-2 { display: flex; align-items: center; gap: var(--sp-2); }
+.row-gap-3 { display: flex; align-items: center; gap: var(--sp-3); }
+.row-gap-4 { display: flex; align-items: center; gap: var(--sp-4); }
+.wrap { flex-wrap: wrap; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+
+::selection { background: var(--brand-100); color: var(--ink-950); }
+
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}

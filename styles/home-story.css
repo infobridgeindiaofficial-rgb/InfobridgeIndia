@@ -1,0 +1,267 @@
+/* ============================================================
+   Homepage scroll story â€” continuous dark-green canvas that runs
+   from the end of the hero straight into the footer. Reuses the
+   existing hero gradient tone (see .hero in components.css) so
+   there is no visible seam between hero, story and footer.
+   ============================================================ */
+
+.story {
+  position: relative;
+  background: var(--ink-950);
+  color: rgba(255, 255, 255, 0.7);
+}
+.story .eyebrow { color: var(--brand-400); }
+.story h1, .story h2, .story h3 { color: #fff; }
+.story .text-lead { color: rgba(255, 255, 255, 0.68); }
+.story-note { color: rgba(255, 255, 255, 0.5); font-size: var(--fs-13); }
+
+.story-taglist {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: var(--fs-14);
+  letter-spacing: 0.02em;
+}
+.story-taglist .dot { color: var(--brand-400); margin: 0 var(--sp-2); }
+
+/* ---------- Static blocks (intro / services / youtube) ---------- */
+.story-block { padding: var(--sp-20) 0; position: relative; z-index: 1; }
+
+.story-intro-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+.story-intro-inner .story-taglist { margin: var(--sp-5) 0; }
+
+.story-services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-5);
+}
+.story-service {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.02);
+}
+.story-service-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brand-400);
+}
+.story-service-icon svg { width: 19px; height: 19px; }
+.story-service strong { color: #fff; font-size: var(--fs-15); }
+.story-service span:last-child { color: rgba(255, 255, 255, 0.5); font-size: var(--fs-13); }
+
+.story-youtube-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  padding: var(--sp-8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.02);
+  flex-wrap: wrap;
+}
+.story-yt-poster {
+  width: 92px; height: 92px; flex: none;
+  border-radius: var(--r-md);
+  background: linear-gradient(160deg, #12352d, #0c1613);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  transition: transform var(--dur-base) var(--ease);
+}
+.story-yt-poster:hover { transform: scale(1.05); }
+.story-yt-text { color: #fff; font-size: var(--fs-18); font-weight: 600; margin: 0 0 var(--sp-3); }
+
+/* ---------- Pinned scroll-story sections (phone / laptop) ---------- */
+.story-pin-wrap { position: relative; height: 340vh; z-index: 1; }
+.story-pin {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; align-items: center; overflow: hidden;
+  padding-top: var(--header-h);
+  box-sizing: border-box;
+}
+.story-pin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-16);
+  align-items: center;
+  width: 100%;
+}
+#phoneStory .story-pin-grid { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: var(--sp-8); }
+#phoneStory .story-app-list { width: 100%; max-width: 500px; }
+
+.story-app-list { display: flex; flex-direction: column; gap: var(--sp-3); margin: var(--sp-6) 0; }
+.story-app-item {
+  display: flex; gap: var(--sp-3); align-items: flex-start;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0.45;
+  transition: opacity var(--dur-slow) var(--ease), background var(--dur-slow) var(--ease), border-color var(--dur-slow) var(--ease);
+}
+.story-app-item.is-active { opacity: 1; background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.16); }
+.story-app-mark {
+  width: 36px; height: 36px; flex: none;
+  border-radius: 10px;
+  background: var(--brand-700);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.story-app-mark svg { width: 18px; height: 18px; }
+.story-app-item strong { color: #fff; display: block; font-size: var(--fs-15); }
+.story-app-item p { color: rgba(255, 255, 255, 0.55); font-size: var(--fs-13); margin-top: 2px; }
+
+.story-device-img { display: block; width: 100%; height: auto; }
+
+.story-phone-stage { position: relative; display: flex; justify-content: center; align-items: center; min-height: 460px; perspective: 1400px; }
+#phoneStory .story-phone-stage { justify-content: flex-start; }
+.story-phone {
+  position: relative;
+  width: 300px; max-width: 78%;
+  aspect-ratio: 700 / 1050;
+  transform: translate3d(170px, 0, 0) rotateY(-32deg);
+  transform-style: preserve-3d;
+  will-change: transform;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+}
+.story-phone .story-device-img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.story-phone .story-device-img[data-phone-face="0"] { opacity: 1; }
+.story-product-quick-info {
+  position: absolute;
+  left: 340px;
+  top: 50%;
+  width: min(340px, calc(100% - 340px));
+  transform: translateY(-50%);
+  padding-left: var(--sp-4);
+  border-left: 1px solid rgba(33, 191, 143, 0.55);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--fs-13);
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+  pointer-events: none;
+}
+.story-product-quick-info span { display: block; }
+
+.story-tablet {
+  position: absolute;
+  width: 440px; max-width: 82%;
+  aspect-ratio: 1100 / 733;
+  opacity: 0;
+  transform: translate3d(220px, 0, 0) scale(0.92);
+  will-change: transform, opacity;
+  filter: drop-shadow(0 20px 44px rgba(0, 0, 0, 0.45));
+}
+.story-tablet .story-device-img { width: 100%; height: 100%; }
+
+.story-laptop-stage { position: relative; display: flex; justify-content: center; align-items: flex-end; min-height: 380px; perspective: 1800px; }
+.story-laptop-glow {
+  position: absolute; left: 15%; bottom: -8px; width: 70%; height: 64px;
+  background: radial-gradient(ellipse at center, rgba(18, 154, 119, 0.3) 0%, rgba(18, 154, 119, 0.12) 42%, transparent 74%);
+  filter: blur(12px);
+  pointer-events: none; z-index: 0;
+}
+.story-laptop-base {
+  display: none;
+}
+.story-laptop-photo {
+  position: absolute; left: 50%; bottom: 8px;
+  width: 730px; max-width: 106%;
+  aspect-ratio: 1300 / 867;
+  transform-origin: 50% 88%;
+  transform: translateX(-50%) rotateX(-78deg) scaleY(0.22);
+  opacity: 0.85;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+.story-laptop-photo .story-device-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
+}
+/* Bezel/hardware layer: unchanged approved laptop asset with its screen
+   area cut to transparent, painted above the screenshot so its frame edge
+   masks any minor crop tolerance. */
+.story-laptop-photo .story-laptop-frame {
+  position: absolute; inset: 0;
+  z-index: 2;
+}
+/* Crisp dashboard screenshot, cropped to sit exactly inside the bezel opening. */
+.story-laptop-screen {
+  position: absolute;
+  left: 16.0%; top: 8.6%; right: 16.7%; bottom: 32.0%;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+  z-index: 1;
+}
+.story-laptop-screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+@media (max-width: 980px) {
+  .story-pin-grid { grid-template-columns: 1fr; text-align: center; gap: var(--sp-8); }
+  #phoneStory .story-pin-grid { grid-template-columns: 1fr; }
+  #phoneStory .story-app-list { margin-inline: auto; }
+  #phoneStory .story-phone-stage { justify-content: center; }
+  .story-product-quick-info { left: calc(50% + 180px); width: min(300px, calc(50% - 190px)); }
+  .story-app-item { text-align: left; }
+  .story-phone-stage { min-height: 380px; }
+  .story-phone { width: 220px; }
+  .story-tablet { width: 340px; }
+  .story-laptop-stage { min-height: 300px; }
+  .story-laptop-photo { width: 460px; max-width: 100%; }
+  .story-services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .story-pin-wrap { height: 230vh; }
+  .story-pin-grid { gap: var(--sp-4); }
+  .story-block { padding: var(--sp-16) 0; }
+  .story-youtube-inner { padding: var(--sp-5); }
+  .story-app-list { gap: var(--sp-2); margin: var(--sp-4) 0; }
+  .story-app-item { padding: var(--sp-2); }
+  .story-note { margin: 0; }
+  .story-phone-stage { min-height: 300px; align-items: flex-start; }
+  .story-phone { width: 150px; }
+  .story-product-quick-info {
+    left: 50%;
+    top: 235px;
+    width: min(300px, calc(100% - var(--sp-6)));
+    transform: translateX(-50%);
+    padding: var(--sp-3) 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(33, 191, 143, 0.45);
+    text-align: left;
+  }
+  .story-tablet { width: 220px; }
+  .story-laptop-stage { min-height: 220px; }
+  .story-laptop-photo { width: 320px; }
+}
+
+/* ---------- prefers-reduced-motion: static fallback ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .story-pin-wrap { height: auto; }
+  .story-pin { position: relative; top: auto; height: auto; padding: var(--sp-16) 0 var(--sp-16); overflow: visible; }
+  .story-phone, .story-tablet, .story-laptop-photo, .story-app-item { transition: none; }
+}
+.story-static .story-phone { transform: translate3d(0, 0, 0) rotateY(0deg) !important; opacity: 1 !important; }
+.story-static .story-phone .story-device-img { opacity: 0 !important; }
+.story-static .story-phone .story-device-img[data-phone-face="0"] { opacity: 1 !important; }
+.story-static [data-civil-quick-info] { opacity: 1 !important; }
+.story-static .story-tablet { opacity: 0 !important; }
+.story-static .story-app-item { opacity: 0.45 !important; }
+.story-static .story-app-item[data-app-item="0"] { opacity: 1 !important; background: rgba(255, 255, 255, 0.04) !important; }
+.story-static .story-laptop-photo { transform: translateX(-50%) rotateX(0deg) scaleY(1) !important; opacity: 1 !important; }
