@@ -4,6 +4,9 @@ import { destinationAfterAuth } from "/auth/core.js";
 const form = document.querySelector("[data-local-auth-form]");
 const errorBox = document.querySelector("[data-auth-error]");
 const successBox = document.querySelector("[data-auth-success]");
+const loginPanel = document.querySelector("[data-login-panel]");
+const recoveryPanel = document.querySelector("[data-recovery-panel]");
+const recoveryForm = document.querySelector("[data-recovery-form]");
 const clearMessages = () => {
   if (errorBox) { errorBox.textContent = ""; errorBox.hidden = true; }
   if (successBox) { successBox.textContent = ""; successBox.hidden = true; }
@@ -21,9 +24,49 @@ if (successBox && notice.get("accountCreated") === "1") {
 } else if (successBox && notice.get("verified") === "1") {
   successBox.textContent = "Your email is verified. Log in with your email and password.";
   successBox.hidden = false;
+} else if (successBox && notice.get("passwordReset") === "1") {
+  successBox.textContent = "Your password was changed successfully. Log in with your new password.";
+  successBox.hidden = false;
 }
 
 form?.addEventListener("input", clearMessages);
+
+document.querySelector("[data-forgot-password]")?.addEventListener("click", (event) => {
+  event.preventDefault();
+  clearMessages();
+  recoveryForm.elements.email.value = form.elements.email.value.trim();
+  loginPanel.hidden = true;
+  recoveryPanel.hidden = false;
+  recoveryForm.elements.email.focus();
+});
+
+document.querySelector("[data-back-to-login]")?.addEventListener("click", () => {
+  recoveryPanel.hidden = true;
+  loginPanel.hidden = false;
+  form.elements.email.focus();
+});
+
+recoveryForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const error = recoveryForm.querySelector("[data-recovery-error]");
+  const success = recoveryForm.querySelector("[data-recovery-success]");
+  const submit = recoveryForm.querySelector('[type="submit"]');
+  error.hidden = true; success.hidden = true; submit.disabled = true;
+  try {
+    if (!isSupabaseConfigured) throw new Error("Authentication is not configured yet.");
+    const email = recoveryForm.elements.email.value.trim();
+    if (!email || !recoveryForm.elements.email.checkValidity()) throw new Error("Enter a valid email address.");
+    const { error: recoveryError } = await requireSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo: "https://infobridgeindia.online/reset-password.html",
+    });
+    if (recoveryError) throw recoveryError;
+    success.textContent = "If an account exists for that email, a password reset link has been sent. Check your inbox and spam folder.";
+    success.hidden = false;
+  } catch (cause) {
+    error.textContent = cause.message || "Unable to send the reset email. Please try again.";
+    error.hidden = false;
+  } finally { submit.disabled = false; }
+});
 
 document.querySelector("[data-google-auth]")?.addEventListener("click", async () => {
   clearMessages();
