@@ -1,20 +1,32 @@
 export const ADMINISTRATION_STORAGE_KEY="infobridgeindia.administration.v2";
 export const DEFAULT_DEPARTMENTS=Object.freeze([
-  ["GEN","General"],["FIN","Finance & Accounting"],["SALES","Sales & CRM"],["PUR","Purchases & Procurement"],
-  ["INV","Inventory & Warehouse"],["HR","HR & Payroll"],["PROJ","Projects & Operations"],["DOC","Documents"],
-  ["BANK","Banking"],["RPT","Reports & Analytics"],["ADMIN","Administration"],["APR","Approvals & Workflows"]
+  ["GEN","General"],["MGT","Management"],["ADMIN","Administration"],["HR","Human Resources"],
+  ["FIN","Finance & Accounts"],["SALES","Sales"],["MKT","Marketing"],["BD","Business Development"],
+  ["OPS","Operations"],["CS","Customer Service"],["PROC","Procurement"],["SC","Supply Chain"],
+  ["LOG","Logistics"],["WHS","Warehouse / Stores"],["IT","Information Technology"],["ENG","Engineering"],
+  ["PROJ","Projects"],["QUAL","Quality"],["HSE","Health, Safety & Environment (HSE)"],["LEGAL","Legal & Compliance"],
+  ["FM","Facilities Management"],["MAINT","Maintenance"],["PROD","Production / Manufacturing"],["RD","Research & Development"],
+  ["SEC","Security"],["TRANS","Transport"]
 ].map(([code,name],order)=>Object.freeze({code,name,order})));
+const LEGACY_MODULE_DEFAULTS=Object.freeze({FIN:"Finance & Accounting",SALES:"Sales & CRM",PUR:"Purchases & Procurement",INV:"Inventory & Warehouse",HR:"HR & Payroll",PROJ:"Projects & Operations",DOC:"Documents",BANK:"Banking",RPT:"Reports & Analytics",APR:"Approvals & Workflows"});
 const norm=value=>String(value||"").trim().toLowerCase();
 const safe=value=>String(value||"COMPANY").replace(/[^a-z0-9_-]+/gi,"-").replace(/^-|-$/g,"").toUpperCase();
 export const stableDepartmentId=(companyId,code)=>`DEP-${safe(companyId)}-${safe(code)}`;
 export function ensureDefaultDepartments(state,companyIds){
   state.departments=Array.isArray(state.departments)?state.departments:[];
   const ids=companyIds||state.companies?.map(company=>company.id)||[state.currentCompanyId];
-  for(const companyId of ids.filter(Boolean))for(const item of DEFAULT_DEPARTMENTS){
-    const existing=state.departments.find(row=>row.companyId===companyId&&(norm(row.code)===norm(item.code)||norm(row.name)===norm(item.name)));
-    if(existing){if(!existing.code)existing.code=item.code;if(existing.defaultOrder==null)existing.defaultOrder=item.order;continue}
-    const timestamp=new Date().toISOString();
-    state.departments.push({id:stableDepartmentId(companyId,item.code),companyId,name:item.name,code:item.code,active:true,systemDefault:true,defaultOrder:item.order,createdAt:timestamp,updatedAt:timestamp});
+  for(const companyId of ids.filter(Boolean)){
+    for(const row of state.departments.filter(item=>item.companyId===companyId&&item.systemDefault===true)){
+      const code=String(row.code||"").toUpperCase(),replacement=DEFAULT_DEPARTMENTS.find(item=>item.code===code),legacyName=LEGACY_MODULE_DEFAULTS[code];
+      if(replacement&&legacyName&&norm(row.name)===norm(legacyName)){row.name=replacement.name;row.updatedAt=new Date().toISOString()}
+      if(legacyName&&!replacement&&norm(row.name)===norm(legacyName)&&(row.active!==false||row.retiredSystemDefault!==true)){row.active=false;row.retiredSystemDefault=true;row.updatedAt=new Date().toISOString()}
+    }
+    for(const item of DEFAULT_DEPARTMENTS){
+      const existing=state.departments.find(row=>row.companyId===companyId&&(norm(row.code)===norm(item.code)||norm(row.name)===norm(item.name)));
+      if(existing){if(!existing.code)existing.code=item.code;if(existing.defaultOrder==null)existing.defaultOrder=item.order;continue}
+      const timestamp=new Date().toISOString();
+      state.departments.push({id:stableDepartmentId(companyId,item.code),companyId,name:item.name,code:item.code,active:true,systemDefault:true,defaultOrder:item.order,createdAt:timestamp,updatedAt:timestamp});
+    }
   }
   return state;
 }

@@ -1,4 +1,6 @@
 import { currentUser, ownedCompany, requireSupabase } from "/supabase/client.js";
+import { resolveCountryConfig } from "/country/registry.js";
+import { DEFAULT_WORKSPACE_BATCH_SIZE, writeInChunks } from "/supabase/workspace-bulk.js";
 
 const KEY_MODULES = {
   "infobridgeindia.finance.v1": "finance",
@@ -19,7 +21,9 @@ async function context() {
   if (!user) throw new Error("Authentication required.");
   if (!company) throw new Error("Company setup required.");
   if (company.owner_id !== user.id) throw new Error("Company access denied.");
-  return { client: requireSupabase(), user, company };
+  const countryConfig = resolveCountryConfig(company.country);
+  globalThis.InfoBridgeCountryConfig = countryConfig;
+  return { client: requireSupabase(), user, company, countryConfig };
 }
 
 async function encodeValue(value) {
@@ -45,7 +49,7 @@ function decodeValue(value) {
 }
 
 export async function createWorkspaceStore(module) {
-  const { client, user, company } = await context();
+  const { client, user, company, countryConfig } = await context();
   const { data: initialRows, error: initialError } = await client.from("workspace_records").select("collection, record_id, data").eq("owner_id", user.id).eq("company_id", company.id).eq("module", module);
   if (initialError) throw initialError;
   const collections = new Map();
@@ -53,6 +57,7 @@ export async function createWorkspaceStore(module) {
     if (!collections.has(row.collection)) collections.set(row.collection, new Map());
     collections.get(row.collection).set(row.record_id, decodeValue(row.data));
   }
+  console.info("InfoBridge workspace load", { authenticatedUserId: user.id, selectedCompanyId: company.id, module, returnedRecords: (initialRows || []).length, collectionCounts: Object.fromEntries([...collections].map(([name, rows]) => [name, rows.size])) });
   const collectionCache = (name) => {
     if (!collections.has(name)) collections.set(name, new Map());
     return collections.get(name);
@@ -60,6 +65,7 @@ export async function createWorkspaceStore(module) {
   return {
     user,
     company,
+    countryConfig,
     async all(collection) {
       return [...collectionCache(collection).values()];
     },
@@ -73,6 +79,17 @@ export async function createWorkspaceStore(module) {
       if (error) throw error;
       collectionCache(collection).set(String(value.id), value);
       return value;
+    },
+    async putMany(collection,values,{batchSize=DEFAULT_WORKSPACE_BATCH_SIZE,onProgress}={}){
+      for(const value of values)if(!value?.id)throw new Error("Cloud records require a stable id.");
+      const result=await writeInChunks(values,async chunk=>{
+        const updatedAt=new Date().toISOString(),rows=await Promise.all(chunk.map(async value=>({owner_id:user.id,company_id:company.id,module,collection,record_id:String(value.id),data:await encodeValue(value),updated_at:updatedAt})));
+        const{error}=await client.from("workspace_records").upsert(rows,{onConflict:"company_id,module,collection,record_id"});
+        if(error)throw error;
+        for(const value of chunk)collectionCache(collection).set(String(value.id),value);
+      },{batchSize,onProgress});
+      console.info("InfoBridge workspace bulk save",{authenticatedUserId:user.id,selectedCompanyId:company.id,saveCompanyId:company.id,module,collection,saved:result.saved});
+      return result;
     },
     async remove(collection, recordId) {
       const { error } = await client.from("workspace_records").delete().eq("owner_id", user.id).eq("company_id", company.id).eq("module", module).eq("collection", collection).eq("record_id", String(recordId));
@@ -92,7 +109,7 @@ export async function createWorkspaceStore(module) {
 }
 
 export async function createWorkspaceStateStorage() {
-  const { client, user, company } = await context();
+  const { client, user, company, countryConfig } = await context();
   const { data, error } = await client.from("workspace_records").select("module, record_id, data").eq("owner_id", user.id).eq("company_id", company.id).eq("collection", "state");
   if (error) throw error;
   const cache = new Map((data || []).map((row) => [row.record_id, JSON.stringify(row.data)]));
@@ -103,17 +120,21 @@ export async function createWorkspaceStateStorage() {
   };
   const persist = (key, value) => {
     const module = KEY_MODULES[key];
-    if (!module) return;
-    const operation = client.from("workspace_records").upsert({ owner_id: user.id, company_id: company.id, module, collection: "state", record_id: key, data: JSON.parse(value), updated_at: new Date().toISOString() }, { onConflict: "company_id,module,collection,record_id" });
-    pending.set(key, operation.then(({ error: saveError }) => {
+    if (!module) return Promise.resolve();
+    const previous = pending.get(key) || Promise.resolve();
+    const operation = previous.catch(() => {}).then(() => client.from("workspace_records").upsert({ owner_id: user.id, company_id: company.id, module, collection: "state", record_id: key, data: JSON.parse(value), updated_at: new Date().toISOString() }, { onConflict: "company_id,module,collection,record_id" })).then(({ error: saveError }) => {
       if (saveError) throw saveError;
-    }).catch(reportPersistenceError).finally(() => pending.delete(key)));
+    }).catch(reportPersistenceError);
+    pending.set(key, operation);
+    operation.finally(() => { if (pending.get(key) === operation) pending.delete(key); });
+    return operation;
   };
   const storage = {
     ownerId: user.id,
     companyId: company.id,
+    countryConfig,
     getItem: (key) => cache.get(key) ?? null,
-    setItem(key, value) { const text = String(value); cache.set(key, text); persist(key, text); },
+    setItem(key, value) { const text = String(value); cache.set(key, text); return persist(key, text); },
     removeItem(key) {
       cache.delete(key);
       const module = KEY_MODULES[key];

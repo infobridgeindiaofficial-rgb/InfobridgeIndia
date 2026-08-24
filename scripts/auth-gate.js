@@ -15,12 +15,15 @@ if (verifiedReturn && user) {
   user = null;
 }
 
-const companyRow = user ? await ownedCompany().catch(() => null) : null;
+let companyLoadError = null;
+const companyRow = user ? await ownedCompany().catch((error) => { companyLoadError = error; return null; }) : null;
 const profile = companyToProfile(companyRow);
 const companyRoute = ["/company-setup.html", "/company-profile.html"].includes(location.pathname);
 const authRoute = ["/login.html", "/signup.html"].includes(location.pathname);
 
-if (isProtectedRoute(safePath) && !user) {
+if (isProtectedRoute(safePath) && companyLoadError) {
+  throw new Error(`Saved company data could not be loaded. Nothing was reset or overwritten. ${companyLoadError.message}`);
+} else if (isProtectedRoute(safePath) && !user) {
   saveIntendedDestination(safePath, temporary);
   location.replace("/login.html");
 } else if (isProtectedRoute(safePath) && !profile) {
