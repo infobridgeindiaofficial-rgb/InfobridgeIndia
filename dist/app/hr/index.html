@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR & Payroll — InfoBridgeIndia</title>
+  <meta name="description" content="HR overview." />
+  <link rel="stylesheet" href="/styles/tokens.css" />
+  <link rel="stylesheet" href="/styles/base.css" />
+  <link rel="stylesheet" href="/styles/components.css" />
+  <link rel="icon" type="image/png" href="/infobridgeindia-logo.png" />
+  <script src="/vendor/supabase.js"></script>
+  <script src="/supabase-config.js"></script>
+  <script type="module" src="/scripts/auth-gate.js"></script>
+<link rel="stylesheet" href="/styles/workspace-sidebar.css"><script type="module" src="/scripts/workspace-sidebar.js"></script></head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar" data-app-sidebar>
+    <div class="app-sidebar-head">
+      <a href="/index.html" class="brand" aria-label="InfoBridgeIndia home">
+        <img class="brand-logo brand-logo-sidebar" src="/infobridgeindia-logo.png" alt="InfoBridgeIndia" />
+      </a>
+    </div>
+    <div class="app-sidebar-company">
+      <div class="company-avatar" data-company-initials>IB</div>
+      <div>
+        <div class="company-name" data-auth-company-name>Your company</div>
+        <div class="company-sub" data-company-fy>India · INR</div>
+      </div>
+      <span style="margin-left:auto; color:rgba(255,255,255,0.4);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <nav class="side-nav"><div class="side-group">
+      <div class="side-group-title">Finance</div>
+      <a class="side-link" href="/app/finance.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.6"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Finance & Accounting</span>
+    
+  </a><a class="side-link" href="/app/banking.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 5l9 5.5"/><path d="M4.5 10.5v8.5M9 10.5v8.5M15 10.5v8.5M19.5 10.5v8.5"/><path d="M3 19.5h18"/></svg><span>Banking</span>
+    
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">Revenue</div>
+      <a class="side-link" href="/app/sales.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-5 4 3 4-6 6 8"/><path d="M17 6h4v4"/></svg><span>Sales & CRM</span>
+    
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">Supply chain</div>
+      <a class="side-link" href="/app/purchases.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.6 11.2A2 2 0 008.6 17H18a2 2 0 002-1.6l1.3-6.8H6"/><circle cx="9" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/></svg><span>Purchases & Procurement</span>
+    
+  </a><a class="side-link" href="/inventory/index.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5L12 3l8.5 4.5L12 12 3.5 7.5z"/><path d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5"/><path d="M12 12v9"/></svg><span>Inventory & Warehouse</span>
+    
+  </a><a class="side-link" href="/app/import-export.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M13 7l-3-3M13 7l-3 3"/><path d="M20 17H11M11 17l3-3M11 17l3 3"/></svg><span>Import & Export</span>
+    
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">Compliance</div>
+      <a class="side-link" href="/app/gst/index.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 5-3.2 7.8-7.5 9-4.3-1.2-7.5-4-7.5-9V6L12 3z"/><path d="M9 12.2l2 2 4-4.2"/></svg><span>GST & Tax</span>
+    <span class="count">2 due</span>
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">People</div>
+      <a class="side-link" href="/hr-payroll/index.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.2"/><path d="M2.8 20c0-3.3 2.8-6 6.2-6s6.2 2.7 6.2 6"/><rect x="15.5" y="3.5" width="6" height="6" rx="1.2"/><path d="M16.8 6.5h3.4"/></svg><span>HR & Payroll</span>
+    
+  </a><a class="side-link" href="/app/projects.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M3.5 9.5h17"/><path d="M8 4.5v-1M16 4.5v-1"/><path d="M7 13.2l2.2 2.2L13.5 11"/></svg><span>Projects</span>
+    
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">Operations</div>
+      <a class="side-link" href="/app/documents.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/></svg><span>Documents</span>
+    
+  </a><a class="side-link" href="/app/approvals.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.4 2.4 5.2-5.4"/></svg><span>Approvals</span>
+    <span class="count">5</span>
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">Insight</div>
+      <a class="side-link" href="/app/reports.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4"/><path d="M4 20h16"/><rect x="7" y="13" width="2.6" height="7"/><rect x="12" y="9" width="2.6" height="11"/><rect x="17" y="6" width="2.6" height="14"/></svg><span>Reports & Analytics</span>
+    
+  </a>
+    </div><div class="side-group">
+      <div class="side-group-title">System</div>
+      <a class="side-link" href="/app/admin.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><path d="M12 3.5v2.3M12 18.2v2.3M20.5 12h-2.3M5.8 12H3.5M18 6l-1.6 1.6M6 18l1.6-1.6M18 18l-1.6-1.6M6 6l1.6 1.6"/></svg><span>Administration</span>
+    
+  </a><a class="side-link" href="/app/settings.html">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M18.5 7h1.5M4 12h1.5M9 12h11M4 17h11M18.5 17h1.5"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Settings</span>
+    
+  </a>
+    </div></nav>
+    <div class="app-sidebar-foot">
+      <a class="side-link" href="/index.html"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5.5A1.5 1.5 0 004 5.5v13A1.5 1.5 0 005.5 20H9"/><path d="M14 16l4-4-4-4"/><path d="M18 12H8"/></svg><span>Exit to website</span></a>
+    </div>
+  </aside>
+  <div class="app-main">
+    <div class="app-topbar">
+    <div class="row-gap-3">
+      <button class="mobile-nav-toggle" data-sidebar-toggle style="color: var(--ink-700);" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
+      <div class="app-search"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><span>Search customers, invoices, employeesâ€¦</span></div>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge badge-brand">Sandbox data</span>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10.5a6 6 0 1112 0c0 3 1 4.7 2 5.8H4c1-1.1 2-2.8 2-5.8z"/><path d="M9.5 19a2.5 2.5 0 005 0"/></svg></button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M18.5 7h1.5M4 12h1.5M9 12h11M4 17h11M18.5 17h1.5"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+      <div class="avatar" data-session-initials>IB</div>
+    </div>
+  </div>
+    <div class="app-content">
+      
+    <div class="app-content-header">
+      <div>
+        <div class="breadcrumbs">
+    <a href="/index.html">Home</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><span class="current">HR & Payroll</span>
+  </div>
+        <h1 style="margin-top:10px;">HR & Payroll</h1>
+        <p class="text-small" style="margin-top:6px;">42 active employees across 2 branches.</p>
+      </div>
+      <div class="app-content-actions">
+        <a class="btn btn-secondary" href="#">Add employee</a>
+      </div>
+    </div>
+  
+      
+    <div style="margin-bottom:24px;">
+      <div class="banner banner-info">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.4" fill="currentColor"/></svg>
+    <div><strong>Payroll for August 2026 runs on 28 Aug.</strong> 42 employees, estimated cost ₹18,40,000.</div>
+  </div>
+    </div>
+    <div class="grid g-4" style="margin-bottom:28px;">
+      <div class="stat-tile">
+    <div class="text-micro">Active employees</div>
+    <span class="figure">42</span>
+    
+  </div>
+      <div class="stat-tile">
+    <div class="text-micro">On leave today</div>
+    <span class="figure">3</span>
+    
+  </div>
+      <div class="stat-tile">
+    <div class="text-micro">Open positions</div>
+    <span class="figure">2</span>
+    
+  </div>
+      <div class="stat-tile">
+    <div class="text-micro">Pending leave approvals</div>
+    <span class="figure">4</span>
+    
+  </div>
+    </div>
+    <div class="grid g-3">
+      <a class="subservice-card" href="/hr-payroll/index.html#payroll">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1.8"/><path d="M3 10h18"/><circle cx="8" cy="14.5" r="1.6"/><path d="M13 14.5h5"/></svg></span>
+      <span class="badge badge-brand">Upcoming</span>
+    </div>
+    <h4 style="margin-top:14px;">Payroll</h4>
+    <p>Runs on 28 Aug for 42 employees.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+      <a class="subservice-card" href="/hr-payroll/index.html#attendance">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/></svg></span>
+      
+    </div>
+    <h4 style="margin-top:14px;">Attendance & Shifts</h4>
+    <p>Check-in/out, late marks and overtime.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+      <a class="subservice-card" href="/hr-payroll/index.html#leave">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="1.6"/><path d="M3.5 9.5h17"/><path d="M8 3v3.5M16 3v3.5"/></svg></span>
+      <span class="badge badge-warning">4 pending</span>
+    </div>
+    <h4 style="margin-top:14px;">Leave Management</h4>
+    <p>4 requests waiting for approval.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+      <a class="subservice-card" href="/hr-payroll/index.html">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="18" height="12" rx="1.6"/><path d="M8 7.5V6a2 2 0 012-2h4a2 2 0 012 2v1.5"/><path d="M3 13h18"/></svg></span>
+      
+    </div>
+    <h4 style="margin-top:14px;">Recruitment</h4>
+    <p>2 open positions, 9 candidates in pipeline.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+      <a class="subservice-card" href="/hr-payroll/index.html">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.5 5.4 5.8.6-4.4 4 1.2 5.9L12 16.6 6.9 19.4l1.2-5.9-4.4-4 5.8-.6L12 3.5z"/></svg></span>
+      
+    </div>
+    <h4 style="margin-top:14px;">Performance</h4>
+    <p>Q2 appraisal cycle in progress.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+      <a class="subservice-card" href="/hr-payroll/index.html">
+    <div class="subservice-top">
+      <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2 2 0 015 6.5h13A2 2 0 0120 8.5V17a2 2 0 01-2 2H5a2 2 0 01-2-2V8.5z"/><path d="M3 10h17"/><path d="M15.5 14.3h2"/></svg></span>
+      
+    </div>
+    <h4 style="margin-top:14px;">Expenses & Advances</h4>
+    <p>3 claims awaiting reimbursement.</p>
+    <div class="subservice-arrow" style="margin-top:12px;"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+  </a>
+    </div>
+  
+    </div>
+  </div>
+</div>
+<script src="/scripts/site.js"></script>
+</body>
+</html>

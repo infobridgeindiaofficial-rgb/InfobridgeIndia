@@ -1,0 +1,2 @@
+import{renderHead}from"../../components/layout.js";
+export function gstWorkspacePage(){return`<!DOCTYPE html><html lang="en"><head>${renderHead({title:"GST & Compliance",description:"Local-first GSTR-1 preparation and validation workspace."})}<link rel="stylesheet" href="/gst-workspace/styles.css"></head><body><div id="gst-app"><div class="gst-boot">Opening GST workspace…</div></div><div id="gst-modal"></div><div id="gst-toast" aria-live="polite"></div><script type="module" src="/gst-workspace/app.js"></script></body></html>`}

@@ -1,0 +1,18 @@
+{
+  "name": "infobridgeindia-business-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "InfoBridgeIndia â€” premium business management, accounting, compliance and office operations platform for India. Static-generated frontend foundation (no build-tool dependency required).",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node --test tests/*.test.js",
+    "preview": "node serve.js",
+    "serve": "node serve.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
+    "jspdf": "^3.0.2",
+    "pdf-lib": "^1.17.1"
+  }
+}
