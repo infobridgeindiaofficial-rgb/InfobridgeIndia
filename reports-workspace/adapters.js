@@ -1,0 +1,26 @@
+import { createWorkspaceStore } from "../supabase/workspace.js";
+import { resolveCountryConfig } from "../country/registry.js";
+import { vatAnalyticsReport } from "./statutory.js";
+const storage = () => globalThis.InfoBridgeWorkspaceStorage || globalThis.localStorage;
+const read = (key) => { try { return JSON.parse(storage().getItem(key) || "null"); } catch { return null; } };
+const available = (module, data, route) => ({ module, available: true, route, refreshedAt: new Date().toISOString(), ...data });
+const unavailable = (module, reason, route) => ({ module, available: false, reason, route, refreshedAt: new Date().toISOString() });
+
+export function salesAnalyticsAdapter() { const x = read("infobridgeindia.sales.v1"); return x ? available("Sales", { invoices: x.invoices || [], creditNotes: x.creditNotes || [], customers: x.customers || [], leads: x.leads || [], quotations: x.quotations || [], orders: x.orders || x.salesOrders || [], payments: x.payments || [], products: x.products || [], audit: x.audit || [] }, "/app/sales.html") : unavailable("Sales", "Sales & CRM has no saved workspace data.", "/app/sales.html"); }
+export function purchaseAnalyticsAdapter() { const x = read("infobridgeindia.purchases.v1"); return x ? available("Purchases", { bills: x.bills || [], debitNotes: x.debitNotes || [], suppliers: x.suppliers || [], orders: x.purchaseOrders || x.orders || [], payments: x.payments || [], grns: x.grns || [], returns: x.purchaseReturns || x.returns || [], audit: x.audit || [] }, "/app/purchases.html") : unavailable("Purchases", "Purchases & Procurement has no saved workspace data.", "/app/purchases.html"); }
+export function bankingAnalyticsAdapter() { const x = read("infobridgeindia.banking.v1"); return x ? available("Banking", { accounts: x.accounts || [], transactions: x.transactions || [], reconciliations: x.reconciliations || [], cashClosings: x.cashClosings || [], cheques: x.cheques || [], transfers: x.transfers || [], audit: x.audit || [] }, "/app/banking.html") : unavailable("Banking", "Banking has no saved workspace data.", "/app/banking.html"); }
+export function approvalsAnalyticsAdapter() { const x = read("InfoBridgeIndiaApprovalsV2"); return x ? available("Approvals", { requests: x.requests || [], audit: x.audit || [] }, "/app/approvals.html") : unavailable("Approvals", "Approvals has no saved workspace data.", "/app/approvals.html"); }
+
+async function cloudAdapter(moduleKey, label, collections, route) {
+  try { const store = await createWorkspaceStore(moduleKey), data = {}; for (const collection of collections) data[collection] = await store.all(collection); return available(label, data, route); }
+  catch (error) { return unavailable(label, error.message || `${label} data is unavailable.`, route); }
+}
+export const inventoryAnalyticsAdapter = () => cloudAdapter("inventory", "Inventory", ["products", "warehouses", "movements", "counts"], "/inventory/index.html");
+export const gstAnalyticsAdapter = () => cloudAdapter("gst", "GST", ["setup", "rows", "uploads", "mappings", "settings"], "/app/gst/index.html");
+export const hrAnalyticsAdapter = () => cloudAdapter("hr-payroll", "HR & Payroll", ["employees", "payrollRuns", "attendance", "leaveTransactions", "settings"], "/hr-payroll/index.html");
+export function financeAnalyticsAdapter() { const x = read("infobridgeindia.finance.v1"); return x ? available("Finance", { journals: x.journals || [], accounts: x.accounts || [], audit: x.audit || [] }, "/app/finance.html") : unavailable("Finance", "Finance has no saved workspace data.", "/app/finance.html"); }
+export function vatAnalyticsAdapter({ sales, purchases }, company = globalThis.InfoBridgeCompany) {
+  const report=vatAnalyticsReport({sales,purchases},company);return report.available?available("VAT",report,report.route):unavailable("VAT",report.reason,report.route);
+}
+export async function loadAnalyticsSources() { const [sales, purchases, banking, approvals, inventory, gst, hr] = await Promise.all([salesAnalyticsAdapter(), purchaseAnalyticsAdapter(), bankingAnalyticsAdapter(), approvalsAnalyticsAdapter(), inventoryAnalyticsAdapter(), gstAnalyticsAdapter(), hrAnalyticsAdapter()]), sources={ sales, purchases, banking, approvals, inventory, gst, hr, finance: financeAnalyticsAdapter() }; sources.statutory=resolveCountryConfig(globalThis.InfoBridgeCompany).country==="AE"?vatAnalyticsAdapter(sources):gst; return sources; }
+export function auditAnalyticsAdapter(data) { const rows = []; for (const value of Object.values(data)) for (const item of value?.audit || []) rows.push({ ...item, module: value.module, sourceRoute: value.route }); return { module: "Audit", available: rows.length > 0, rows: rows.sort((a, b) => String(b.timestamp || b.createdAt).localeCompare(String(a.timestamp || a.createdAt))), reason: rows.length ? "" : "No source audit events are available." }; }

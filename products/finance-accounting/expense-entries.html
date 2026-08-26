@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Entries — InfoBridgeIndia</title>
+  <meta name="description" content="Expense Entries in InfoBridgeIndia Finance & Accounting." />
+  <link rel="stylesheet" href="/styles/tokens.css" />
+  <link rel="stylesheet" href="/styles/base.css" />
+  <link rel="stylesheet" href="/styles/components.css" />
+  <link rel="icon" type="image/png" href="/infobridgeindia-logo.png" />
+  <script src="/vendor/supabase.js"></script>
+  <script src="/supabase-config.js"></script>
+  <script type="module" src="/scripts/auth-gate.js"></script>
+
+</head>
+<body class="">
+<header class="site-header">
+    <div class="container">
+      <a href="/index.html" class="brand">
+        <img class="brand-logo" src="/infobridgeindia-logo.png" alt="InfoBridgeIndia" />
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <div class="nav-item has-mega" data-nav-item>
+        <a class="nav-link" href="/index.html">Products<span class="nav-caret"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></a>
+        <div class="mega">
+    <div class="mega-grid" style="grid-template-columns: repeat(3, 1fr) ;">
+      <div>
+    <div class="mega-col-title">Run the business</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/app/finance.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.6"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+        <span>
+          <span class="mega-link-title">Finance & Accounting</span>
+          <div class="mega-link-desc">Ledgers, GST-ready books, financial statements</div>
+        </span>
+      </a><a class="mega-link" href="/app/sales.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-5 4 3 4-6 6 8"/><path d="M17 6h4v4"/></svg></span>
+        <span>
+          <span class="mega-link-title">Sales & CRM</span>
+          <div class="mega-link-desc">Leads to invoices to collections, one pipeline</div>
+        </span>
+      </a><a class="mega-link" href="/app/purchases.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l1.6 11.2A2 2 0 008.6 17H18a2 2 0 002-1.6l1.3-6.8H6"/><circle cx="9" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/></svg></span>
+        <span>
+          <span class="mega-link-title">Purchases & Procurement</span>
+          <div class="mega-link-desc">RFQs, approvals, purchase orders, bills</div>
+        </span>
+      </a><a class="mega-link" href="/inventory/index.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5L12 3l8.5 4.5L12 12 3.5 7.5z"/><path d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5"/><path d="M12 12v9"/></svg></span>
+        <span>
+          <span class="mega-link-title">Inventory & Warehouse</span>
+          <div class="mega-link-desc">Multi-warehouse stock, batches, valuation</div>
+        </span>
+      </a>
+    </div>
+  </div><div>
+    <div class="mega-col-title">People & operations</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/hr-payroll/index.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.2"/><path d="M2.8 20c0-3.3 2.8-6 6.2-6s6.2 2.7 6.2 6"/><rect x="15.5" y="3.5" width="6" height="6" rx="1.2"/><path d="M16.8 6.5h3.4"/></svg></span>
+        <span>
+          <span class="mega-link-title">HR & Payroll</span>
+          <div class="mega-link-desc">Attendance, statutory payroll, self-service</div>
+        </span>
+      </a><a class="mega-link" href="/app/projects.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M3.5 9.5h17"/><path d="M8 4.5v-1M16 4.5v-1"/><path d="M7 13.2l2.2 2.2L13.5 11"/></svg></span>
+        <span>
+          <span class="mega-link-title">Projects & Operations</span>
+          <div class="mega-link-desc">Timesheets, budgets, internal requests</div>
+        </span>
+      </a><a class="mega-link" href="/app/documents.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/></svg></span>
+        <span>
+          <span class="mega-link-title">Documents</span>
+          <div class="mega-link-desc">Contracts, records and expiry reminders</div>
+        </span>
+      </a><a class="mega-link" href="/app/approvals.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.2 12.3l2.4 2.4 5.2-5.4"/></svg></span>
+        <span>
+          <span class="mega-link-title">Internal Requests</span>
+          <div class="mega-link-desc">Employee material, IT and service requests</div>
+        </span>
+      </a>
+    </div>
+  </div><div>
+    <div class="mega-col-title">Money & insight</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/app/banking.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 5l9 5.5"/><path d="M4.5 10.5v8.5M9 10.5v8.5M15 10.5v8.5M19.5 10.5v8.5"/><path d="M3 19.5h18"/></svg></span>
+        <span>
+          <span class="mega-link-title">Banking</span>
+          <div class="mega-link-desc">Cash, statement import and reconciliation</div>
+        </span>
+      </a><a class="mega-link" href="/app/reports.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4"/><path d="M4 20h16"/><rect x="7" y="13" width="2.6" height="7"/><rect x="12" y="9" width="2.6" height="11"/><rect x="17" y="6" width="2.6" height="14"/></svg></span>
+        <span>
+          <span class="mega-link-title">Reports & Analytics</span>
+          <div class="mega-link-desc">Management, statutory and audit reports</div>
+        </span>
+      </a><a class="mega-link" href="/app/admin.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><path d="M12 3.5v2.3M12 18.2v2.3M20.5 12h-2.3M5.8 12H3.5M18 6l-1.6 1.6M6 18l1.6-1.6M18 18l-1.6-1.6M6 6l1.6 1.6"/></svg></span>
+        <span>
+          <span class="mega-link-title">Administration</span>
+          <div class="mega-link-desc">Companies, branches, roles & permissions</div>
+        </span>
+      </a>
+    </div>
+  </div>
+      
+    </div>
+  </div>
+      </div><div class="nav-item has-mega" data-nav-item>
+        <a class="nav-link" href="/solutions.html">Business Tools<span class="nav-caret"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></a>
+        <div class="mega">
+    <div class="mega-grid" style="grid-template-columns: repeat(3, 1fr) ;">
+      <div>
+    <div class="mega-col-title">GST & Calculators</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/gst-calculator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 5-3.2 7.8-7.5 9-4.3-1.2-7.5-4-7.5-9V6L12 3z"/><path d="M9 12.2l2 2 4-4.2"/></svg></span>
+        <span>
+          <span class="mega-link-title">GST Calculator</span>
+          <div class="mega-link-desc">Quick GST inclusive and exclusive amount workings</div>
+        </span>
+      </a><a class="mega-link" href="/gst-interest-calculator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/></svg></span>
+        <span>
+          <span class="mega-link-title">GST Interest Calculator</span>
+          <div class="mega-link-desc">Interest on delayed GST payments</div>
+        </span>
+      </a><a class="mega-link" href="/gst-late-fee-calculator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5"/><circle cx="12" cy="16" r="0.4" fill="currentColor"/></svg></span>
+        <span>
+          <span class="mega-link-title">GST Late Fee Calculator</span>
+          <div class="mega-link-desc">Late fees for delayed GST returns</div>
+        </span>
+      </a><a class="mega-link" href="/marketplace-profit-calculator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="20.5" r="1.3"/><circle cx="17" cy="20.5" r="1.3"/><path d="M2.5 3h2.4L7 15.2h11l2-8.4H6.2"/></svg></span>
+        <span>
+          <span class="mega-link-title">Marketplace Profit Calculator</span>
+          <div class="mega-link-desc">True profit after marketplace fees and costs</div>
+        </span>
+      </a>
+    </div>
+  </div><div>
+    <div class="mega-col-title">PDF & Documents</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/pdf-to-word.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/></svg></span>
+        <span>
+          <span class="mega-link-title">PDF to Word</span>
+          <div class="mega-link-desc">Convert PDF files into editable Word documents</div>
+        </span>
+      </a><a class="mega-link" href="/shipping-label-4in1.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.2"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.2"/></svg></span>
+        <span>
+          <span class="mega-link-title">Shipping Label 4-in-1 PDF</span>
+          <div class="mega-link-desc">Fit 4 marketplace shipping labels on one A4 page</div>
+        </span>
+      </a><a class="mega-link" href="/word-to-pdf.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5"/><path d="M4 20h16"/></svg></span>
+        <span>
+          <span class="mega-link-title">Word to PDF</span>
+          <div class="mega-link-desc">Convert Word documents into shareable PDFs</div>
+        </span>
+      </a><a class="mega-link" href="/jpg-to-pdf.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l8 4.2-8 4.2-8-4.2 8-4.2z"/><path d="M4 12l8 4.2 8-4.2M4 15.8L12 20l8-4.2"/></svg></span>
+        <span>
+          <span class="mega-link-title">JPG to PDF</span>
+          <div class="mega-link-desc">Convert JPG images into a single PDF</div>
+        </span>
+      </a><a class="mega-link" href="/merge-pdf.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.3"/><circle cx="19" cy="6" r="2.3"/><circle cx="12" cy="18" r="2.3"/><path d="M5 8.3v3a3 3 0 003 3h2M19 8.3v3a3 3 0 01-3 3h-2"/></svg></span>
+        <span>
+          <span class="mega-link-title">Merge PDF</span>
+          <div class="mega-link-desc">Combine multiple PDF files into one</div>
+        </span>
+      </a><a class="mega-link" href="/split-pdf.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="0.9" fill="currentColor"/><circle cx="3.5" cy="12" r="0.9" fill="currentColor"/><circle cx="3.5" cy="18" r="0.9" fill="currentColor"/></svg></span>
+        <span>
+          <span class="mega-link-title">Split PDF</span>
+          <div class="mega-link-desc">Split a PDF into separate files or pages</div>
+        </span>
+      </a>
+    </div>
+  </div><div>
+    <div class="mega-col-title">Business Generators</div>
+    <div class="stack-1">
+      <a class="mega-link" href="/gst-invoice-generator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/></svg></span>
+        <span>
+          <span class="mega-link-title">GST Invoice Generator</span>
+          <div class="mega-link-desc">Create GST-compliant invoices in minutes</div>
+        </span>
+      </a><a class="mega-link" href="/quotation-generator.html">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7.5" width="18" height="12" rx="1.6"/><path d="M8 7.5V6a2 2 0 012-2h4a2 2 0 012 2v1.5"/><path d="M3 13h18"/></svg></span>
+        <span>
+          <span class="mega-link-title">Quotation Generator</span>
+          <div class="mega-link-desc">Create professional quotations for customers</div>
+        </span>
+      </a>
+    </div>
+  </div>
+      
+    </div>
+  </div>
+      </div><div class="nav-item" data-nav-item>
+        <a class="nav-link" href="/app/gst/index.html">GST Workspace</a>
+        
+      </div><div class="nav-item" data-nav-item>
+        <a class="nav-link" href="/about.html">About Us</a>
+        
+      </div><div class="nav-item" data-nav-item>
+        <a class="nav-link" href="/pricing.html">Pricing</a>
+        
+      </div>
+      </nav>
+      <div class="header-actions">
+        <span data-auth-logged-out><a href="/login.html" class="btn btn-accent btn-sm">Log in</a></span>
+        <div class="profile-menu" data-auth-logged-in hidden>
+          <button class="profile-control" type="button" data-profile-toggle aria-label="Open account menu" aria-haspopup="menu" aria-expanded="false"><span class="profile-initials" data-session-initials>IB</span><span class="profile-label" data-auth-display-name>Account</span><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="profile-dropdown" data-profile-dropdown role="menu" hidden>
+            <div class="profile-dropdown-identity"><strong data-auth-display-name>Account</strong><span data-auth-email></span><span data-auth-company-detail hidden></span></div>
+            <a href="/company-profile.html" role="menuitem">Company Profile</a>
+            <button type="button" data-auth-logout role="menuitem">Log out</button>
+          </div>
+        </div>
+        <button class="mobile-nav-toggle" data-mobile-toggle aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
+      </div>
+    </div>
+    <div class="mobile-nav" data-mobile-nav>
+      <div class="container">
+        <div class="mobile-group">
+        <a class="mobile-group-title" href="/index.html" style="display:block;">Products</a>
+        <a href="/app/finance.html">Finance & Accounting</a><a href="/app/sales.html">Sales & CRM</a><a href="/app/purchases.html">Purchases & Procurement</a><a href="/inventory/index.html">Inventory & Warehouse</a><a href="/hr-payroll/index.html">HR & Payroll</a><a href="/app/projects.html">Projects & Operations</a><a href="/app/documents.html">Documents</a><a href="/app/approvals.html">Internal Requests</a><a href="/app/banking.html">Banking</a><a href="/app/reports.html">Reports & Analytics</a><a href="/app/admin.html">Administration</a>
+      </div><div class="mobile-group">
+        <a class="mobile-group-title" href="/solutions.html" style="display:block;">Business Tools</a>
+        <a href="/gst-calculator.html">GST Calculator</a><a href="/gst-interest-calculator.html">GST Interest Calculator</a><a href="/gst-late-fee-calculator.html">GST Late Fee Calculator</a><a href="/marketplace-profit-calculator.html">Marketplace Profit Calculator</a><a href="/pdf-to-word.html">PDF to Word</a><a href="/shipping-label-4in1.html">Shipping Label 4-in-1 PDF</a><a href="/word-to-pdf.html">Word to PDF</a><a href="/jpg-to-pdf.html">JPG to PDF</a><a href="/merge-pdf.html">Merge PDF</a><a href="/split-pdf.html">Split PDF</a><a href="/gst-invoice-generator.html">GST Invoice Generator</a><a href="/quotation-generator.html">Quotation Generator</a>
+      </div><div class="mobile-group">
+        <a class="mobile-group-title" href="/app/gst/index.html" style="display:block;">GST Workspace</a>
+        
+      </div><div class="mobile-group">
+        <a class="mobile-group-title" href="/about.html" style="display:block;">About Us</a>
+        
+      </div><div class="mobile-group">
+        <a class="mobile-group-title" href="/pricing.html" style="display:block;">Pricing</a>
+        
+      </div>
+        <div class="mobile-group" style="border-bottom:none;" data-auth-logged-out>
+          <a href="/login.html" style="color:#fff; font-weight:600;">Log in</a>
+        </div>
+        <div class="mobile-group" style="border-bottom:none;" data-auth-logged-in hidden>
+          <span data-auth-display-name></span><span data-auth-email></span><span data-auth-company-detail hidden></span><a href="/company-profile.html">Company Profile</a><button class="mobile-auth-logout" type="button" data-auth-logout>Log out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+<section class="service-hero"><div class="container"><div class="breadcrumbs">
+    <a href="/index.html">Home</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><a href="/index.html">Products</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><a href="/products/finance-accounting.html">Finance & Accounting</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><span class="current">Expense Entries</span>
+  </div><div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Finance & Accounting / Expense Accounting</span><h1 class="h-1">Expense Entries</h1><p class="text-lead">A dedicated expense entries workspace within InfoBridgeIndia Finance & Accounting.</p></div><div class="service-icon-badge"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2 2 0 015 6.5h13A2 2 0 0120 8.5V17a2 2 0 01-2 2H5a2 2 0 01-2-2V8.5z"/><path d="M3 10h17"/><path d="M15.5 14.3h2"/></svg></div></div></div></section>
+    <section class="section"><div class="container"><div class="finance-detail-shell"><span class="eyebrow">Workspace structure</span><h2 class="h-3">Built for the complete expense entries process</h2><p class="text-lead">This route establishes the dedicated page in the finance architecture. Transaction processing and accounting-engine functionality will be connected here in a later implementation phase.</p><a class="btn btn-secondary" href="/products/finance-accounting.html#expense-accounting">Back to Expense Accounting</a></div></div></section>
+<footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="/index.html" class="brand">
+            <img class="brand-logo brand-logo-footer" src="/infobridgeindia-logo.png" alt="InfoBridgeIndia" />
+          </a>
+          <p>Business platforms, mobile apps, desktop software and websites — built to make everyday work simpler.</p>
+        </div>
+        <div class="footer-col">
+      <div class="footer-col-title">Products</div>
+      <a href="/app/finance.html">Finance & Accounting</a><a href="/app/sales.html">Sales & CRM</a><a href="/app/purchases.html">Purchases & Procurement</a><a href="/inventory/index.html">Inventory & Warehouse</a><a href="/hr-payroll/index.html">HR & Payroll</a><a href="/app/banking.html">Banking</a>
+    </div><div class="footer-col">
+      <div class="footer-col-title">Business Tools</div>
+      <a href="/app/reports.html">Reports & Analytics</a><a href="/app/approvals.html">Internal Requests</a><a href="/solutions.html#enterprise">Multi-branch & Enterprise</a><a href="/solutions.html#service">Service Business</a>
+    </div><div class="footer-col">
+      <div class="footer-col-title">GST Workspace</div>
+      <a href="/app/gst/index.html">GST & Tax Compliance</a><a href="/app/gst/gstr-1.html">GSTR-1 Workspace</a><a href="/gst/gstr-3b.html">GSTR-3B</a><a href="/products/import-export.html">Import & Export</a>
+    </div><div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="/pricing.html">Pricing</a><a href="/resources.html">Resources</a><a href="/security.html">Security</a><a href="/pricing.html#contact">Contact sales</a>
+    </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 InfoBridgeIndia Business Systems. All rights reserved.</span>
+        <span class="row-gap-4" style="gap:8px;">
+          <a href="/privacy.html">Privacy</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="/terms.html">Terms</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="/security.html">Security</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+<script src="/scripts/site.js"></script>
+
+</body>
+</html>
