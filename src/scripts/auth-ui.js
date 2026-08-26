@@ -1,4 +1,4 @@
-import { isSupabaseConfigured, ownedCompany, requireSupabase } from "/supabase/client.js";
+import { currentCompany, isSupabaseConfigured, requireSupabase } from "/supabase/client.js";
 import { destinationAfterAuth } from "/auth/core.js";
 
 const form = document.querySelector("[data-local-auth-form]");
@@ -18,6 +18,11 @@ const showError = (message) => {
 };
 
 const notice = new URLSearchParams(location.search);
+const invitationToken=notice.get("invite")||"";
+const memberInvitationToken=notice.get("memberInvite")||"";
+const invitationDestination=invitationToken?`/company-admin-invite.html?token=${encodeURIComponent(invitationToken)}`:memberInvitationToken?`/company-member-invite.html?token=${encodeURIComponent(memberInvitationToken)}`:"";
+const invitationQuery=invitationToken?`invite=${encodeURIComponent(invitationToken)}`:memberInvitationToken?`memberInvite=${encodeURIComponent(memberInvitationToken)}`:"";
+if(invitationQuery){document.querySelectorAll('a[href="/login.html"],a[href="/signup.html"]').forEach(link=>{link.href=`${link.getAttribute("href")}?${invitationQuery}`})}
 if (successBox && notice.get("accountCreated") === "1") {
   successBox.textContent = "Account created. Check your email to confirm your address, then log in.";
   successBox.hidden = false;
@@ -91,17 +96,17 @@ form?.addEventListener("submit", async (event) => {
     const signup = location.pathname === "/signup.html";
     if (signup && password !== form.elements.confirmPassword.value) throw new Error("Passwords do not match.");
     const result = signup
-      ? await client.auth.signUp({ email, password, options: { emailRedirectTo: new URL("/login.html?verified=1", location.origin).href } })
+      ? await client.auth.signUp({ email, password, options: { emailRedirectTo: new URL(invitationDestination||"/login.html?verified=1", location.origin).href } })
       : await client.auth.signInWithPassword({ email, password });
     if (result.error) throw result.error;
     form.elements.password.value = "";
     if (signup) {
       if (result.data.session) await client.auth.signOut({ scope: "local" });
-      location.replace("/login.html?accountCreated=1");
+      if(invitationDestination)location.replace(invitationDestination);else location.replace("/login.html?accountCreated=1");
       return;
     }
-    const company = await ownedCompany();
-    location.replace(company ? destinationAfterAuth(sessionStorage) : "/company-setup.html");
+    const company = await currentCompany();
+    location.replace(invitationDestination||(company ? destinationAfterAuth(sessionStorage) : "/company-setup.html"));
   } catch (cause) {
     const message = /email.*not.*confirm|not.*confirm.*email/i.test(cause.message || "")
       ? "Please confirm your email address before logging in."

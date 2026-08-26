@@ -1,5 +1,0 @@
-export const projectProgress=tasks=>tasks.length?Math.round(tasks.reduce((s,t)=>s+Number(t.progress||0),0)/tasks.length):0;
-export function projectSummary(project,tasks,today=new Date().toISOString().slice(0,10)){const actual=tasks.reduce((s,t)=>s+Number(t.actualCost||0),0),budget=Number(project.budget||0),progress=projectProgress(tasks),due=project.dueDate?Math.ceil((new Date(project.dueDate)-new Date(today))/86400000):null;return{total:tasks.length,completed:tasks.filter(t=>t.status==="Completed").length,inProgress:tasks.filter(t=>t.status==="In Progress").length,blocked:tasks.filter(t=>t.status==="Blocked").length,progress,budget,actual,remaining:budget-actual,daysRemaining:due,overdue:due!==null&&due<0&&!['Completed','Cancelled'].includes(project.status)}}
-export const isOverdue=(task,today=new Date().toISOString().slice(0,10))=>Boolean(task.dueDate&&task.dueDate<today&&task.status!=="Completed");
-export const csvEscape=v=>/[",\n]/.test(String(v??""))?`"${String(v??"").replaceAll('"','""')}"`:String(v??"");
-export const toCsv=(rows,columns)=>[columns.map(c=>c[1]).join(","),...rows.map(r=>columns.map(c=>csvEscape(r[c[0]])).join(","))].join("\n");

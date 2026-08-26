@@ -30,7 +30,7 @@ export const mainNav = [
             { icon: "hr", title: "HR & Payroll", desc: "Attendance, statutory payroll, self-service", href: "/hr-payroll/index.html" },
             { icon: "projects", title: "Projects & Operations", desc: "Timesheets, budgets, internal requests", href: "/app/projects.html" },
             { icon: "documents", title: "Documents", desc: "Contracts, records and expiry reminders", href: "/app/documents.html" },
-            { icon: "approvals", title: "Approvals & Workflows", desc: "Configurable multi-level sign-off", href: "/app/approvals.html" },
+            { icon: "approvals", title: "Internal Requests", desc: "Employee material, IT and service requests", href: "/app/approvals.html" },
           ],
         },
         {
@@ -109,7 +109,7 @@ export const footerColumns = [
     title: "Business Tools",
     links: [
       { title: "Reports & Analytics", href: "/app/reports.html" },
-      { title: "Approvals & Workflows", href: "/app/approvals.html" },
+      { title: "Internal Requests", href: "/app/approvals.html" },
       { title: "Multi-branch & Enterprise", href: "/solutions.html#enterprise" },
       { title: "Service Business", href: "/solutions.html#service" },
     ],

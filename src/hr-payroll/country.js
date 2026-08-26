@@ -1,19 +1,34 @@
-import { resolveCountryConfig } from "../country/registry.js";
+import { formatCountryMoney, resolveCountryConfig } from "../country/registry.js";
 import { payrollForEmployee as sharedPayrollForEmployee } from "./core.js";
 
-export const UAE_EMPLOYMENT_TYPES = Object.freeze([
-  ["unlimited", "Unlimited-term employment"],
-  ["limited", "Fixed-term employment"],
-  ["part-time", "Part-time employment"],
-  ["temporary", "Temporary employment"],
-  ["flexible", "Flexible employment"],
+export const COMMON_EMPLOYMENT_TYPES = Object.freeze([
+  ["permanent", "Permanent"], ["fixed-term", "Fixed Term"], ["contract", "Contract"],
+  ["probation", "Probation"], ["temporary", "Temporary"], ["intern", "Intern"],
+  ["part-time", "Part-time"], ["full-time", "Full-time"], ["limited", "Fixed-term employment"],
+  ["unlimited", "Unlimited-term employment"], ["flexible", "Flexible employment"],
 ]);
+export const UAE_EMPLOYMENT_TYPES = COMMON_EMPLOYMENT_TYPES;
+export const INDIA_EMPLOYMENT_TYPES = COMMON_EMPLOYMENT_TYPES;
 
-export const INDIA_EMPLOYMENT_TYPES = Object.freeze([
-  ["full-time", "Full-time"],
-  ["part-time", "Part-time"],
-  ["contract", "Contract"],
-]);
+export const employeeCountryCode = (employee = {}, fallback = "IN") => {
+  const explicit = String(employee.countryCode || employee.country || "").toUpperCase();
+  if (["IN", "AE"].includes(explicit)) return explicit;
+  if (employee.currency === "AED" || employee.emiratesId || employee.iban || employee.workPermitNumber) return "AE";
+  if (employee.currency === "INR" || employee.pan || employee.uan || employee.ifsc) return "IN";
+  const safeFallback = String(fallback?.country || fallback || "IN").toUpperCase();
+  return ["IN", "AE"].includes(safeFallback) ? safeFallback : "IN";
+};
+
+export function resolveEmployeeCountryConfig(country = "IN") {
+  const code = employeeCountryCode(typeof country === "object" ? country : { country }, "IN");
+  const resolved = resolveCountryConfig(code);
+  return Object.freeze({
+    ...resolved,
+    employmentTypes: COMMON_EMPLOYMENT_TYPES,
+    locationLabel: code === "AE" ? "Work Location / Emirate" : "Work Location",
+    salaryLabel: code === "AE" ? "Basic Salary (AED)" : "Basic Salary (INR)",
+  });
+}
 
 export function resolveHrCountryConfig(company) {
   const country = resolveCountryConfig(globalThis.InfoBridgeCompany?.country ?? company?.country);
@@ -26,30 +41,38 @@ export function resolveHrCountryConfig(company) {
 }
 
 export function formatHrMoney(value, company) {
-  const config = resolveHrCountryConfig(company);
-  return new Intl.NumberFormat(config.defaults.locale, { style: "currency", currency: config.currency, maximumFractionDigits: 2 }).format(Number(value || 0));
+  const config = resolveEmployeeCountryConfig(company);
+  return formatCountryMoney(value, config.country);
 }
 
 export function prepareEmployeeRecord(existing, values, company, createId) {
-  const config = resolveHrCountryConfig(company);
+  const code = employeeCountryCode(values, employeeCountryCode(existing, company));
+  const config = resolveEmployeeCountryConfig(code);
   const record = {
     ...existing,
     ...values,
     id: existing?.id || createId(),
     basicSalary: Number(values.basicSalary || 0),
-    allowances: Number(values.allowances || 0),
+    hra: Number(values.hra || 0),
+    housingAllowance: Number(values.housingAllowance || 0),
+    transportAllowance: Number(values.transportAllowance || 0),
+    otherAllowances: Number(values.otherAllowances ?? values.allowances ?? 0),
+    allowances: Number(values.hra || 0) + Number(values.housingAllowance || 0) + Number(values.transportAllowance || 0) + Number(values.otherAllowances ?? values.allowances ?? 0),
     deductions: Number(values.deductions || 0),
     overtimeRate: Number(values.overtimeRate || 0),
     active: existing?.active !== false,
     updatedAt: new Date().toISOString(),
     createdAt: existing?.createdAt || new Date().toISOString(),
   };
+  record.grossSalary = record.basicSalary + record.allowances;
+  record.country = record.countryCode = code;
+  record.currency = config.currency;
   if (config.country === "AE") {
-    record.country = "AE";
-    record.currency = "AED";
     record.deductions = 0;
     record.overtimeRate = 0;
-    for (const field of ["pan", "uan", "esi", "ifsc"]) delete record[field];
+    for (const field of ["pan", "uan", "esi", "pfApplicable", "esiApplicable", "professionalTaxApplicable", "ifsc"]) delete record[field];
+  } else {
+    for (const field of ["emiratesId", "visaNumber", "visaExpiry", "workPermitNumber", "workPermitExpiry", "iban"]) delete record[field];
   }
   return record;
 }

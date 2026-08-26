@@ -8,6 +8,17 @@ export function repository(storage = globalThis.InfoBridgeWorkspaceStorage || gl
   return {
     load() { try { return ensureDefaultDepartments(bootstrap(JSON.parse(storage.getItem(KEY)) || defaultState())); } catch { return ensureDefaultDepartments(bootstrap(defaultState())); } },
     save(state) { if (state.version !== 2) throw Error("Unsupported Administration schema"); ensureDefaultDepartments(state); storage.setItem(KEY, JSON.stringify(state)); publishAdministrationCompany(state, state.currentCompanyId); return state; },
+    async saveVerified(state) {
+      if (state.version !== 2) throw Error("Unsupported Administration schema");
+      if (typeof storage.setItemVerified !== "function" || typeof storage.readItemFromDatabase !== "function") throw Error("Supabase database verification is unavailable. Reload the authenticated workspace and try again.");
+      ensureDefaultDepartments(state);
+      await storage.setItemVerified(KEY, JSON.stringify(state));
+      const savedText = await storage.readItemFromDatabase(KEY);
+      const saved = JSON.parse(savedText);
+      if (!saved || saved.version !== 2 || !Array.isArray(saved.gstSettings)) throw Error("Supabase returned an invalid Administration workspace after saving.");
+      publishAdministrationCompany(saved, saved.currentCompanyId);
+      return saved;
+    },
     snapshot() { const values = {}; for (const key of MODULE_KEYS) if (storage.getItem(key) !== null) values[key] = storage.getItem(key); return { createdAt: now(), values }; },
     restoreSnapshot(snapshot) { for (const [key, value] of Object.entries(snapshot.values || {})) storage.setItem(key, value); },
     exportAdministration: (state) => JSON.stringify({ schema: KEY, version: 2, exportedAt: now(), administration: state }, null, 2),

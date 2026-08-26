@@ -494,6 +494,17 @@ function effectiveSize(mediabox, rotate) {
   return rotate === 90 || rotate === 270 ? { effW: H, effH: W } : { effW: W, effH: H };
 }
 
+// The physical source label is always the complete inherited MediaBox. Never
+// substitute CropBox/TrimBox/ArtBox or a content-derived bounding box: blank
+// space inside the page is part of the shipping label's original layout.
+export function sourcePageGeometry(objects, pageDict) {
+  const pageBox = inheritedMediaBox(objects, pageDict);
+  const rotate = normalizeRotate(inheritedRotate(objects, pageDict));
+  const { effW, effH } = effectiveSize(pageBox, rotate);
+  if (!(effW > 0 && effH > 0)) throw Object.assign(new Error("The source PDF page has an invalid MediaBox."), { code: "INVALID_PAGE_BOX" });
+  return { pageBox, rotate, effW, effH };
+}
+
 // ---------------------------------------------------------------------------
 // A4 4-up layout
 // ---------------------------------------------------------------------------
@@ -627,8 +638,7 @@ function writePdf(builder, rootNum) {
 // ---------------------------------------------------------------------------
 
 async function embedSlipAsForm(builder, sourceCtx, pageDict) {
-  const mediabox = inheritedMediaBox(sourceCtx.objects, pageDict);
-  const rotate = normalizeRotate(inheritedRotate(sourceCtx.objects, pageDict));
+  const { pageBox, rotate, effW, effH } = sourcePageGeometry(sourceCtx.objects, pageDict);
   const resources = inheritedResources(sourceCtx.objects, pageDict);
   const newResources = transformValue(sourceCtx, builder, resources);
 
@@ -672,15 +682,14 @@ async function embedSlipAsForm(builder, sourceCtx, pageDict) {
     "/Type": "/XObject",
     "/Subtype": "/Form",
     "/FormType": 1,
-    "/BBox": mediabox,
-    "/Matrix": rotationMatrix(mediabox, rotate),
+    "/BBox": pageBox,
+    "/Matrix": rotationMatrix(pageBox, rotate),
     "/Resources": newResources,
   };
   if (filterVal) formDict["/Filter"] = transformValue(sourceCtx, builder, filterVal);
   if (decodeParmsVal) formDict["/DecodeParms"] = transformValue(sourceCtx, builder, decodeParmsVal);
 
   const formNum = builder.addObject(formDict, contentBytes);
-  const { effW, effH } = effectiveSize(mediabox, rotate);
   return { formNum, effW, effH };
 }
 
@@ -736,7 +745,9 @@ export async function buildFourInOnePdf(files, { onProgress } = {}) {
       const { scale, offX, offY } = computePlacement(effW, effH, box);
       const name = `S${slot}`;
       xobjectDict["/" + name] = { ref: formNum, gen: 0 };
-      contentLines.push(`q ${formatNumber(scale)} 0 0 ${formatNumber(scale)} ${formatNumber(offX)} ${formatNumber(offY)} cm /${name} Do Q`);
+      // Clip only to the destination slot. The embedded Form's BBox remains
+      // the complete source MediaBox, including every blank/white area.
+      contentLines.push(`q ${formatNumber(box.x)} ${formatNumber(box.y)} ${formatNumber(box.w)} ${formatNumber(box.h)} re W n\nq ${formatNumber(scale)} 0 0 ${formatNumber(scale)} ${formatNumber(offX)} ${formatNumber(offY)} cm /${name} Do Q\nQ`);
     }
 
     const contentBytes = new TextEncoder().encode(contentLines.join("\n") + "\n");

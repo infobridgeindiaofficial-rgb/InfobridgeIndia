@@ -1,5 +1,6 @@
-import { createMovement, createTransfer, currentInventory, inventoryMetrics, parseCsv, productStock, stockMap, toCsv, uid } from "./core.js";
-import { createWorkspaceStore } from "/supabase/workspace.js";
+import { canDeleteProduct, createMovement, createTransfer, currentInventory, findDuplicateReceipt, inventoryMetrics, normalizeSku, parseCsv, prepareProduct, productStock, productUsageReasons, stockMap, toCsv, uid } from "./core.js";
+import { createWorkspaceStateStorage, createWorkspaceStore } from "/supabase/workspace.js";
+import { formatCountryMoney } from "/country/registry.js";
 
 const STORES = ["settings", "warehouses", "products", "movements", "counts"];
 const BUSINESS_TYPES = ["Retail", "Wholesale", "Distributor", "Garments / Fashion", "Grocery / FMCG", "Electronics", "Hardware", "Pharmacy", "Restaurant / Hotel", "Manufacturing", "Construction", "E-commerce", "Import / Export", "Multi-warehouse", "Other / Custom"];
@@ -41,7 +42,7 @@ async function reload() {
   state.counts = counts;
 }
 
-function money(value) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(Number(value || 0)); }
+function money(value) { return formatCountryMoney(value, globalThis.InfoBridgeCompany); }
 function dateTime(value) { return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char])); }
 function product(id) { return state.products.find((p) => p.id === id); }
@@ -63,7 +64,7 @@ const nav = [
 ];
 
 function shell(content) {
-  return `<div class="app-shell"><aside class="sidebar" id="sidebar"><a class="sidebar-brand" href="/index.html"><img src="/infobridgeindia-logo.png" alt="InfoBridgeIndia"/></a><div class="workspace-label"><strong>Inventory & Warehouse</strong><span>${escapeHtml(state.settings.businessType)}</span></div><nav>${nav.map(([view, ic, label]) => `<button class="nav-link ${state.view === view ? "active" : ""}" data-view="${view}">${icon(ic)}<span>${label}</span></button>`).join("")}</nav><div class="local-note">Local-first database<br/><span>Last saved automatically</span><a href="/index.html">Exit to website</a></div></aside><div class="main"><header class="topbar"><button class="icon-button mobile-menu" data-menu aria-label="Open menu">${icon("menu")}</button><div class="global-search">${icon("search")}<input id="global-search" value="${escapeHtml(state.query)}" placeholder="Search product, SKU, barcode, supplier, batch…"/></div><div class="top-actions"><button class="btn secondary compact" data-action="stock-in">Stock In</button><button class="btn primary compact" data-action="add-product">${icon("plus")} Add Product</button></div></header><div class="content">${content}</div><nav class="mobile-nav">${nav.slice(0, 5).map(([view, ic, label]) => `<button class="${state.view === view ? "active" : ""}" data-view="${view}">${icon(ic)}<span>${label}</span></button>`).join("")}</nav></div></div>`;
+  return `<div class="app-shell"><aside class="sidebar" id="sidebar"><a class="sidebar-brand" href="/index.html"><img src="/infobridgeindia-logo.png" alt="InfoBridgeIndia"/></a><div class="workspace-label"><strong>Inventory & Warehouse</strong><span>${escapeHtml(state.settings.businessType)}</span></div><nav>${nav.map(([view, ic, label]) => `<button class="nav-link ${state.view === view ? "active" : ""}" data-view="${view}">${icon(ic)}<span>${label}</span></button>`).join("")}</nav><div class="local-note">Local-first database<br/><span>Last saved automatically</span><a href="/index.html">Exit to website</a></div></aside><div class="main"><header class="topbar"><button class="icon-button mobile-menu" data-menu aria-label="Open menu">${icon("menu")}</button><div class="global-search">${icon("search")}<input id="global-search" value="${escapeHtml(state.query)}" placeholder="Search product, SKU, barcode, supplier, batch…"/></div></header><div class="content">${content}</div><nav class="mobile-nav">${nav.slice(0, 5).map(([view, ic, label]) => `<button class="${state.view === view ? "active" : ""}" data-view="${view}">${icon(ic)}<span>${label}</span></button>`).join("")}</nav></div></div>`;
 }
 
 function pageHead(title, subtitle, actions = "") { return `<div class="page-head"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="page-actions">${actions}</div></div>`; }
@@ -79,11 +80,11 @@ function dashboardView() {
 function filteredProducts() {
   const inventory = currentInventory(state.products, state.movements);
   const q = state.query.toLowerCase();
-  return inventory.filter((p) => p.active !== false && (!q || [p.name,p.sku,p.barcode,p.brand,p.category,p.supplier,p.batch,p.serial].some(v=>String(v||"").toLowerCase().includes(q))) && (state.productFilter === "all" || (state.productFilter === "low" && p.quantity > 0 && p.quantity <= Number(p.reorderLevel||0)) || (state.productFilter === "out" && p.quantity <= 0))).sort((a,b)=>state.productSort==="stock"?a.quantity-b.quantity:state.productSort==="value"?b.stockValue-a.stockValue:String(a[state.productSort]||"").localeCompare(String(b[state.productSort]||"")));
+  return inventory.filter((p) => (!q || [p.name,p.sku,p.barcode,p.brand,p.category,p.supplier,p.batch,p.serial].some(v=>String(v||"").toLowerCase().includes(q))) && (state.productFilter === "all" || (state.productFilter === "low" && p.quantity > 0 && p.quantity <= Number(p.reorderLevel||0)) || (state.productFilter === "out" && p.quantity <= 0))).sort((a,b)=>state.productSort==="stock"?a.quantity-b.quantity:state.productSort==="value"?b.stockValue-a.stockValue:String(a[state.productSort]||"").localeCompare(String(b[state.productSort]||"")));
 }
 
 function productTable(rows) {
-  return `<div class="table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Category</th><th class="num">Current Stock</th><th class="num">Avg. Cost</th><th class="num">Stock Value</th><th>Status</th><th></th></tr></thead><tbody>${rows.map((p)=>`<tr><td><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.brand||p.description||"")}</small></td><td class="mono">${escapeHtml(p.sku)}</td><td>${escapeHtml(p.category||"—")}</td><td class="num"><strong>${p.quantity}</strong> ${escapeHtml(p.unit||"unit")}</td><td class="num">${money(p.averageCost)}</td><td class="num">${money(p.stockValue)}</td><td>${p.quantity<=0?'<span class="badge danger">Out</span>':p.quantity<=Number(p.reorderLevel||0)?'<span class="badge warn">Low</span>':'<span class="badge success">In stock</span>'}</td><td><button class="more" data-view-product="${p.id}">View</button><button class="more" data-edit-product="${p.id}">Edit</button></td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Category</th><th class="num">Current Stock</th><th class="num">Avg. Cost</th><th class="num">Stock Value</th><th>Status</th><th></th></tr></thead><tbody>${rows.map((p)=>`<tr><td><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.brand||p.description||"")}</small></td><td class="mono">${escapeHtml(p.sku)}</td><td>${escapeHtml(p.category||"—")}</td><td class="num"><strong>${p.quantity}</strong> ${escapeHtml(p.unit||"unit")}</td><td class="num">${money(p.averageCost)}</td><td class="num">${money(p.stockValue)}</td><td>${p.active===false?'<span class="badge neutral">Archived</span>':p.quantity<=0?'<span class="badge danger">Out</span>':p.quantity<=Number(p.reorderLevel||0)?'<span class="badge warn">Low</span>':'<span class="badge success">In stock</span>'}</td><td><button class="more" data-view-product="${p.id}">View</button><button class="more" data-edit-product="${p.id}">Edit</button>${p.active===false?`<button class="more" data-restore-product="${p.id}">Restore</button>`:`<button class="more" data-archive-product="${p.id}">Archive</button>`}<button class="more" data-delete-product="${p.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
 }
 
 function productsView() {
@@ -143,7 +144,75 @@ function render() {
 function openModal(title, body, submitLabel, onSubmit, wide=false) {
   modalRoot.innerHTML=`<div class="modal-backdrop"><section class="modal ${wide?'wide':''}" role="dialog" aria-modal="true"><header><h2>${title}</h2><button class="icon-button" data-close-modal aria-label="Close">${icon("close")}</button></header><form id="modal-form"><div class="modal-body">${body}</div><footer><button class="btn secondary" type="button" data-close-modal>Cancel</button><button class="btn primary" type="submit">${submitLabel}</button></footer></form></section></div>`;
   modalRoot.querySelectorAll("[data-close-modal]").forEach(b=>b.addEventListener("click",()=>modalRoot.innerHTML=""));
-  modalRoot.querySelector("#modal-form").addEventListener("submit",async(e)=>{e.preventDefault();try{await onSubmit(new FormData(e.currentTarget));modalRoot.innerHTML="";await reload();render()}catch(error){toast(error.message,"error")}});
+  const form=modalRoot.querySelector("#modal-form"), submitButton=form.querySelector('button[type="submit"]');
+  let saving=false;
+  form.addEventListener("submit",async(e)=>{
+    e.preventDefault();
+    if(saving) return;
+    saving=true; submitButton.disabled=true; submitButton.textContent="Saving...";
+    try{await onSubmit(new FormData(e.currentTarget));modalRoot.innerHTML="";await reload();render()}
+    catch(error){toast(error.message,"error");saving=false;submitButton.disabled=false;submitButton.textContent=submitLabel}
+  });
+  bindProductPickers(modalRoot);
+}
+function productPickerHtml(name, selectedId="") {
+  const selected=product(selectedId), label=selected?`${selected.name} (${selected.sku})`:"";
+  return `<div class="product-picker" data-product-picker><input type="text" class="input" data-product-search autocomplete="off" placeholder="Search by name, SKU or barcode…" value="${escapeHtml(label)}"><input type="hidden" name="${name}" data-product-value value="${escapeHtml(selectedId||"")}"><div class="product-picker-results" data-product-results hidden></div></div>`;
+}
+function productSearchMatches(query) {
+  const q=String(query||"").trim().toLowerCase();
+  if(!q) return state.products.filter(p=>p.active!==false).slice(0,20);
+  return state.products.filter(p=>p.active!==false && [p.name,p.sku,p.barcode].some(v=>String(v||"").toLowerCase().includes(q))).slice(0,20);
+}
+function bindProductPickers(root) {
+  root.querySelectorAll("[data-product-picker]").forEach(wrap=>{
+    const searchInput=wrap.querySelector("[data-product-search]"), valueInput=wrap.querySelector("[data-product-value]"), resultsBox=wrap.querySelector("[data-product-results]");
+    const labelFor=p=>`${p.name} (${p.sku})`;
+    let activeIndex=-1;
+    function renderResults(list){
+      resultsBox.innerHTML=list.length?list.map(p=>`<button type="button" class="product-picker-option" data-pick="${p.id}">${escapeHtml(p.name)} — ${escapeHtml(p.sku)}</button>`).join(""):'<div class="product-picker-empty">No matching product</div>';
+      resultsBox.hidden=false; activeIndex=-1;
+    }
+    function highlight(index){
+      const options=[...resultsBox.querySelectorAll("[data-pick]")];
+      options.forEach(o=>o.classList.remove("active"));
+      if(options[index]){options[index].classList.add("active");options[index].scrollIntoView({block:"nearest"})}
+      activeIndex=index;
+    }
+    function pick(id){
+      const p=product(id); if(!p) return;
+      valueInput.value=p.id; searchInput.value=labelFor(p); resultsBox.hidden=true; activeIndex=-1;
+    }
+    searchInput.addEventListener("focus",()=>renderResults(productSearchMatches(searchInput.value)));
+    searchInput.addEventListener("input",()=>{valueInput.value="";renderResults(productSearchMatches(searchInput.value))});
+    searchInput.addEventListener("keydown",e=>{
+      if(e.key==="ArrowDown"){e.preventDefault();if(resultsBox.hidden)renderResults(productSearchMatches(searchInput.value));else highlight(Math.min(activeIndex+1,resultsBox.querySelectorAll("[data-pick]").length-1))}
+      else if(e.key==="ArrowUp"){e.preventDefault();highlight(Math.max(activeIndex-1,0))}
+      else if(e.key==="Enter"){if(!resultsBox.hidden){const options=[...resultsBox.querySelectorAll("[data-pick]")];const target=options[activeIndex]||options[0];if(target){e.preventDefault();pick(target.dataset.pick)}}}
+      else if(e.key==="Escape"){resultsBox.hidden=true;activeIndex=-1}
+    });
+    searchInput.addEventListener("blur",()=>setTimeout(()=>{resultsBox.hidden=true;if(!valueInput.value)searchInput.value=""},150));
+    resultsBox.addEventListener("mousedown",e=>{const btn=e.target.closest("[data-pick]");if(btn){e.preventDefault();pick(btn.dataset.pick)}});
+  });
+}
+function requireProduct(fd, field="productId") {
+  const id=fd.get(field);
+  const p=id?product(id):null;
+  if(!p) throw new Error("Select a product from the list.");
+  if(p.active===false) throw new Error("This product is archived and cannot be used in new transactions.");
+  return id;
+}
+function confirmModal(title, bodyHtml, confirmLabel, onConfirm, danger=true) {
+  modalRoot.innerHTML=`<div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true"><header><h2>${title}</h2><button class="icon-button" data-close-modal aria-label="Close">${icon("close")}</button></header><div class="modal-body">${bodyHtml}</div><footer><button class="btn secondary" type="button" data-close-modal>Cancel</button><button class="btn ${danger?'danger-button':'primary'}" type="button" data-confirm-action>${confirmLabel}</button></footer></section></div>`;
+  modalRoot.querySelectorAll("[data-close-modal]").forEach(b=>b.addEventListener("click",()=>modalRoot.innerHTML=""));
+  const confirmButton=modalRoot.querySelector("[data-confirm-action]");
+  let acting=false;
+  confirmButton.addEventListener("click",async()=>{
+    if(acting) return;
+    acting=true; confirmButton.disabled=true; confirmButton.textContent="Please wait...";
+    try{await onConfirm();modalRoot.innerHTML="";await reload();render()}
+    catch(error){toast(error.message,"error");acting=false;confirmButton.disabled=false;confirmButton.textContent=confirmLabel}
+  });
 }
 function selectProducts() { return state.products.filter(p=>p.active!==false).map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.sku)})</option>`).join(""); }
 function selectWarehouses() { return state.warehouses.filter(w=>w.active!==false).map(w=>`<option value="${w.id}">${escapeHtml(w.name)}</option>`).join(""); }
@@ -155,18 +224,47 @@ function productForm(existing={}) {
   return `<div class="form-grid">${field("name","Product Name","text",existing.name,true)}${field("sku","SKU","text",existing.sku,true)}${field("category","Category","text",existing.category)}${field("brand","Brand","text",existing.brand)}${field("unit","Unit","text",existing.unit||"unit")}${field("barcode","Barcode","text",existing.barcode)}${field("purchasePrice","Purchase Price","number",existing.purchasePrice||0,true,'step="0.01" min="0"')}${field("sellingPrice","Selling Price","number",existing.sellingPrice||0,false,'step="0.01" min="0"')}${openingFields}${field("reorderLevel","Reorder Level","number",existing.reorderLevel||0,false,'step="0.001" min="0"')}${field("supplier","Supplier","text",existing.supplier)}${field("location","Location / Bin","text",existing.location)}${extra.map(key=>field(`extra_${key}`,FIELD_LABELS[key]||key, key.toLowerCase().includes("date")||key==="expiry"?"date":"text",existing[key])).join("")}</div><label>Description<textarea class="input" name="description">${escapeHtml(existing.description||"")}</textarea></label><label>Notes<textarea class="input" name="notes">${escapeHtml(existing.notes||"")}</textarea></label>${existing.id?`<p class="form-note">Stock quantities are not editable here. Use Adjust Stock to correct inventory while preserving movement history.</p><label class="toggle"><input type="checkbox" name="active" ${existing.active!==false?"checked":""}/><span>Active product</span></label>`:""}`;
 }
 async function saveProduct(fd, existing=null) {
-  const sku=fd.get("sku").trim(); if(state.products.some(p=>p.sku.toLowerCase()===sku.toLowerCase()&&p.id!==existing?.id)) throw new Error("SKU already exists.");
-  const now=new Date().toISOString(); const data={...(existing||{}),id:existing?.id||uid("PRD"),name:fd.get("name").trim(),sku,category:fd.get("category"),brand:fd.get("brand"),unit:fd.get("unit")||"unit",barcode:fd.get("barcode"),purchasePrice:Number(fd.get("purchasePrice")),sellingPrice:Number(fd.get("sellingPrice")),reorderLevel:Number(fd.get("reorderLevel")),supplier:fd.get("supplier"),location:fd.get("location"),description:fd.get("description"),notes:fd.get("notes"),active:existing?fd.has("active"):true,createdAt:existing?.createdAt||now,updatedAt:now};
-  for(const [key,value] of fd.entries()) if(key.startsWith("extra_")) data[key.slice(6)]=value;
+  const candidate={name:fd.get("name").trim(),sku:fd.get("sku").trim(),category:fd.get("category"),brand:fd.get("brand"),unit:fd.get("unit")||"unit",barcode:fd.get("barcode"),purchasePrice:Number(fd.get("purchasePrice")),sellingPrice:Number(fd.get("sellingPrice")),reorderLevel:Number(fd.get("reorderLevel")),supplier:fd.get("supplier"),location:fd.get("location"),description:fd.get("description"),notes:fd.get("notes"),active:existing?fd.has("active"):true};
+  for(const [key,value] of fd.entries()) if(key.startsWith("extra_")) candidate[key.slice(6)]=value;
+  const freshProducts=await all("products");
+  const data=prepareProduct(freshProducts,candidate,existing);
   await put("products",data); const opening=Number(fd.get("openingStock")||0); if(!existing&&opening>0){const movement=createMovement({type:"opening",productId:data.id,warehouseId:fd.get("warehouseId"),quantity:opening,unitCost:data.purchasePrice,reference:"Opening balance"},state.movements,state.settings);await put("movements",movement)} toast(existing?"Product updated.":"Product added.");
+}
+
+let crossModuleStoragePromise=null;
+function crossModuleStorage(){crossModuleStoragePromise=crossModuleStoragePromise||createWorkspaceStateStorage().catch(error=>{crossModuleStoragePromise=null;throw error});return crossModuleStoragePromise}
+function readCrossModuleState(storage,key){try{return JSON.parse(storage.getItem(key)||"null")||{}}catch{return {}}}
+async function productUsageFor(productId){
+  const storage=await crossModuleStorage();
+  const purchases=readCrossModuleState(storage,"infobridgeindia.purchases.v1");
+  const sales=readCrossModuleState(storage,"infobridgeindia.sales.v1");
+  return productUsageReasons(productId,state.movements,{purchaseRequests:purchases.requests,rfqs:purchases.rfqs,purchaseQuotations:purchases.quotations,purchaseOrders:purchases.orders,grns:purchases.grns,purchaseBills:purchases.bills,purchaseReturns:purchases.returns,salesQuotations:sales.quotations,salesOrders:sales.orders,salesInvoices:sales.invoices,salesReturns:sales.returns});
+}
+function archivePayload(p,active){return {...p,active,archivedAt:active?null:new Date().toISOString(),updatedAt:new Date().toISOString()}}
+function archiveProductAction(p){confirmModal("Archive this product?",`<p><strong>${escapeHtml(p.name)}</strong> (${escapeHtml(p.sku)}) will be hidden from new transactions but kept in all historical records. You can restore it anytime.</p>`,"Archive Product",async()=>{await put("products",archivePayload(p,false));toast("Product archived.")},false)}
+function restoreProductAction(p){confirmModal("Restore this product?",`<p><strong>${escapeHtml(p.name)}</strong> (${escapeHtml(p.sku)}) will become available again for new transactions.</p>`,"Restore Product",async()=>{await put("products",archivePayload(p,true));toast("Product restored.")},false)}
+async function deleteProductAction(p){
+  let usage;
+  try{usage=await productUsageFor(p.id)}catch{usage=null}
+  if(usage===null){
+    return confirmModal("Cannot verify product history",`<p>InfoBridgeIndia could not verify Purchases/Sales history for <strong>${escapeHtml(p.name)}</strong> right now. Archive keeps this product's history intact and removes it from new transactions without risking data loss.</p>`,"Archive Instead",async()=>{await put("products",archivePayload(p,false));toast("Product archived.")},false);
+  }
+  if(usage.length){
+    return confirmModal("This product has history",`<p><strong>${escapeHtml(p.name)}</strong> (${escapeHtml(p.sku)}) cannot be permanently deleted because it is referenced by: ${usage.map(escapeHtml).join(", ")}.</p><p>Archive it instead to keep history intact and remove it from new transactions.</p>`,"Archive Instead",async()=>{await put("products",archivePayload(p,false));toast("Product archived.")},false);
+  }
+  return confirmModal("Delete product permanently?",`<p>This will permanently delete <strong>${escapeHtml(p.name)}</strong> (${escapeHtml(p.sku)}). This action cannot be undone.</p>`,"Delete Permanently",async()=>{await remove("products",p.id);toast("Product deleted.")});
 }
 
 function movementForm(type) {
   const outbound=["stock-out","supplier-return","damage"].includes(type); const title=type.replaceAll("-"," ");
   const advanced=state.settings.advancedFeatures; const batch=advanced&&["Grocery / FMCG","Pharmacy","Restaurant / Hotel"].includes(state.settings.businessType); const serial=advanced&&state.settings.businessType==="Electronics";
-  return `<div class="form-grid"><label>Product<select class="input" name="productId" required>${selectProducts()}</select></label><label>Warehouse<select class="input" name="warehouseId" required>${selectWarehouses()}</select></label>${field("date","Date","date",new Date().toISOString().slice(0,10),true)}${field("quantity","Quantity","number","",true,'step="0.001" min="0.001"')}${!outbound?field("unitCost","Cost","number","0",false,'step="0.01" min="0"'):""}${field("reference","Reference","text")}${batch?field("batch","Batch Number","text")+field("expiry","Expiry Date","date"):""}${serial?field("serial","Serial / IMEI","text"):""}${type==="damage"?`<label>Reason<select class="input" name="reason"><option>Damaged</option><option>Expired</option><option>Wastage</option><option>Lost</option><option>Other</option></select></label>`:field("reason","Reason / Destination","text")}</div><label>Notes<textarea class="input" name="notes"></textarea></label>`;
+  return `<div class="form-grid"><label>Product${productPickerHtml("productId")}</label><label>Warehouse<select class="input" name="warehouseId" required>${selectWarehouses()}</select></label>${field("date","Date","date",new Date().toISOString().slice(0,10),true)}${field("quantity","Quantity","number","",true,'step="0.001" min="0.001"')}${!outbound?field("unitCost","Cost","number","0",false,'step="0.01" min="0"'):""}${field("reference","Reference","text")}${batch?field("batch","Batch Number","text")+field("expiry","Expiry Date","date"):""}${serial?field("serial","Serial / IMEI","text"):""}${type==="damage"?`<label>Reason<select class="input" name="reason"><option>Damaged</option><option>Expired</option><option>Wastage</option><option>Lost</option><option>Other</option></select></label>`:field("reason","Reason / Destination","text")}</div><label>Notes<textarea class="input" name="notes"></textarea></label>`;
 }
-async function saveMovement(type,fd){const movement=createMovement({type,productId:fd.get("productId"),warehouseId:fd.get("warehouseId"),quantity:Number(fd.get("quantity")),unitCost:Number(fd.get("unitCost")||0),reference:fd.get("reference"),batch:fd.get("batch"),expiry:fd.get("expiry"),serial:fd.get("serial"),reason:fd.get("reason"),notes:fd.get("notes"),createdAt:new Date(`${fd.get("date")}T12:00:00`).toISOString()},state.movements,state.settings);await put("movements",movement);toast("Stock movement recorded.")}
+async function saveMovement(type,fd){
+  requireProduct(fd);
+  const productId=fd.get("productId"),warehouseId=fd.get("warehouseId"),reference=fd.get("reference");
+  if(type==="purchase-receipt"&&findDuplicateReceipt(state.movements,{type,productId,warehouseId,reference})) throw new Error("A purchase receipt with this reference has already been recorded for this product and warehouse. Check Purchases/GRN before recording it again.");
+  const movement=createMovement({type,productId,warehouseId,quantity:Number(fd.get("quantity")),unitCost:Number(fd.get("unitCost")||0),reference,batch:fd.get("batch"),expiry:fd.get("expiry"),serial:fd.get("serial"),reason:fd.get("reason"),notes:fd.get("notes"),createdAt:new Date(`${fd.get("date")}T12:00:00`).toISOString()},state.movements,state.settings);await put("movements",movement);toast("Stock movement recorded.")}
 
 function action(name) {
   if(name==="add-product") return openModal("Add Product",productForm(),"Add Product",fd=>saveProduct(fd),true);
@@ -179,7 +277,13 @@ function action(name) {
   if(name==="stock-count") return countModal();
 }
 function warehouseModal(existing={}) { openModal(existing.id?"Edit Warehouse":"Add Warehouse",`<div class="form-grid">${field("name","Warehouse Name","text",existing.name,true)}${field("code","Code","text",existing.code,true)}${field("contact","Contact","text",existing.contact)}${field("address","Address","text",existing.address)}</div><label class="toggle"><input type="checkbox" name="active" ${existing.active!==false?'checked':''}/><span>Active warehouse</span></label>`,existing.id?"Save Warehouse":"Add Warehouse",async fd=>{const duplicate=state.warehouses.some(w=>w.code.toLowerCase()===fd.get("code").toLowerCase()&&w.id!==existing.id);if(duplicate)throw new Error("Warehouse code already exists.");await put("warehouses",{...existing,id:existing.id||uid("WH"),name:fd.get("name"),code:fd.get("code"),contact:fd.get("contact"),address:fd.get("address"),active:fd.has("active"),createdAt:existing.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()});toast("Warehouse saved.")}); }
-function transferModal(){openModal("Warehouse Transfer",`<div class="form-grid"><label>Product<select class="input" name="productId">${selectProducts()}</select></label>${field("quantity","Quantity","number","",true,'step="0.001" min="0.001"')}<label>From Warehouse<select class="input" name="fromWarehouseId">${selectWarehouses()}</select></label><label>To Warehouse<select class="input" name="toWarehouseId">${selectWarehouses()}</select></label>${field("reference","Reference","text")}</div><label>Notes<textarea class="input" name="notes"></textarea></label>`,"Transfer Stock",async fd=>{const pair=createTransfer({productId:fd.get("productId"),quantity:Number(fd.get("quantity")),fromWarehouseId:fd.get("fromWarehouseId"),toWarehouseId:fd.get("toWarehouseId"),reference:fd.get("reference"),notes:fd.get("notes")},state.movements,state.settings);await Promise.all(pair.map(m=>put("movements",m)));toast("Linked warehouse transfer recorded.")},true)}
+function transferModal(){
+  openModal("Warehouse Transfer",`<div class="form-grid"><label>Product${productPickerHtml("productId")}</label>${field("quantity","Quantity","number","",true,'step="0.001" min="0.001"')}<label>From Warehouse<select class="input" name="fromWarehouseId" id="transfer-from">${selectWarehouses()}</select></label><label>To Warehouse<select class="input" name="toWarehouseId" id="transfer-to">${selectWarehouses()}</select></label>${field("reference","Reference","text")}</div><label>Notes<textarea class="input" name="notes"></textarea></label>`,"Transfer Stock",async fd=>{requireProduct(fd);const pair=createTransfer({productId:fd.get("productId"),quantity:Number(fd.get("quantity")),fromWarehouseId:fd.get("fromWarehouseId"),toWarehouseId:fd.get("toWarehouseId"),reference:fd.get("reference"),notes:fd.get("notes")},state.movements,state.settings,state.warehouses);await Promise.all(pair.map(m=>put("movements",m)));toast("Linked warehouse transfer recorded.")},true);
+  const fromSelect=modalRoot.querySelector("#transfer-from"),toSelect=modalRoot.querySelector("#transfer-to");
+  function syncDestinations(){const currentTo=toSelect.value;toSelect.innerHTML=state.warehouses.filter(w=>w.active!==false&&w.id!==fromSelect.value).map(w=>`<option value="${w.id}">${escapeHtml(w.name)}</option>`).join("");if([...toSelect.options].some(o=>o.value===currentTo))toSelect.value=currentTo}
+  fromSelect.addEventListener("change",syncDestinations);
+  syncDestinations();
+}
 function adjustmentModal(){openModal("Adjust Stock",`<div class="form-grid"><label>Product<select class="input" name="productId" id="adjust-product">${selectProducts()}</select></label><label>Warehouse<select class="input" name="warehouseId" id="adjust-warehouse">${selectWarehouses()}</select></label>${field("newQuantity","New Physical Quantity","number","",true,'step="0.001" min="0"')}${field("reason","Reason / Note","text","",true)}${field("date","Date","date",new Date().toISOString().slice(0,10),true)}</div><p class="form-note">InfoBridgeIndia will compare the physical quantity with system stock and post only the difference as an adjustment movement.</p>`,"Post Stock Adjustment",async fd=>{const previous=productStock(fd.get("productId"),state.movements,fd.get("warehouseId"));const next=Number(fd.get("newQuantity"));const difference=next-previous;if(!difference)throw new Error("The physical quantity already matches system stock.");await saveMovement(difference>0?"adjustment-in":"adjustment-out",new MapFormData(fd,{quantity:Math.abs(difference),notes:`Previous: ${previous}; Adjustment: ${difference}; New: ${next}`}))},true)}
 class MapFormData { constructor(fd,extra){this.fd=fd;this.extra=extra} get(k){return k in this.extra?this.extra[k]:this.fd.get(k)} }
 function returnModal(){openModal("Inventory Return",`<label>Return Type<select class="input" name="returnType"><option value="customer-return">Customer Return (stock in)</option><option value="supplier-return">Supplier Return (stock out)</option></select></label>${movementForm("customer-return")}`,"Record Return",fd=>saveMovement(fd.get("returnType"),fd),true)}
@@ -189,7 +293,7 @@ async function createSetup(type,customFields=[],demo=false){await put("settings"
 async function seedDemo(warehouseId){const second={id:uid("WH"),name:"Secondary Warehouse",code:"SEC",address:"Industrial Area",contact:"",active:true,createdAt:new Date().toISOString()};await put("warehouses",second);const samples=[{name:"Cotton T-Shirt",sku:"TSH-001",category:"Apparel",brand:"Demo",unit:"pcs",purchasePrice:240,sellingPrice:499,reorderLevel:8},{name:"Packaging Box",sku:"BOX-010",category:"Packaging",brand:"",unit:"pcs",purchasePrice:18,sellingPrice:30,reorderLevel:20},{name:"USB-C Cable",sku:"USB-020",category:"Electronics",brand:"DemoTech",unit:"pcs",purchasePrice:120,sellingPrice:249,reorderLevel:5}];for(const sample of samples){const p={...sample,id:uid("PRD"),active:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};await put("products",p);const m=createMovement({type:"opening",productId:p.id,warehouseId,quantity:p.sku==="BOX-010"?12:25,unitCost:p.purchasePrice,reference:"Demo opening stock"},[],{});await put("movements",m)}}
 
 function templateColumns(){const extras=[...(TEMPLATE_FIELDS[state.settings.businessType]||[]),...(state.settings.customFields||[])];return [...new Set([...DEFAULT_FIELDS.filter(f=>f!=="warehouseId"),...extras])].map(f=>FIELD_LABELS[f]||f)}
-async function previewCsv(file){const rows=parseCsv(await file.text());const existing=new Set(state.products.map(p=>p.sku.toLowerCase()));const seen=new Set();const validated=rows.map((row,index)=>{const sku=(row.SKU||row.sku||"").trim();const name=(row["Product Name"]||row.Product||row.name||"").trim();const errors=[];if(!sku)errors.push("SKU required");if(!name)errors.push("Product name required");if(sku&&(existing.has(sku.toLowerCase())||seen.has(sku.toLowerCase())))errors.push("Duplicate SKU");seen.add(sku.toLowerCase());return {row,index:index+2,sku,name,errors}});const body=`<div class="import-summary"><strong>${rows.length}</strong> rows · <strong>${validated.filter(v=>v.errors.length).length}</strong> with errors</div><div class="table-wrap"><table><thead><tr><th>Row</th><th>SKU</th><th>Product</th><th>Validation</th></tr></thead><tbody>${validated.map(v=>`<tr><td>${v.index}</td><td>${escapeHtml(v.sku)}</td><td>${escapeHtml(v.name)}</td><td>${v.errors.length?`<span class="error-text">${v.errors.join(", ")}</span>`:'<span class="success-text">Ready</span>'}</td></tr>`).join("")}</tbody></table></div>`;openModal("Preview Product Import",body,"Confirm Import",async()=>{if(validated.some(v=>v.errors.length))throw new Error("Fix validation errors before importing.");const wh=state.warehouses.find(w=>w.active!==false);for(const v of validated){const r=v.row;const now=new Date().toISOString();const p={id:uid("PRD"),sku:v.sku,name:v.name,category:r.Category||"",brand:r.Brand||"",unit:r.Unit||"unit",purchasePrice:Number(r["Purchase Price"]||0),sellingPrice:Number(r["Selling Price"]||0),reorderLevel:Number(r["Reorder Level"]||0),supplier:r.Supplier||"",barcode:r.Barcode||"",active:true,createdAt:now,updatedAt:now};for(const [label,value] of Object.entries(r)){const key=Object.keys(FIELD_LABELS).find(k=>FIELD_LABELS[k]===label);if(key)p[key]=value}await put("products",p);const opening=Number(r["Opening Stock"]||0);if(opening>0){const m=createMovement({type:"opening",productId:p.id,warehouseId:wh.id,quantity:opening,unitCost:p.purchasePrice,reference:"CSV opening balance"},state.movements,state.settings);state.movements.push(m);await put("movements",m)}}toast(`${validated.length} products imported.`)},true)}
+async function previewCsv(file){const rows=parseCsv(await file.text());const existing=new Set(state.products.map(p=>normalizeSku(p.sku)));const seen=new Set();const validated=rows.map((row,index)=>{const sku=(row.SKU||row.sku||"").trim();const name=(row["Product Name"]||row.Product||row.name||"").trim();const errors=[];if(!sku)errors.push("SKU required");if(!name)errors.push("Product name required");if(sku&&(existing.has(normalizeSku(sku))||seen.has(normalizeSku(sku))))errors.push("Duplicate SKU");seen.add(normalizeSku(sku));return {row,index:index+2,sku,name,errors}});const body=`<div class="import-summary"><strong>${rows.length}</strong> rows · <strong>${validated.filter(v=>v.errors.length).length}</strong> with errors</div><div class="table-wrap"><table><thead><tr><th>Row</th><th>SKU</th><th>Product</th><th>Validation</th></tr></thead><tbody>${validated.map(v=>`<tr><td>${v.index}</td><td>${escapeHtml(v.sku)}</td><td>${escapeHtml(v.name)}</td><td>${v.errors.length?`<span class="error-text">${v.errors.join(", ")}</span>`:'<span class="success-text">Ready</span>'}</td></tr>`).join("")}</tbody></table></div>`;openModal("Preview Product Import",body,"Confirm Import",async()=>{if(validated.some(v=>v.errors.length))throw new Error("Fix validation errors before importing.");const wh=state.warehouses.find(w=>w.active!==false);for(const v of validated){const r=v.row;const now=new Date().toISOString();const p={id:uid("PRD"),sku:v.sku,name:v.name,category:r.Category||"",brand:r.Brand||"",unit:r.Unit||"unit",purchasePrice:Number(r["Purchase Price"]||0),sellingPrice:Number(r["Selling Price"]||0),reorderLevel:Number(r["Reorder Level"]||0),supplier:r.Supplier||"",barcode:r.Barcode||"",active:true,createdAt:now,updatedAt:now};for(const [label,value] of Object.entries(r)){const key=Object.keys(FIELD_LABELS).find(k=>FIELD_LABELS[k]===label);if(key)p[key]=value}await put("products",p);const opening=Number(r["Opening Stock"]||0);if(opening>0){const m=createMovement({type:"opening",productId:p.id,warehouseId:wh.id,quantity:opening,unitCost:p.purchasePrice,reference:"CSV opening balance"},state.movements,state.settings);state.movements.push(m);await put("movements",m)}}toast(`${validated.length} products imported.`)},true)}
 
 function exportData(kind){let rows,columns,name;if(kind==="products"){rows=state.products;columns=["sku","name","category","brand","unit","purchasePrice","sellingPrice","reorderLevel","supplier","barcode"];name="product-master.csv"}else if(kind==="movements"){rows=state.movements.map(m=>({...m,product:product(m.productId)?.name,warehouse:warehouse(m.warehouseId)?.name}));columns=["createdAt","transactionId","product","type","quantityIn","quantityOut","warehouse","reference","balanceAfter","notes"];name="stock-movements.csv"}else{const reportKind=kind==="report"?state.report:kind;rows=reportRows(reportKind);if(rows[0]?.type){rows=rows.map(m=>({...m,product:product(m.productId)?.name,warehouse:warehouse(m.warehouseId)?.name}));columns=["createdAt","transactionId","product","type","quantityIn","quantityOut","warehouse","reference","balanceAfter"]}else{columns=["sku","name","category","quantity","averageCost","stockValue"]}name=`${reportKind}.csv`}download(name,toCsv(rows,columns))}
 async function backup(){const data={version:1,exportedAt:new Date().toISOString()};for(const store of STORES)data[store]=await all(store);download(`infobridgeindia-inventory-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(data,null,2),"application/json")}
@@ -218,6 +322,9 @@ function bind(){
   document.querySelectorAll("[data-report]").forEach(b=>b.addEventListener("click",()=>{state.report=b.dataset.report;render()}));
   document.querySelectorAll("[data-export]").forEach(b=>b.addEventListener("click",()=>exportData(b.dataset.export)));
   document.querySelectorAll("[data-edit-product]").forEach(b=>b.addEventListener("click",()=>{const p=product(b.dataset.editProduct);openModal("Edit Product",productForm(p),"Save Product",fd=>saveProduct(fd,p),true)}));
+  document.querySelectorAll("[data-archive-product]").forEach(b=>b.addEventListener("click",()=>archiveProductAction(product(b.dataset.archiveProduct))));
+  document.querySelectorAll("[data-restore-product]").forEach(b=>b.addEventListener("click",()=>restoreProductAction(product(b.dataset.restoreProduct))));
+  document.querySelectorAll("[data-delete-product]").forEach(b=>b.addEventListener("click",()=>deleteProductAction(product(b.dataset.deleteProduct))));
   document.querySelectorAll("[data-view-product]").forEach(b=>b.addEventListener("click",()=>{const p=currentInventory([product(b.dataset.viewProduct)],state.movements)[0];const byWarehouse=state.warehouses.map(w=>`<div><span>${escapeHtml(w.name)}</span><strong>${productStock(p.id,state.movements,w.id)} ${escapeHtml(p.unit||"unit")}</strong></div>`).join("");openModal("Product Details",`<div class="product-view"><h3>${escapeHtml(p.name)}</h3><p class="mono">${escapeHtml(p.sku)}</p><dl><div><dt>Category</dt><dd>${escapeHtml(p.category||"—")}</dd></div><div><dt>Supplier</dt><dd>${escapeHtml(p.supplier||"—")}</dd></div><div><dt>Total stock</dt><dd>${p.quantity} ${escapeHtml(p.unit||"unit")}</dd></div><div><dt>Stock value</dt><dd>${money(p.stockValue)}</dd></div></dl><h4>Stock by warehouse</h4><div class="stock-by-warehouse">${byWarehouse}</div></div>`,"Close",async()=>{},true)}));
   document.querySelectorAll("[data-edit-warehouse]").forEach(b=>b.addEventListener("click",()=>warehouseModal(warehouse(b.dataset.editWarehouse))));
   document.querySelector("#setup-form")?.addEventListener("change",e=>{if(e.target.name==="businessType")document.querySelector("#custom-fields-wrap").hidden=e.target.value!=="Other / Custom"});

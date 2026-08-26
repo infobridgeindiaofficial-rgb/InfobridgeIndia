@@ -27,7 +27,7 @@ function loadReferenceBytes() {
 // Builds a minimal, valid multi-page PDF for layout/ordering tests, in the
 // same spirit as the fixtures in pdf-to-word.test.js - classic xref-less
 // (but trailer-terminated) structure our hand-rolled scanner accepts.
-function buildMiniPdf(pageSizes, { rotate } = {}) {
+function buildMiniPdf(pageSizes, { rotate, cropBox } = {}) {
   const kids = [];
   const pageObjs = [];
   const contentObjs = [];
@@ -38,8 +38,9 @@ function buildMiniPdf(pageSizes, { rotate } = {}) {
     const contentNum = nextObj++;
     kids.push(`${pageNum} 0 R`);
     const rotateAttr = rotate ? ` /Rotate ${rotate}` : "";
+    const cropAttr = cropBox ? ` /CropBox [${cropBox.join(" ")}] /TrimBox [${cropBox.join(" ")}]` : "";
     pageObjs.push(
-      `${pageNum} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}]${rotateAttr} /Resources << /ProcSet [/PDF] >> /Contents ${contentNum} 0 R >>\nendobj\n`
+      `${pageNum} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}]${cropAttr}${rotateAttr} /Resources << /ProcSet [/PDF] >> /Contents ${contentNum} 0 R >>\nendobj\n`
     );
     const content = `1 0 0 RG\n0 0 ${w} ${h} re\nS\n`;
     contentObjs.push(`${contentNum} 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
@@ -125,6 +126,15 @@ test("TEST 2: two slips fill top-left and top-right, bottom row stays empty", as
   assert.deepEqual(Object.keys(placements).sort(), ["S0", "S1"]);
   assert.ok(placements.S1.offX > placements.S0.offX, "slip 2 must be to the right of slip 1");
   assert.ok(Math.abs(placements.S0.offY - placements.S1.offY) < 0.01, "both slips must be on the same (top) row");
+});
+
+test("three slips leave the bottom-right slot completely blank", async () => {
+  const bytes = loadReferenceBytes();
+  const result = await buildFourInOnePdf([0, 1, 2].map(i => ({ name: `ref${i}.pdf`, bytes })));
+  const doc = await generatedPages(result.bytes);
+  const placements = readSlotPlacements(doc, doc.pages[0]);
+  assert.deepEqual(Object.keys(placements).sort(), ["S0", "S1", "S2"]);
+  assert.equal(placements.S3, undefined);
 });
 
 test("TEST 3: four slips fill all four quadrants in the approved order", async () => {
@@ -227,6 +237,17 @@ test("aspect ratio is preserved (never stretched) and content never overflows it
   assert.ok(Math.abs(placement.placedW / placement.placedH - srcW / srcH) < 1e-9, "aspect ratio must be preserved exactly");
   assert.ok(placement.placedW <= box.w + 1e-9);
   assert.ok(placement.placedH <= box.h + 1e-9);
+});
+
+test("complete MediaBox controls scaling even when visible/crop bounds are shorter", async () => {
+  const fullPage = buildMiniPdf([[300, 600]], { cropBox: [0, 300, 300, 600] });
+  const result = await buildFourInOnePdf([{ name: "full-physical-page.pdf", bytes: fullPage }]);
+  const doc = await generatedPages(result.bytes);
+  const placement = readSlotPlacements(doc, doc.pages[0]).S0;
+  const box = slotBox(0);
+  assert.deepEqual(placement.bbox, [0, 0, 300, 600], "Form BBox must preserve the full source MediaBox");
+  assert.ok(Math.abs(placement.scale - Math.min(box.w / 300, box.h / 600)) < 0.001);
+  assert.notEqual(placement.scale, Math.min(box.w / 300, box.h / 300), "Crop/content height must not control scaling");
 });
 
 test("rotated source pages (/Rotate 90) are compensated so content lands fully within bounds, dimensions swapped", async () => {

@@ -54,8 +54,14 @@ export function createMovement(input, movements, settings = {}) {
   };
 }
 
-export function createTransfer(input, movements, settings = {}) {
+export function createTransfer(input, movements, settings = {}, warehouses = []) {
   if (input.fromWarehouseId === input.toWarehouseId) throw new Error("Source and destination warehouses must be different.");
+  if (warehouses.length) {
+    const from = warehouses.find((w) => w.id === input.fromWarehouseId);
+    const to = warehouses.find((w) => w.id === input.toWarehouseId);
+    if (!from || from.active === false) throw new Error("Select an active source warehouse.");
+    if (!to || to.active === false) throw new Error("Select an active destination warehouse.");
+  }
   const transactionId = uid("TRF");
   const out = createMovement({ ...input, type: "transfer-out", warehouseId: input.fromWarehouseId, transactionId }, movements, settings);
   const incomingHistory = [...movements, out];
@@ -86,6 +92,48 @@ export function inventoryMetrics(products, warehouses, movements, today = new Da
     damaged: movements.filter((m) => m.type === "damage").reduce((sum, m) => sum + Number(m.quantity), 0),
     warehouses: warehouses.filter((w) => w.active !== false).length,
   };
+}
+
+export const normalizeSku = (value) => String(value ?? "").trim().toLowerCase();
+
+export function findDuplicateSku(products, sku, excludeId = null) {
+  const target = normalizeSku(sku);
+  if (!target) return null;
+  return products.find((p) => p.id !== excludeId && normalizeSku(p.sku) === target) || null;
+}
+
+export function prepareProduct(products, candidate, existing = null) {
+  const sku = String(candidate.sku ?? "").trim();
+  const name = String(candidate.name ?? "").trim();
+  if (!sku) throw new Error("SKU is required.");
+  if (!name) throw new Error("Product name is required.");
+  if (findDuplicateSku(products, sku, existing?.id || null)) throw new Error("A product with this SKU already exists.");
+  const now = new Date().toISOString();
+  return { ...(existing || {}), ...candidate, sku, name, id: existing?.id || uid("PRD"), createdAt: existing?.createdAt || now, updatedAt: now };
+}
+
+export function productUsageReasons(productId, movements = [], cross = {}) {
+  const reasons = [];
+  if (movements.some((m) => m.productId === productId)) reasons.push("Stock movement history");
+  const collections = {
+    "Purchase Request": cross.purchaseRequests, RFQ: cross.rfqs, "Supplier Quotation": cross.purchaseQuotations,
+    "Purchase Order": cross.purchaseOrders, GRN: cross.grns, "Purchase Bill": cross.purchaseBills, "Purchase Return": cross.purchaseReturns,
+    "Sales Quotation": cross.salesQuotations, "Sales Order": cross.salesOrders, "Sales Invoice": cross.salesInvoices, "Sales Return": cross.salesReturns,
+  };
+  for (const [label, list] of Object.entries(collections)) {
+    if ((list || []).some((doc) => (doc.items || []).some((item) => item.productId === productId))) reasons.push(label);
+  }
+  return reasons;
+}
+
+export function canDeleteProduct(productId, movements = [], cross = {}) {
+  return productUsageReasons(productId, movements, cross).length === 0;
+}
+
+export function findDuplicateReceipt(movements, { type, productId, warehouseId, reference }) {
+  const ref = String(reference ?? "").trim();
+  if (!ref) return null;
+  return movements.find((m) => m.type === type && m.productId === productId && m.warehouseId === warehouseId && String(m.reference ?? "").trim().toLowerCase() === ref.toLowerCase()) || null;
 }
 
 export function csvEscape(value) {

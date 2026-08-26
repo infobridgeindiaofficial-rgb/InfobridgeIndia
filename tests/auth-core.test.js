@@ -6,13 +6,14 @@ import { companyToProfile } from "../src/supabase/client.js";
 
 class MemoryStorage { constructor() { this.values = new Map(); } getItem(key) { return this.values.get(key) ?? null; } setItem(key, value) { this.values.set(key, String(value)); } removeItem(key) { this.values.delete(key); } }
 
-test("protected routes include every business workspace", () => {
-  for (const route of ["/app/finance.html", "/app/sales.html", "/app/purchases.html", "/inventory/index.html", "/hr-payroll/index.html", "/app/projects.html", "/app/documents.html", "/app/approvals.html", "/app/banking.html", "/app/reports.html", "/app/admin.html", "/app/gst/index.html"]) assert.equal(isProtectedRoute(route), true, route);
+test("protected routes include every private business workspace but exclude public GST", () => {
+  for (const route of ["/app/finance.html", "/app/sales.html", "/app/purchases.html", "/inventory/index.html", "/hr-payroll/index.html", "/app/projects.html", "/app/documents.html", "/app/approvals.html", "/app/banking.html", "/app/reports.html", "/app/admin.html"]) assert.equal(isProtectedRoute(route), true, route);
+  for (const route of ["/app/gst/index.html", "/app/gst/gstr-1.html"]) assert.equal(isProtectedRoute(route), false, route);
 });
 test("company setup always returns to the main page", () => { const storage = new MemoryStorage(); saveIntendedDestination("/app/reports.html?range=fy#profit", storage); setLastWorkspace("/app/banking.html", storage); assert.equal(destinationAfterSetup(storage), "/index.html"); assert.equal(storage.getItem(INTENDED_KEY), null); });
 test("external and protocol-relative destinations are rejected", () => { assert.equal(normalizePath("https://evil.example/app/finance.html"), ""); assert.equal(normalizePath("//evil.example/app/finance.html"), ""); });
 test("last workspace is company-session temporary navigation state", () => { const storage = new MemoryStorage(); setLastWorkspace("/app/banking.html", storage); assert.equal(getLastWorkspace(storage), "/app/banking.html"); });
-test("public tools remain public", () => assert.equal(isPublicToolRoute("/gst-calculator.html"), true));
+test("public tools and GST Workspace remain public", () => { for (const route of ["/gst-calculator.html", "/app/gst/index.html", "/app/gst/gstr-1.html"]) assert.equal(isPublicToolRoute(route), true, route); });
 test("company defaults remain India focused", () => { const profile = validateCompanyProfile({ name: "A", businessType: "Partnership", state: "Kerala", gstRegistered: false }); assert.deepEqual([profile.currency, profile.dateFormat, profile.financialYear, profile.invoicePrefix, profile.quotationPrefix], ["INR", "DD/MM/YYYY", currentIndianFinancialYear(), "INV", "QUO"]); });
 test("registered companies require a valid GSTIN", () => assert.throws(() => validateCompanyProfile({ name: "A", businessType: "Other", state: "Delhi", gstRegistered: true, gstin: "BAD" }), /valid GSTIN/));
 test("new India companies use explicit GST and INR defaults", () => {
@@ -52,6 +53,12 @@ test("saved UAE profiles reload with country-specific tax and licence data", () 
   const profile = companyToProfile({ id: "C1", owner_id: "U1", name: "Dubai Co", legal_name: "Dubai Co LLC", business_type: "Limited Liability Company (LLC)", state: "Dubai", country: "AE", vat_registered: true, trn: "100123456700003", trade_license_number: "DED-123", trade_license_expiry_date: "2027-01-31", tax_system: "VAT", tax_number: "100123456700003", currency: "AED" });
   assert.deepEqual([profile.country, profile.state, profile.vatRegistered, profile.trn, profile.tradeLicenseNumber, profile.currency], ["AE", "Dubai", true, "100123456700003", "DED-123", "AED"]);
 });
+test("stored currency and tax conflicts resolve from saved company country without rewriting the row", () => {
+  const row={id:"C1",owner_id:"U1",name:"Dubai Co",business_type:"Other",state:"Dubai",country:"UAE",currency:"INR",tax_system:"GST",profile_complete:true};
+  const profile=companyToProfile(row);
+  assert.deepEqual([profile.country,profile.currency,profile.taxSystem],["AE","AED","VAT"]);
+  assert.deepEqual([row.country,row.currency,row.tax_system],["UAE","INR","GST"]);
+});
 test("legacy profiles without a country remain India GST profiles", () => {
   const profile = companyToProfile({ id: "C1", owner_id: "U1", name: "Legacy", legal_name: "Legacy", business_type: "Limited liability partnership", state: "Kerala", gst_registered: true, gstin: "27ABCDE1234F1Z5", currency: "INR" });
   assert.deepEqual([profile.country, profile.taxSystem, profile.taxNumber, profile.gstRegistered, profile.gstin, profile.businessType], ["IN", "GST", "27ABCDE1234F1Z5", true, "27ABCDE1234F1Z5", "Limited liability partnership"]);
@@ -63,14 +70,19 @@ test("country switching updates business, jurisdiction, tax labels and workspace
   assert.match(page, /name="country" required/);
   assert.match(page, /name="state" required/);
   assert.match(page, /name="emirate" disabled/);
-  for (const value of ["Abu Dhabi", "Dubai", "Free Zone Company", "VAT Registered", "Trade Licence Number"]) assert.match(`${page}\n${script}`, new RegExp(value.replace(/[()]/g, "\\$&")));
-  assert.match(script, /data-default-currency.*AED/s);
-  assert.match(script, /country === "AE" \? "TRN \*" : "GSTIN \*"/);
+  assert.match(page, /supportedCountryOptions\(\)/);
+  assert.match(page, /countryRegistry\.AE\.jurisdictions/);
+  assert.match(page, /Trade Licence Number/);
+  assert.match(script, /companyProfileCountryModel\(form\.elements\.country\.value\)/);
+  assert.match(script, /data-default-currency/);
+  assert.match(script, /model\.taxNumberLabel/);
   assert.match(page, /data-uae-label="VAT Registered\? \*"/);
   assert.match(page, /data-uae-label="TRN \*"/);
-  assert.match(page, /company-profile\.js\?v=20260823-india-uae/);
+  assert.match(page, /company-profile\.js\?v=20260824-country-profile/);
   assert.match(script, /form\.elements\.state\.disabled = country === "AE"/);
   assert.match(script, /form\.elements\.emirate\.required = country === "AE"/);
+  assert.match(script, /control\.disabled = !model\.showTradeLicence/);
+  assert.match(script, /data\.country = form\.elements\.country\.value/);
 });
 test("email login and signup call Supabase Auth methods", () => { const source = readFileSync(new URL("../src/scripts/auth-ui.js", import.meta.url), "utf8"); assert.match(source, /auth\.signUp\(/); assert.match(source, /auth\.signInWithPassword\(/); });
 test("password recovery uses the production reset route and updates through Supabase", () => {

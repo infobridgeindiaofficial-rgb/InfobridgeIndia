@@ -84,6 +84,6 @@ test("print controls are hidden and payslip sections avoid page splitting",()=>{
 test("HR print action uses the shared payslip renderer and current profile",()=>{
   const source=readFileSync(new URL("../src/hr-payroll/app.js",import.meta.url),"utf8");
   assert.match(source,/companyProfileSnapshot:run\?\.companyProfileSnapshot/);
-  assert.match(source,/renderPayslipDocument\(\{payslip:printRecord,employee,company:window\.InfoBridgeCompany\|\|\{\},departmentName\}\)/);
+  assert.match(source,/renderPayslipDocument\(\{payslip:printRecord,employee(?::employee)?,company:window\.InfoBridgeCompany\|\|\{\},departmentName(?::departmentName)?\}\)/);
 });
 test("payslip shows only used leave types and unpaid leave separately",()=>{const html=renderPayslipDocument({payslip:{...slip,paidLeaveDays:4,unpaidLeaveDays:1,leaveBreakdown:{Vacation:4,"Unpaid Leave":1,Medical:0}},employee,company:uae});assert.match(html,/Unpaid Leave \/ LOP/);assert.match(html,/Vacation: 4 days/);assert.match(html,/Unpaid Leave: 1 day/);assert.doesNotMatch(html,/Medical: 0/)});

@@ -28,7 +28,7 @@ import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
 import { privacyPage, termsPage } from "./src/pages/marketing/legal.js";
 import { aboutPage } from "./src/pages/marketing/about.js";
-import { companySetupPage, companyProfilePage } from "./src/pages/marketing/company.js";
+import { companyAdminInvitePage, companyMemberInvitePage, companySetupPage, companyProfilePage, companySecurityPage } from "./src/pages/marketing/company.js";
 import { loginPageHtml, resetPasswordPageHtml, signupPageHtml } from "./src/pages/marketing/login.js";
 import { pdfToWordPageHtml } from "./src/pages/marketing/pdf-to-word.js";
 import { gstCalculatorPageHtml } from "./src/pages/marketing/gst-calculator.js";
@@ -114,6 +114,9 @@ const marketingPages = [
   aboutPage(),
   companySetupPage(),
   companyProfilePage(),
+  companySecurityPage(),
+  companyAdminInvitePage(),
+  companyMemberInvitePage(),
 ];
 
 let count = 0;
@@ -201,6 +204,9 @@ cpSync(join(__dirname, "src/scripts"), join(DIST, "scripts"), { recursive: true 
 cpSync(join(__dirname, "src/auth"), join(DIST, "auth"), { recursive: true });
 cpSync(join(__dirname, "src/supabase"), join(DIST, "supabase"), { recursive: true });
 cpSync(join(__dirname, "src/country"), join(DIST, "country"), { recursive: true });
+cpSync(join(__dirname, "src/export"), join(DIST, "export"), { recursive: true });
+cpSync(join(__dirname, "src/company"), join(DIST, "company"), { recursive: true });
+cpSync(join(__dirname, "src/security"), join(DIST, "security"), { recursive: true });
 mkdirSync(join(DIST, "vendor"), { recursive: true });
 cpSync(join(__dirname, "node_modules/@supabase/supabase-js/dist/umd/supabase.js"), join(DIST, "vendor/supabase.js"));
 cpSync(join(__dirname, "src/inventory"), join(DIST, "inventory"), { recursive: true });

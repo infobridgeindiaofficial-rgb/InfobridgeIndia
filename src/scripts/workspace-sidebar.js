@@ -1,7 +1,7 @@
 const MODULES = [
   [/finance/, "Finance & Accounting"], [/sales/, "Sales & CRM"], [/purchases/, "Purchases & Procurement"],
   [/inventory/, "Inventory & Warehouse"], [/hr-payroll|\/app\/hr\//, "HR & Payroll"], [/projects/, "Projects & Operations"],
-  [/documents/, "Documents"], [/approvals/, "Approvals & Workflows"], [/banking/, "Banking"],
+  [/documents/, "Documents"], [/approvals/, "Internal Requests"], [/banking/, "Banking"],
   [/reports/, "Reports & Analytics"], [/admin/, "Administration"], [/gst/, "GST Workspace"],
 ];
 

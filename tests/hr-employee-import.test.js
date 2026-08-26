@@ -1,92 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { employeeImportErrorRows, employeeTemplateHeaders, employeeTemplateWorkbookData, validateEmployeeImportRows } from "../src/hr-payroll/employee-import.js";
+import { employeeImportErrorRows, employeeTemplateHeaders, validateEmployeeImportRows } from "../src/hr-payroll/employee-import.js";
+import { companyExportBranding, countryCurrencyFormat, INFOBRIDGE_FOOTER } from "../src/export/workbook.js";
 import { eligibleSalesEmployees } from "../src/sales/employees.js";
 
-const departments = [{ id: "DEP-SALES", name: "Sales & CRM" }, { id: "DEP-HR", name: "Human Resources" }];
-const aeRow = (id = "EMP-001") => ({
-  "Employee ID": id, "Joining date": "2026-08-01", "First name": "Ahmed", "Last name": "Khan",
-  Email: `${id.toLowerCase()}@example.com`, Mobile: "+971500000000", Designation: "Sales Manager",
-  Department: "Sales & CRM", "Employment type": "Fixed-term employment", "Basic salary (AED)": "12000",
-  Allowances: "2000", "Work location / Emirate": "Dubai", Nationality: "Indian", "Employment status": "Active",
-  "Salary payment method": "Bank transfer", "Bank name": "Example Bank", "Bank account": "001", IBAN: "AE070000000000000000001",
-  "Emirates ID": "784-0000-0000000-0", "Emirates ID expiry": "2028-01-01", "Passport number": "P123",
-  "Passport expiry": "2029-01-01", "Visa / residence details": "V123", "Visa expiry": "2027-01-01",
-  "Labour / work permit details": "WP123", "Work permit expiry": "2027-01-01", "Emergency contact name": "Ali",
-  "Emergency contact mobile": "+971511111111", "Weekly-off type": "One day per week", "Weekly-off days": "Sunday",
-  "Custom fields (JSON)": "{}",
-});
-const validate = (rows, extra = {}) => validateEmployeeImportRows(rows, { company: { country: "AE" }, departments, existingEmployees: [], createId: (() => { let id = 0; return () => `EMP-STABLE-${++id}`; })(), ...extra });
+const departments=[{id:"DEP-SALES",name:"Sales & CRM",active:true},{id:"DEP-HOUSE",name:"House Keeping",active:true},{id:"DEP-SERVICE",name:"SERVICE",active:true},{id:"DEP-OLD",name:"Old Team",active:false}];
+const common=(id="EMP-001")=>({"Employee ID":id,"First Name":"Ahmed","Last Name":"Khan",Email:`${id.toLowerCase()}@example.com`,Mobile:"+971500000000",Nationality:"Indian",Department:"Sales & CRM",Designation:"Sales Manager","Date of Joining":"2026-08-01","Employment Type":"Fixed Term","Employment Status":"Active"});
+const uae=id=>({...common(id),Emirate:"Dubai","Basic Salary AED":"12000","Housing Allowance":"2000","Transport Allowance":"500","Other Allowances":"250","Emirates ID":"784-0000-0000000-0","Work Permit Number":"WP1","Visa Number":"V1","Visa Expiry Date":"2027-01-01","Work Permit Expiry Date":"2027-01-01","Salary Payment Method":"Bank Transfer","Bank Name":"Bank","Account Holder Name":"Ahmed Khan","Account Number":"001",IBAN:"AE070000000000000000001"});
+const india=id=>({...common(id),"Work Location":"Mumbai","Basic Salary INR":"50000",HRA:"20000","Other Allowances":"5000",PAN:"ABCDE1234F",UAN:"UAN1","PF Applicable":"Yes","ESI Applicable":"No","Professional Tax Applicable":"Yes","Salary Payment Method":"Bank Transfer","Bank Name":"Bank","Account Holder Name":"Ahmed Khan","Bank Account Number":"001","IFSC Code":"ABCD000001"});
+const validate=(rows,country,extra={})=>validateEmployeeImportRows(rows,{country,departments,existingEmployees:[],createId:(()=>{let id=0;return()=>`STABLE-${++id}`})(),...extra});
 
-test("country-aware employee template data contains only the blank Employees sheet", () => {
-  const uae = employeeTemplateWorkbookData({ country: "AE" }, departments);
-  assert.deepEqual(Object.keys(uae), ["employees"]);
-  assert.ok(uae.employees[0].includes("Basic salary (AED)"));
-  assert.ok(uae.employees[0].includes("Emirates ID"));
-  for (const field of ["PAN", "UAN / PF", "ESI number", "IFSC"]) assert.ok(!uae.employees[0].includes(field));
-  assert.equal(uae.employees.length, 1);
-  assert.equal("instructions" in uae, false);
-  assert.equal("options" in uae, false);
-  const india = employeeTemplateHeaders({ country: "IN" });
-  for (const field of ["Basic salary", "PAN", "UAN / PF", "ESI number", "IFSC"]) assert.ok(india.includes(field));
-  assert.ok(!india.includes("Emirates ID"));
-});
-
-test("downloaded workbook creates exactly one worksheet named Employees", () => {
-  const source = readFileSync(new URL("../src/hr-payroll/app.js", import.meta.url), "utf8");
-  const templateFunction = source.match(/function downloadEmployeeTemplate\(\)\{[^\n]+/u)?.[0] || "";
-  assert.equal((templateFunction.match(/book_append_sheet/g) || []).length, 1);
-  assert.match(templateFunction, /book_append_sheet\(book,XLSX\.utils\.aoa_to_sheet\(data\.employees\),"Employees"\)/);
-  assert.doesNotMatch(templateFunction, /Instructions|Options|README|Summary|Help/);
-});
-
-test("valid UAE employee import prepares the normal employee record", () => {
-  const [result] = validate([aeRow()]);
-  assert.equal(result.valid, true);
-  assert.equal(result.record.id, "EMP-STABLE-1");
-  assert.equal(result.record.employeeId, "EMP-001");
-  assert.equal(result.record.departmentId, "DEP-SALES");
-  assert.equal(result.record.currency, "AED");
-});
-
-test("invalid rows report duplicate ID, department, salary, date and JSON errors", () => {
-  const bad = aeRow("EMP-EXISTING");
-  bad.Department = "Kitchen ABC";
-  bad["Basic salary (AED)"] = "twelve thousand";
-  bad["Joining date"] = "2026-99-40";
-  bad["Custom fields (JSON)"] = "{bad";
-  const [result] = validate([bad], { existingEmployees: [{ id: "OLD", employeeId: "EMP-EXISTING" }] });
-  assert.equal(result.valid, false);
-  const messages = result.errors.map((error) => error.message).join(" ");
-  assert.match(messages, /already exists/);
-  assert.match(messages, /does not exist/);
-  assert.match(messages, /non-negative number/);
-  assert.match(messages, /valid YYYY-MM-DD/);
-  assert.match(messages, /valid JSON/);
-  const report = employeeImportErrorRows([result]);
-  assert.ok(report.every((row) => row["Original row"] === 2 && row["Employee ID"] === "EMP-EXISTING"));
-});
-
-test("country-specific UAE validation rejects invalid emirate and employment values", () => {
-  const bad = aeRow(); bad["Work location / Emirate"] = "Kerala"; bad["Employment type"] = "Full-time"; bad["Employment status"] = "Unknown";
-  const [result] = validate([bad]);
-  assert.equal(result.valid, false);
-  assert.match(result.errors.map((error) => error.message).join(" "), /Emirate.*invalid|Employment type.*invalid|Employment status.*invalid/);
-});
-
-test("duplicate Employee IDs inside one file are rejected", () => {
-  const results = validate([aeRow("EMP-009"), aeRow("EMP-009")]);
-  assert.equal(results[0].valid, true);
-  assert.equal(results[1].valid, false);
-  assert.match(results[1].errors[0].message, /duplicated in this file/);
-});
-
-test("90 valid rows import without duplicates and remain visible to HR and Sales", () => {
-  const results = validate(Array.from({ length: 90 }, (_, index) => aeRow(`EMP-${String(index + 1).padStart(3, "0")}`)));
-  assert.equal(results.filter((row) => row.valid).length, 90);
-  const records = results.map((row) => row.record), saved = new Map(records.map((employee) => [employee.id, employee]));
-  assert.equal(saved.size, 90);
-  assert.equal(new Set(records.map((employee) => employee.employeeId)).size, 90);
-  assert.equal(eligibleSalesEmployees(records, departments).length, 90);
-});
+test("India and UAE templates contain only their jurisdiction fields",()=>{const ind=employeeTemplateHeaders("IN"),ae=employeeTemplateHeaders("AE");for(const key of["Basic Salary INR","HRA","PAN","UAN","PF Applicable","IFSC Code"])assert.ok(ind.includes(key));for(const key of["Basic Salary AED","Housing Allowance","Transport Allowance","Emirates ID","Work Permit Number","IBAN"])assert.ok(ae.includes(key));for(const key of["Emirates ID","IBAN","Basic Salary AED"])assert.ok(!ind.includes(key));for(const key of["PAN","UAN","PF Applicable","IFSC Code"])assert.ok(!ae.includes(key))});
+test("valid India and UAE imports use one stable employee model",()=>{const [inResult]=validate([india("IN-1")],"IN"),[aeResult]=validate([uae("AE-1")],"AE");assert.equal(inResult.valid,true);assert.equal(aeResult.valid,true);assert.deepEqual([inResult.record.countryCode,inResult.record.currency],["IN","INR"]);assert.deepEqual([aeResult.record.countryCode,aeResult.record.currency],["AE","AED"]);assert.equal(inResult.record.departmentId,"DEP-SALES");assert.equal(aeResult.record.departmentId,"DEP-SALES")});
+test("India and UAE imports accept active custom Administration departments by stable ID",()=>{const indiaRow=india("IN-HOUSE"),uaeRow=uae("AE-SERVICE");indiaRow.Department="House Keeping";uaeRow.Department="SERVICE";const[inResult]=validate([indiaRow],"IN"),[aeResult]=validate([uaeRow],"AE");assert.deepEqual([inResult.valid,inResult.record.departmentId],[true,"DEP-HOUSE"]);assert.deepEqual([aeResult.valid,aeResult.record.departmentId],[true,"DEP-SERVICE"])});
+test("inactive or unknown departments are rejected with Administration guidance",()=>{for(const name of["Old Team","Kitchen ABC"]){const row=uae("AE-2");row.Department=name;const[result]=validate([row],"AE");assert.equal(result.valid,false);assert.match(result.errors.map(e=>e.message).join(" "),/Department not found or inactive.*Administration → Departments/)}});
+test("duplicates invalid email dates salary emirate and employment type are reported by row",()=>{const bad=uae("DUP");bad.Email="bad";bad["Date of Joining"]="2026-99-01";bad["Basic Salary AED"]="x";bad.Emirate="Kerala";bad["Employment Type"]="Unknown";const results=validate([bad,bad],"AE",{existingEmployees:[{employeeId:"DUP"}]});assert.ok(results.every(row=>!row.valid));const text=results.flatMap(row=>row.errors.map(e=>e.message)).join(" ");assert.match(text,/already exists|duplicated/);assert.match(text,/Email is invalid/);assert.match(text,/valid YYYY-MM-DD/);assert.match(text,/non-negative number/);assert.match(text,/Emirate.*invalid/);assert.match(text,/Employment type.*invalid/);assert.ok(employeeImportErrorRows(results).every(row=>row["Original row"]>=2))});
+test("large valid mixed-country batches retain unique employee identities",()=>{let inId=0,aeId=0;const inRows=validate(Array.from({length:45},(_,i)=>india(`IN-${i}`)),"IN",{createId:()=>`IN-STABLE-${++inId}`}),aeRows=validate(Array.from({length:45},(_,i)=>uae(`AE-${i}`)),"AE",{createId:()=>`AE-STABLE-${++aeId}`}),records=[...inRows,...aeRows].map(row=>row.record);assert.equal(records.filter(Boolean).length,90);assert.equal(new Set(records.map(row=>row.id)).size,90);assert.equal(eligibleSalesEmployees(records,departments).length,90)});
+test("shared workbook branding resolves current company logo name footer and country currency",()=>{const withLogo=companyExportBranding({companyId:"CO1",legalName:"Shayay Hospitality Services",logo:"data:image/png;base64,AAAA"}),withoutLogo=companyExportBranding({name:"Another Company"});assert.equal(withLogo.companyName,"Shayay Hospitality Services");assert.match(withLogo.logo,/data:image\/png/);assert.equal(withoutLogo.logo,"");assert.equal(INFOBRIDGE_FOOTER,"Generated with InfoBridgeIndia");assert.match(countryCurrencyFormat("IN"),/₹/);assert.match(countryCurrencyFormat("AE"),/AED/)});
+test("Employees UI exposes explicit country actions filters and branded templates",()=>{const source=readFileSync(new URL("../src/hr-payroll/app.js",import.meta.url),"utf8");for(const label of["Add India Employee","Import India Employees","Add UAE Employee","Import UAE Employees","Download India Employee Template","Download UAE Employee Template"])assert.match(source,new RegExp(label));assert.match(source,/data-employee-country-filter/);assert.match(source,/brandedWorkbook/);assert.match(source,/countryCode/);assert.match(source,/employeeImportCountry/)});

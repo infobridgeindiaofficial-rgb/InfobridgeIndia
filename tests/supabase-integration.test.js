@@ -27,18 +27,19 @@ test("every Company Setup upsert column exists in the companies migration", asyn
   for (const column of writtenColumns) assert.match(sql, new RegExp(`\\b${column}\\b`, "i"), `companies migration must define ${column}`);
 });
 
-test("workspace persistence scopes every query to authenticated owner and company", async () => {
+test("workspace persistence scopes every query to the authorized company owner record and company", async () => {
   const source = await read("src/supabase/workspace.js");
-  assert.match(source, /\.eq\("owner_id", user\.id\)/);
+  const context = await read("src/company/context.js");
+  assert.match(source, /\.eq\("owner_id", workspaceOwnerId\(company\)\)/);
   assert.match(source, /\.eq\("company_id", company\.id\)/);
-  assert.match(source, /company\.owner_id !== user\.id/);
+  assert.match(source, /resolveCurrentCompanyContext\(\)/);
+  assert.match(context, /profile\.ownerId !== user\.id && !\["company_admin","company_member"\]\.includes\(profile\.accessRole\)/);
 });
 
 test("major business workspaces use Supabase-backed persistence", async () => {
   const paths = [
     "src/hr-payroll/app.js",
     "src/inventory/app.js",
-    "src/gst/app.js",
     "src/scripts/projects.js",
     "src/scripts/documents.js",
     "src/sales/app.js",
@@ -51,4 +52,7 @@ test("major business workspaces use Supabase-backed persistence", async () => {
   for (const path of paths) {
     assert.match(await read(path), /supabase\/workspace\.js/, `${path} must use the shared Supabase workspace store`);
   }
+  const gst=await read("src/gst/app.js");
+  assert.match(gst,/\.\/public-store\.js/,"public GST must not require an authenticated company workspace");
+  assert.doesNotMatch(gst,/supabase\/workspace\.js/);
 });

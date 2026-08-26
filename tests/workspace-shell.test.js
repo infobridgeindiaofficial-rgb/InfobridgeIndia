@@ -6,7 +6,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("shared workspace chrome covers every protected product family", async () => {
   const source = await read("src/scripts/workspace-sidebar.js");
-  for (const name of ["Finance & Accounting", "Sales & CRM", "Purchases & Procurement", "Inventory & Warehouse", "HR & Payroll", "Projects & Operations", "Documents", "Approvals & Workflows", "Banking", "Reports & Analytics", "Administration", "GST Workspace"]) assert.match(source, new RegExp(name.replace(/[&]/g, "\\&")));
+  for (const name of ["Finance & Accounting", "Sales & CRM", "Purchases & Procurement", "Inventory & Warehouse", "HR & Payroll", "Projects & Operations", "Documents", "Internal Requests", "Banking", "Reports & Analytics", "Administration", "GST Workspace"]) assert.match(source, new RegExp(name.replace(/[&]/g, "\\&")));
   assert.match(source, /brand\.replaceWith\(replacement\)/);
   assert.match(source, /Back to main page/);
   assert.match(source, /href="\/index\.html"/);
@@ -19,6 +19,7 @@ test("build injects the shared workspace chrome into protected outputs", async (
   assert.match(build, /withWorkspaceChrome\(inventoryWorkspacePage\(\)\)/);
   assert.match(build, /withWorkspaceChrome\(hrPayrollWorkspacePage\(\)/);
   assert.match(build, /src\/country/);
+  assert.match(build, /src\/export/);
 });
 
 test("Administration catches module graph startup failures instead of spinning forever", async () => {
@@ -29,11 +30,13 @@ test("Administration catches module graph startup failures instead of spinning f
 
 test("workspace startup preloads one owner-scoped module result instead of querying every collection", async () => {
   const source = await read("src/supabase/workspace.js");
+  const context = await read("src/company/context.js");
   assert.match(source, /select\("collection, record_id, data"\)/);
   assert.match(source, /return \[\.\.\.collectionCache\(collection\)\.values\(\)\]/);
   assert.doesNotMatch(source, /base\(\)\.eq\("collection"/);
-  assert.match(source, /globalThis\.InfoBridgeUser/);
-  assert.match(source, /globalThis\.InfoBridgeCompany/);
+  assert.match(source, /resolveCurrentCompanyContext\(\)/);
+  assert.match(context, /globalThis\.InfoBridgeUser/);
+  assert.match(context, /globalThis\.InfoBridgeCompany/);
 });
 
 test("Projects and Documents render non-interactive sidebar brands in source", async () => {

@@ -252,27 +252,27 @@ export function documentsPage() {
 export function approvalsPage() {
   return renderModulePage({
     route: "/app/approvals.html",
-    title: "Approvals & Workflows",
-    crumb: [crumbHome, { label: "Approvals & Workflows", href: "#" }],
-    description: "Everything waiting on a decision, across every module.",
+    title: "Internal Requests",
+    crumb: [crumbHome, { label: "Internal Requests", href: "#" }],
+    description: "Employee material, IT and service requests, routed to the responsible team.",
     stats: [
-      { label: "Waiting on you", value: "5" },
-      { label: "Approved this week", value: "11" },
-      { label: "Average time to decide", value: "4.2 hrs" },
+      { label: "Waiting on your team", value: "5" },
+      { label: "Completed this week", value: "11" },
+      { label: "Categories configured", value: "22" },
     ],
     table: {
       columns: [
-        { key: "type", label: "Type", render: (r) => `<span class="cell-primary">${r.type}</span><div class="cell-sub">${r.detail}</div>` },
+        { key: "type", label: "Category", render: (r) => `<span class="cell-primary">${r.type}</span><div class="cell-sub">${r.detail}</div>` },
         { key: "from", label: "Requested by" },
         { key: "status", label: "Status", render: () => `<span class="badge badge-warning">Pending</span>` },
       ],
       rows: [
-        { type: "Purchase request", detail: "â‚¹1,64,000 â€” Sri Dyes & Chemicals", from: "Warehouse Team" },
+        { type: "Stationery request", detail: "A4 Copy Paper Ã— 10 packs", from: "HR Department" },
         { type: "Leave request", detail: "6 days, 2â€“7 Sep", from: "Ananya Iyer" },
-        { type: "Expense claim", detail: "â‚¹8,400 â€” Client travel", from: "Rohit Mehta" },
+        { type: "Expense reimbursement", detail: "â‚¹8,400 â€” Client travel", from: "Rohit Mehta" },
       ],
     },
-    activity: [{ title: "Discount approval granted", meta: "12% â€” InfoBridgeIndia Retail Group" }],
+    activity: [{ title: "Stationery request completed", meta: "Issued from warehouse stock" }],
     reportLinks: [],
   });
 }

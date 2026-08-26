@@ -306,7 +306,7 @@ function sheetToXml(sheet) {
       if (!cell) continue;
       rowHasCell = true;
       if (cell.t === "n") {
-        const styleIdx = cell.z === "#,##0.00" ? 1 : 0;
+        const styleIdx = cell.z === "#,##0.00" ? 1 : cell.z?.includes("AED") ? 2 : cell.z?.includes("₹") ? 3 : 0;
         cellsXml += `<c r="${addr}" s="${styleIdx}"><v>${cell.v}</v></c>`;
       } else {
         cellsXml += `<c r="${addr}" t="inlineStr"><is><t xml:space="preserve">${escapeXml(cell.v)}</t></is></c>`;
@@ -327,8 +327,12 @@ function sheetToXml(sheet) {
   if (sheet["!autofilter"]) {
     autofilter = `<autoFilter ref="${sheet["!autofilter"].ref}"/>`;
   }
+  const print = sheet["!print"] || {};
+  const printSetup = sheet["!print"] ? `<pageSetup orientation="${print.orientation || "portrait"}" fitToWidth="${print.fitToWidth || 1}" fitToHeight="0"/>` : "";
+  const footer = sheet["!footer"] ? `<headerFooter><oddFooter>&amp;C${escapeXml(sheet["!footer"])}</oddFooter></headerFooter>` : "";
+  const repeatRows = print.repeatRows ? `<printOptions horizontalCentered="0" verticalCentered="0"/>` : "";
 
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${extras}${cols}<sheetData>${rowsXml.join("")}</sheetData>${autofilter}</worksheet>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${extras}${cols}<sheetData>${rowsXml.join("")}</sheetData>${autofilter}${repeatRows}${printSetup}${footer}</worksheet>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -417,7 +421,7 @@ function workbookToXlsxBytes(workbook) {
   const workbookRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${workbook.SheetNames.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${workbook.SheetNames.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
   files.push({ name: "xl/_rels/workbook.xml.rels", data: enc.encode(workbookRels) });
 
-  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00"/></numFmts><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`;
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="[$AED] #,##0.00;[Red]-[$AED] #,##0.00"/><numFmt numFmtId="166" formatCode="[$₹-en-IN]#,##0.00;[Red]-[$₹-en-IN]#,##0.00"/></numFmts><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`;
   files.push({ name: "xl/styles.xml", data: enc.encode(stylesXml) });
 
   workbook.SheetNames.forEach((name, i) => {

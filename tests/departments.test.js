@@ -1,59 +1,27 @@
-import test from "node:test";
-import assert from "node:assert/strict";
-import { defaultState } from "../src/administration/core.js";
-import { DEFAULT_DEPARTMENTS, absorbLegacyDepartments, ensureDefaultDepartments, orderedDepartments, stableDepartmentId } from "../src/administration/departments.js";
+import test from"node:test";
+import assert from"node:assert/strict";
+import{readFileSync}from"node:fs";
+import{defaultState,saveDepartment}from"../src/administration/core.js";
+import{DEFAULT_DEPARTMENTS,absorbLegacyDepartments,departmentSourceDiagnostics,ensureDefaultDepartments,orderedDepartments,sharedDepartments,stableDepartmentId}from"../src/administration/departments.js";
 
+const expected=["Finance & Accounting","Sales & CRM","Purchases & Procurement","Inventory & Warehouse","HR & Payroll","Projects & Operations","Documents","Internal Requests","Banking","Reports & Analytics","Administration"];
 const company=id=>({id,legalName:id,tradeName:id,active:true});
-const expectedDefaults=["General","Management","Administration","Human Resources","Finance & Accounts","Sales","Marketing","Business Development","Operations","Customer Service","Procurement","Supply Chain","Logistics","Warehouse / Stores","Information Technology","Engineering","Projects","Quality","Health, Safety & Environment (HSE)","Legal & Compliance","Facilities Management","Maintenance","Production / Manufacturing","Research & Development","Security","Transport"];
+const memoryStorage=(state,companyId=state.currentCompanyId)=>{const memory=new Map([["infobridgeindia.administration.v2",JSON.stringify(state)]]);return{companyId,getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,value),memory}};
 
-test("all global defaults are stable, ordered, and idempotent",()=>{
-  const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[{id:"CUSTOM-1",companyId:"CO-A",name:"Kitchen",code:"KITCHEN",active:true}]};
-  ensureDefaultDepartments(state);
-  const once=JSON.stringify(state);
-  ensureDefaultDepartments(state);
-  assert.equal(JSON.stringify(state),once);
-  const rows=orderedDepartments(state,"CO-A");
-  assert.equal(DEFAULT_DEPARTMENTS.length,26);
-  assert.deepEqual(DEFAULT_DEPARTMENTS.map(row=>row.name),expectedDefaults);
-  assert.equal(rows.length,27);
-  assert.deepEqual(rows.slice(0,26).map(row=>row.name),DEFAULT_DEPARTMENTS.map(row=>row.name));
-  assert.equal(rows[26].name,"Kitchen");
-  assert.equal(new Set(rows.map(row=>row.code)).size,27);
-  assert.equal(rows[0].id,stableDepartmentId("CO-A","GEN"));
-});
+test("each company receives exactly eleven stable protected core departments idempotently",()=>{const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A"),company("CO-B")],departments:[]};ensureDefaultDepartments(state);const once=JSON.stringify(state);ensureDefaultDepartments(state);assert.equal(JSON.stringify(state),once);for(const id of["CO-A","CO-B"]){const rows=orderedDepartments(state,id);assert.deepEqual(rows.map(row=>row.name),expected);assert.ok(rows.every(row=>row.isSystem&&row.systemDefault&&row.active));assert.equal(new Set(rows.map(row=>row.id)).size,11)}assert.equal(orderedDepartments(state,"CO-A")[0].id,stableDepartmentId("CO-A","FIN"))});
 
-test("legacy module defaults retire safely while referenced IDs and custom departments survive",()=>{
-  const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[
-    {id:"DEP-OLD-SALES",companyId:"CO-A",name:"Sales & CRM",code:"SALES",active:true,systemDefault:true},
-    {id:"DEP-OLD-DOC",companyId:"CO-A",name:"Documents",code:"DOC",active:true,systemDefault:true},
-    {id:"CUSTOM-CIVIL",companyId:"CO-A",name:"Civil",code:"CIVIL",active:true}
-  ]};
-  ensureDefaultDepartments(state);
-  assert.equal(state.departments.find(row=>row.id==="DEP-OLD-SALES").name,"Sales");
-  assert.equal(state.departments.find(row=>row.id==="DEP-OLD-DOC").active,false);
-  assert.equal(orderedDepartments(state,"CO-A").some(row=>row.name==="Documents"),false);
-  assert.equal(orderedDepartments(state,"CO-A",{includeIds:["DEP-OLD-DOC"]}).some(row=>row.id==="DEP-OLD-DOC"),true);
-  assert.equal(state.departments.find(row=>row.id==="CUSTOM-CIVIL").active,true);
-});
+test("compatible legacy core rows are reused and protected identity is restored",()=>{const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[{id:"OLD-FIN",companyId:"CO-A",name:"Finance & Accounts",code:"FIN",active:false,systemDefault:true},{id:"OLD-HR",companyId:"CO-A",name:"Human Resources",code:"HR",active:true,systemDefault:true},{id:"OLD-GEN",companyId:"CO-A",name:"General",code:"GEN",active:true,systemDefault:true}]};ensureDefaultDepartments(state);assert.deepEqual([state.departments.find(row=>row.id==="OLD-FIN").name,state.departments.find(row=>row.id==="OLD-FIN").active],["Finance & Accounting",true]);assert.equal(state.departments.find(row=>row.id==="OLD-HR").name,"HR & Payroll");assert.equal(state.departments.find(row=>row.id==="OLD-GEN").retiredSystemDefault,true);assert.equal(orderedDepartments(state,"CO-A").length,11)});
 
-test("active selectors are company isolated while historical inactive records can be included",()=>{
-  const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A"),company("CO-B")],departments:[
-    {id:"OLD",companyId:"CO-A",name:"Old team",code:"OLD",active:false},
-    {id:"OTHER",companyId:"CO-B",name:"Other company team",code:"OCT",active:true}
-  ]};
-  ensureDefaultDepartments(state);
-  assert.equal(orderedDepartments(state,"CO-A").some(row=>row.id==="OLD"),false);
-  assert.equal(orderedDepartments(state,"CO-A",{includeIds:["OLD"]}).some(row=>row.id==="OLD"),true);
-  assert.equal(orderedDepartments(state,"CO-A",{includeIds:["OLD"]}).some(row=>row.companyId==="CO-B"),false);
-});
+test("custom departments add edit and remain separate from protected core rows",()=>{let state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[]};ensureDefaultDepartments(state);let result=saveDepartment(state,{name:"Event Operations",code:"EVENT",active:true});state=result.state;result=saveDepartment(state,{...result.record,name:"Banquet Operations"});state=result.state;ensureDefaultDepartments(state);assert.equal(orderedDepartments(state,"CO-A").find(row=>row.code==="EVENT").name,"Banquet Operations");const core=state.departments.find(row=>row.code==="FIN");core.name="Broken";core.active=false;ensureDefaultDepartments(state);assert.deepEqual([core.name,core.active],["Finance & Accounting",true])});
 
-test("legacy HR departments merge into Administration without duplicating General",()=>{
-  const memory=new Map(),storage={companyId:"CO-A",getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,value)};
-  memory.set("infobridgeindia.administration.v2",JSON.stringify({...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[]}));
-  const map=absorbLegacyDepartments([{id:"HR-GEN",name:"General",active:true},{id:"HR-OPS",name:"Operations",active:true}],storage);
-  const saved=JSON.parse(memory.get("infobridgeindia.administration.v2"));
-  assert.equal(saved.departments.filter(row=>row.name==="General").length,1);
-  assert.equal(saved.departments.filter(row=>row.name==="Operations").length,1);
-  assert.equal(map.get("HR-GEN"),stableDepartmentId("CO-A","GEN"));
-  assert.equal(map.get("HR-OPS"),stableDepartmentId("CO-A","OPS"));
-});
+test("HR shared selector reflects only active Administration departments for its company",()=>{const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A"),company("CO-B")],departments:[{id:"EVENT-A",companyId:"CO-A",name:"Event Operations",code:"EVENT",active:true},{id:"OLD-A",companyId:"CO-A",name:"Old Team",code:"OLD",active:false},{id:"EVENT-B",companyId:"CO-B",name:"Other Company Team",code:"OTHER",active:true}]};ensureDefaultDepartments(state);const storage=memoryStorage(state,"CO-A"),rows=sharedDepartments({storage});assert.ok(rows.some(row=>row.name==="Event Operations"));assert.ok(!rows.some(row=>row.name==="Old Team"));assert.ok(!rows.some(row=>row.name==="Other Company Team"));assert.ok(!rows.some(row=>row.name==="General"))});
+
+test("HR hydrates current-company Administration state before rendering custom department choices",()=>{const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A"),company("CO-B")],departments:[{id:"HOUSE-A",companyId:"CO-A",name:"House Keeping",code:"HOUSE",active:true},{id:"SERVICE-A",companyId:"CO-A",name:"SERVICE",code:"SERVICE",active:true},{id:"SERVICE-B",companyId:"CO-B",name:"Other Company Service",code:"SERVICE",active:true}]};ensureDefaultDepartments(state);const storage=memoryStorage(state,"CO-A"),rows=sharedDepartments({storage});assert.deepEqual(rows.filter(row=>["House Keeping","SERVICE"].includes(row.name)).map(row=>row.id),["HOUSE-A","SERVICE-A"]);assert.ok(!rows.some(row=>row.name==="Other Company Service"));const bootstrap=readFileSync(new URL("../src/hr-payroll/bootstrap.js",import.meta.url),"utf8"),companySource=readFileSync(new URL("../src/administration/company.js",import.meta.url),"utf8"),page=readFileSync(new URL("../src/pages/app/hr-payroll-workspace.js",import.meta.url),"utf8");assert.match(bootstrap,/InfoBridgeRefreshAdministrationStorage/);assert.match(bootstrap,/await globalThis\.InfoBridgeRefreshAdministrationStorage\(\)/);assert.match(companySource,/await globalThis\.InfoBridgeRefreshAdministrationStorage\?\.\(\)/);assert.match(bootstrap,/await import\("\.\/app\.js"\)/);assert.match(page,/\/hr-payroll\/bootstrap\.js/)});
+
+test("stable custom department assignments follow rename and remain historical after deactivation",()=>{let state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[]};ensureDefaultDepartments(state);let saved=saveDepartment(state,{name:"House Keeping",code:"HOUSE",active:true});state=saved.state;const departmentId=saved.record.id,employee={id:"EMP-A",departmentId};let storage=memoryStorage(state,"CO-A");assert.equal(sharedDepartments({storage}).find(row=>row.id===employee.departmentId)?.name,"House Keeping");saved=saveDepartment(state,{...saved.record,name:"Hospitality Services"});state=saved.state;storage=memoryStorage(state,"CO-A");assert.equal(sharedDepartments({storage}).find(row=>row.id===employee.departmentId)?.name,"Hospitality Services");saved=saveDepartment(state,{...saved.record,name:"Hospitality Services",active:false});state=saved.state;storage=memoryStorage(state,"CO-A");assert.ok(!sharedDepartments({storage}).some(row=>row.id===departmentId));assert.equal(sharedDepartments({storage,includeIds:[employee.departmentId]}).find(row=>row.id===employee.departmentId)?.name,"Hospitality Services")});
+
+test("authoritative saved Administration collection wins and shared reads never seed a core fallback",()=>{const cloud={...defaultState(),currentCompanyId:"CLOUD-COMPANY",companies:[company("CLOUD-COMPANY")],departments:[{id:"HOUSE",name:"House Keeping",code:"HOUSE",active:true},{id:"SERVICE",name:"SERVICE",code:"SERVICE",active:true}]};ensureDefaultDepartments(cloud,["CLOUD-COMPANY"]);const cloudStorage=memoryStorage(cloud,"CLOUD-COMPANY"),emptyStorage=memoryStorage({...defaultState(),currentCompanyId:"CLOUD-COMPANY",companies:[company("CLOUD-COMPANY")],departments:[]},"CLOUD-COMPANY");globalThis.InfoBridgeCompany={companyId:"STALE-COMPANY"};try{const emptyRows=sharedDepartments({storage:emptyStorage}),rows=sharedDepartments({storage:cloudStorage}),diagnostics=departmentSourceDiagnostics({storage:cloudStorage});assert.equal(emptyRows.length,0);assert.ok(rows.some(row=>row.id==="HOUSE"&&row.name==="House Keeping"));assert.ok(rows.some(row=>row.id==="SERVICE"&&row.name==="SERVICE"));assert.equal(diagnostics.source,"authoritative-workspace");assert.equal(diagnostics.resolvedCompanyId,"CLOUD-COMPANY");assert.equal(diagnostics.profileCompanyId,"STALE-COMPANY");assert.equal(diagnostics.resolvedCount,13)}finally{delete globalThis.InfoBridgeCompany}});
+
+test("referenced legacy employee departments remain readable without reviving the old HR list",()=>{const state={...defaultState(),currentCompanyId:"CO-A",companies:[company("CO-A")],departments:[]},storage=memoryStorage(state,"CO-A");absorbLegacyDepartments([{id:"HR-OLD",name:"Human Resources",code:"HR",active:true}],storage);const rows=sharedDepartments({storage,includeIds:["HR-OLD"]});assert.equal(rows.find(row=>row.id==="HR-OLD").name,"HR & Payroll");assert.equal(rows.find(row=>row.id==="HR-OLD").active,false);assert.equal(rows.filter(row=>row.name==="HR & Payroll"&&row.active!==false).length,1)});
+
+test("Administration protects core UI and HR Add/Edit use the shared active source",()=>{const administration=readFileSync(new URL("../src/administration/app.js",import.meta.url),"utf8"),hr=readFileSync(new URL("../src/hr-payroll/app.js",import.meta.url),"utf8");assert.match(administration,/Core department/);assert.match(administration,/Protected/);assert.match(administration,/Core departments are protected and cannot be edited/);assert.match(hr,/sharedDepartments\(\{includeIds:/);assert.match(hr,/state\.departments\.map\(\(?d=>\[d\.id,d\.name\]\)?\)/);assert.match(hr,/opts=opts\.filter/);assert.doesNotMatch(hr,/await put\("employees",\{\.\.\.employee,departmentId/)});

@@ -1,6 +1,7 @@
-import { companyToProfile, currentSession, isSupabaseConfigured, ownedCompany, supabase } from "/supabase/client.js";
+import { companyToProfile, currentCompany, currentSession, isSupabaseConfigured, supabase } from "/supabase/client.js";
 import { HOME_ROUTE, clearTemporaryNavigation, destinationAfterAuth, isProtectedRoute, normalizePath, profileDisplayName, saveIntendedDestination, setLastWorkspace } from "/auth/core.js";
 import { currentCompanyName, publishAdministrationCompany } from "/administration-workspace/company.js";
+import { createCountryContext } from "/country/registry.js";
 
 const temporary = sessionStorage;
 const path = `${location.pathname}${location.search}${location.hash}`;
@@ -16,7 +17,7 @@ if (verifiedReturn && user) {
 }
 
 let companyLoadError = null;
-const companyRow = user ? await ownedCompany().catch((error) => { companyLoadError = error; return null; }) : null;
+const companyRow = user ? await currentCompany().catch((error) => { companyLoadError = error; return null; }) : null;
 const profile = companyToProfile(companyRow);
 const companyRoute = ["/company-setup.html", "/company-profile.html"].includes(location.pathname);
 const authRoute = ["/login.html", "/signup.html"].includes(location.pathname);
@@ -49,6 +50,8 @@ if (isProtectedRoute(safePath) && companyLoadError) {
     window.InfoBridgeSession = activeSession;
     window.InfoBridgeUser = activeUser;
     window.InfoBridgeCompany = activeProfile;
+    window.InfoBridgeCountryContext = activeProfile ? createCountryContext(activeProfile) : null;
+    window.InfoBridgeCountryConfig = window.InfoBridgeCountryContext?.config || null;
     window.InfoBridgeSupabaseConfigured = isSupabaseConfigured;
 
     document.querySelectorAll("[data-auth-logged-out]").forEach((node) => { node.hidden = Boolean(activeUser); });
@@ -100,7 +103,7 @@ if (isProtectedRoute(safePath) && companyLoadError) {
     });
   }
 
-  async function syncAdministrationCompany(activeUser,activeProfile){if(!activeUser||!activeProfile?.companyId)return;try{const query=supabase.from("workspace_records").select("data").eq("owner_id",activeUser.id).eq("company_id",activeProfile.companyId).eq("module","administration").eq("collection","state").eq("record_id","infobridgeindia.administration.v2").maybeSingle(),timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error("Administration company lookup timed out")),1500)),result=await Promise.race([query,timeout]);if(result?.data?.data)publishAdministrationCompany(result.data.data,activeProfile.companyId,{broadcast:false})}catch(error){console.warn("Using authenticated company name until Administration is available.",error)}}
+  async function syncAdministrationCompany(activeUser,activeProfile){if(!activeUser||!activeProfile?.companyId)return;try{const query=supabase.from("workspace_records").select("data").eq("owner_id",activeProfile.ownerId).eq("company_id",activeProfile.companyId).eq("module","administration").eq("collection","state").eq("record_id","infobridgeindia.administration.v2").maybeSingle(),timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error("Administration company lookup timed out")),1500)),result=await Promise.race([query,timeout]);if(result?.data?.data)publishAdministrationCompany(result.data.data,activeProfile.companyId,{broadcast:false})}catch(error){console.warn("Using authenticated company name until Administration is available.",error)}}
   const initializeHeader = () => { renderHeaderState(session, profile); bindHeaderActions();syncAdministrationCompany(user,profile); };
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", initializeHeader, { once: true });
   else initializeHeader();
@@ -108,7 +111,7 @@ if (isProtectedRoute(safePath) && companyLoadError) {
   supabase?.auth.onAuthStateChange((_event, nextSession) => {
     setTimeout(async () => {
       const nextUser = nextSession?.user || null;
-      const nextProfile = nextUser ? companyToProfile(await ownedCompany().catch(() => null)) : null;
+      const nextProfile = nextUser ? companyToProfile(await currentCompany().catch(() => null)) : null;
       renderHeaderState(nextSession, nextProfile);
       if (!nextUser && isProtectedRoute(safePath)) location.replace("/login.html");
     }, 0);

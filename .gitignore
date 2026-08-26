@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.claude/
+.backup-git-worktree/
+.deploy-worktree/
+.scratch-dashboard-old.txt
+.env
+.env.*
+*.log

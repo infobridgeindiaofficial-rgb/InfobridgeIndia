@@ -55,3 +55,15 @@ test("existing name-only leads remain readable and empty HR lists show guidance"
   assert.match(source,/class="salesperson-helper"/);
   assert.doesNotMatch(source,/salesperson-helper[^}]*position\s*:\s*absolute/);
 });
+
+test("Sales renders from its own persisted state before optional Inventory and HR integrations load",()=>{
+  const source=readFileSync(new URL("../src/sales/app.js",import.meta.url),"utf8");
+  const stateReady=source.indexOf('await createWorkspaceStateStorage({recordKey:"infobridgeindia.sales.v1"})');
+  const firstRender=source.lastIndexOf("render();Promise.allSettled");
+  const inventoryLoad=source.indexOf('inventoryCloud=await createWorkspaceStore("inventory")');
+  const hrLoad=source.indexOf('hrCloud=await createWorkspaceStore("hr-payroll")');
+  assert.ok(stateReady>=0&&firstRender>stateReady);
+  assert.ok(inventoryLoad>stateReady&&hrLoad>stateReady);
+  assert.match(source,/render\(\);Promise\.allSettled\(\[loadInventory\(\),loadSalesEmployees\(\)\]\)/);
+  assert.doesNotMatch(source,/createWorkspaceStateStorage\(\),inventoryCloud=await/);
+});

@@ -62,8 +62,9 @@ test("IN HR retains INR, India defaults and legacy employee fields", () => {
 test("actual UAE employee UI excludes India-only statutory controls", () => {
   const source = readFileSync(new URL("../src/hr-payroll/app.js", import.meta.url), "utf8");
   assert.match(source, /if\(c\.country==="IN"\)return/);
-  assert.match(source, /Emirates ID expiry/);
-  assert.match(source, /Labour \/ work permit details/);
-  assert.match(source, /Visa \/ residence details/);
+  assert.match(source, /Labour \/ Work Permit Number/);
+  assert.match(source, /Visa Expiry Date/);
+  assert.match(source, /Basic Salary \(AED\)/);
+  assert.match(source, /Basic Salary \(INR\)/);
   assert.match(source, /prepareEmployeeRecord/);
 });
