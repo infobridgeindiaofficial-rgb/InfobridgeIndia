@@ -2,6 +2,8 @@ import { companyToProfile, currentCompany, currentSession, isSupabaseConfigured,
 import { HOME_ROUTE, clearTemporaryNavigation, destinationAfterAuth, isProtectedRoute, normalizePath, profileDisplayName, saveIntendedDestination, setLastWorkspace } from "/auth/core.js";
 import { currentCompanyName, publishAdministrationCompany } from "/administration-workspace/company.js";
 import { createCountryContext } from "/country/registry.js";
+import { companySecurityStatus } from "/security/client.js";
+import { hasModuleAccess, requiredModuleForRoute } from "/auth/module-access.js";
 
 const temporary = sessionStorage;
 const path = `${location.pathname}${location.search}${location.hash}`;
@@ -22,13 +24,42 @@ const profile = companyToProfile(companyRow);
 const companyRoute = ["/company-setup.html", "/company-profile.html"].includes(location.pathname);
 const authRoute = ["/login.html", "/signup.html"].includes(location.pathname);
 
+// Company Master Key setup is mandatory for the Company Owner. Only check when it can
+// actually change the outcome (entering a protected workspace route, or landing back on
+// login/signup after authentication) so every other page load stays a single company lookup.
+// A failed status check never blocks an already-working Owner -- it only fails open here.
+let masterKeyRequired = false;
+const isOwner = Boolean(user && profile && profile.ownerId === user.id);
+if (isOwner && (isProtectedRoute(safePath) || authRoute)) {
+  try { masterKeyRequired = !(await companySecurityStatus(profile.companyId)).masterConfigured; }
+  catch (error) { console.warn("Unable to verify Company Master Key status.", error); }
+}
+
+// Company Owner always retains full access -- module access is only ever evaluated for a
+// non-owner company member, and always against the CURRENT public.company_members.permissions
+// value carried on this freshly-resolved profile (never a cached/local value), so a
+// permission the Owner revokes takes effect on the member's very next page load.
+const requiredModule = user && profile && !isOwner ? requiredModuleForRoute(safePath) : null;
+const moduleAccessDenied = Boolean(requiredModule && !hasModuleAccess(profile.accessPermissions, requiredModule));
+
 if (isProtectedRoute(safePath) && companyLoadError) {
   throw new Error(`Saved company data could not be loaded. Nothing was reset or overwritten. ${companyLoadError.message}`);
 } else if (isProtectedRoute(safePath) && !user) {
   saveIntendedDestination(safePath, temporary);
   location.replace("/login.html");
+} else if (companyLoadError) {
+  // A real company-resolution failure (e.g. the pending-appointment link RPC erroring) must
+  // never be silently treated as "no company" -- that previously sent an already-appointed
+  // member straight to company-setup instead of surfacing the actual problem.
+  throw new Error(`Saved company data could not be loaded. Nothing was reset or overwritten. ${companyLoadError.message}`);
 } else if (isProtectedRoute(safePath) && !profile) {
   location.replace("/company-setup.html");
+} else if (isProtectedRoute(safePath) && masterKeyRequired) {
+  location.replace("/company-security.html");
+} else if (isProtectedRoute(safePath) && moduleAccessDenied) {
+  // Direct URL navigation must not bypass module authorization -- this fires before the
+  // protected workspace page below ever renders, regardless of sidebar visibility.
+  location.replace(`${HOME_ROUTE}?accessDenied=${encodeURIComponent(requiredModule)}`);
 } else if (companyRoute && !user) {
   location.replace("/login.html");
 } else if (location.pathname === "/company-profile.html" && !profile) {
@@ -36,9 +67,37 @@ if (isProtectedRoute(safePath) && companyLoadError) {
 } else if (location.pathname === "/company-setup.html" && profile?.profileComplete) {
   location.replace(HOME_ROUTE);
 } else if (authRoute && user) {
-  location.replace(profile ? destinationAfterAuth(temporary) : "/company-setup.html");
+  location.replace(profile ? (masterKeyRequired ? "/company-security.html" : destinationAfterAuth(temporary)) : "/company-setup.html");
 } else {
   if (isProtectedRoute(safePath)) setLastWorkspace(safePath, temporary);
+
+  const deniedModule = new URLSearchParams(location.search).get("accessDenied");
+  if (deniedModule) {
+    const showBanner = () => {
+      const banner = document.createElement("div");
+      banner.setAttribute("data-access-denied-banner", "");
+      banner.setAttribute("role", "alert");
+      banner.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#fee2e2;color:#991b1b;padding:12px 16px;text-align:center;font:600 14px/1.4 system-ui,sans-serif;";
+      banner.textContent = `You don't have access to ${deniedModule}.`;
+      document.body.prepend(banner);
+    };
+    if (document.readyState === "loading") addEventListener("DOMContentLoaded", showBanner, { once: true });
+    else showBanner();
+    const url = new URL(location.href);
+    url.searchParams.delete("accessDenied");
+    history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
+  // Navigation visibility: an unauthorized module must not even appear as a clickable link on
+  // the main app sidebar. This is UI convenience only -- the route guard above is what actually
+  // enforces access, so this must never be the only check for a module.
+  function applyModuleAccessRestrictions(activeUser, activeProfile) {
+    if (!activeUser || !activeProfile || activeProfile.ownerId === activeUser.id) return;
+    document.querySelectorAll("[data-app-sidebar] a[href]").forEach((link) => {
+      const module = requiredModuleForRoute(link.getAttribute("href"));
+      if (module && !hasModuleAccess(activeProfile.accessPermissions, module)) link.remove();
+    });
+  }
 
   function closeProfileMenu() {
     document.querySelectorAll("[data-profile-dropdown]").forEach((menu) => { menu.hidden = true; });
@@ -104,7 +163,7 @@ if (isProtectedRoute(safePath) && companyLoadError) {
   }
 
   async function syncAdministrationCompany(activeUser,activeProfile){if(!activeUser||!activeProfile?.companyId)return;try{const query=supabase.from("workspace_records").select("data").eq("owner_id",activeProfile.ownerId).eq("company_id",activeProfile.companyId).eq("module","administration").eq("collection","state").eq("record_id","infobridgeindia.administration.v2").maybeSingle(),timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error("Administration company lookup timed out")),1500)),result=await Promise.race([query,timeout]);if(result?.data?.data)publishAdministrationCompany(result.data.data,activeProfile.companyId,{broadcast:false})}catch(error){console.warn("Using authenticated company name until Administration is available.",error)}}
-  const initializeHeader = () => { renderHeaderState(session, profile); bindHeaderActions();syncAdministrationCompany(user,profile); };
+  const initializeHeader = () => { renderHeaderState(session, profile); bindHeaderActions();syncAdministrationCompany(user,profile); applyModuleAccessRestrictions(user, profile); };
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", initializeHeader, { once: true });
   else initializeHeader();
 
@@ -113,6 +172,7 @@ if (isProtectedRoute(safePath) && companyLoadError) {
       const nextUser = nextSession?.user || null;
       const nextProfile = nextUser ? companyToProfile(await currentCompany().catch(() => null)) : null;
       renderHeaderState(nextSession, nextProfile);
+      applyModuleAccessRestrictions(nextUser, nextProfile);
       if (!nextUser && isProtectedRoute(safePath)) location.replace("/login.html");
     }, 0);
   });

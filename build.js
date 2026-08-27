@@ -28,7 +28,7 @@ import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
 import { privacyPage, termsPage } from "./src/pages/marketing/legal.js";
 import { aboutPage } from "./src/pages/marketing/about.js";
-import { companyAdminInvitePage, companyMemberInvitePage, companySetupPage, companyProfilePage, companySecurityPage } from "./src/pages/marketing/company.js";
+import { companySetupPage, companyProfilePage, companySecurityPage } from "./src/pages/marketing/company.js";
 import { loginPageHtml, resetPasswordPageHtml, signupPageHtml } from "./src/pages/marketing/login.js";
 import { pdfToWordPageHtml } from "./src/pages/marketing/pdf-to-word.js";
 import { gstCalculatorPageHtml } from "./src/pages/marketing/gst-calculator.js";
@@ -115,8 +115,6 @@ const marketingPages = [
   companySetupPage(),
   companyProfilePage(),
   companySecurityPage(),
-  companyAdminInvitePage(),
-  companyMemberInvitePage(),
 ];
 
 let count = 0;

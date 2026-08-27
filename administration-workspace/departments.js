@@ -14,13 +14,35 @@ const CORE_DEPARTMENT_DEFINITIONS=Object.freeze([
   {code:"ADMIN",name:"Administration"}
 ]);
 export const DEFAULT_DEPARTMENTS=Object.freeze(CORE_DEPARTMENT_DEFINITIONS.map((item,order)=>Object.freeze({code:item.code,name:item.name,order})));
+// One-time cleanup: these two custom departments are no longer wanted and must stop
+// appearing anywhere (Appoint Member, Default Department Access). Only exact-name,
+// non-system rows are affected -- core/system departments are never touched here.
+const RETIRED_CUSTOM_DEPARTMENT_NAMES=new Set(["house keeping","service"]);
 const norm=value=>String(value||"").trim().toLowerCase();
 const safe=value=>String(value||"COMPANY").replace(/[^a-z0-9_-]+/gi,"-").replace(/^-|-$/g,"").toUpperCase();
 const matchesCore=(row,item)=>[item.code,...item.codeAliases||[]].some(code=>norm(row.code)===norm(code))||[item.name,...item.aliases||[]].some(name=>norm(row.name)===norm(name));
 const coreDefinition=row=>CORE_DEPARTMENT_DEFINITIONS.find(item=>matchesCore(row,item));
 export const stableDepartmentId=(companyId,code)=>`DEP-${safe(companyId)}-${safe(code)}`;
+const stableDepartmentAccessId=(companyId,code)=>`DDA-${safe(companyId)}-${safe(code)}`;
+
+// Maps each system-default department to the InfoBridgeIndia module it naturally corresponds to,
+// so appointing someone to that department can automatically seed sensible default access.
+// Custom (company-created) departments have no obvious module mapping and get an empty
+// default template -- the Owner configures their access explicitly from Roles & Permissions.
+export const DEPARTMENT_MODULE_BY_CODE=Object.freeze({FIN:"Finance & Accounting",SALES:"Sales & CRM",PUR:"Purchases & Procurement",INV:"Inventory & Warehouse",HR:"HR & Payroll",PROJ:"Projects & Operations",DOC:"Documents",APR:"Internal Requests",BANK:"Banking",RPT:"Reports & Analytics",ADMIN:"Administration"});
+const MEMBER_DEFAULT_ACTIONS=Object.freeze(["View","Create","Edit"]);
+const HEAD_DEFAULT_ACTIONS=Object.freeze(["View","Create","Edit","Approve","Import","Export","Manage Settings"]);
+const ADMIN_HEAD_EXTRA_ACTIONS=Object.freeze(["Manage Users","Manage Permissions","View Audit"]);
+const permissionsFor=(module,actions)=>module?{[module]:Object.fromEntries(actions.map(action=>[action,true]))}:{};
 
 function assignChanged(row,values){let changed=false;for(const[key,value]of Object.entries(values))if(row[key]!==value){row[key]=value;changed=true}if(changed)row.updatedAt=new Date().toISOString();return row}
+
+function ensureDepartmentDefaultAccess(state,companyId,departmentId,code){
+  state.departmentDefaultAccess=Array.isArray(state.departmentDefaultAccess)?state.departmentDefaultAccess:[];
+  if(state.departmentDefaultAccess.some(x=>x.departmentId===departmentId))return;
+  const module=DEPARTMENT_MODULE_BY_CODE[code],headActions=code==="ADMIN"?[...HEAD_DEFAULT_ACTIONS,...ADMIN_HEAD_EXTRA_ACTIONS]:HEAD_DEFAULT_ACTIONS,timestamp=new Date().toISOString();
+  state.departmentDefaultAccess.push({id:stableDepartmentAccessId(companyId,code),companyId,departmentId,memberPermissions:permissionsFor(module,MEMBER_DEFAULT_ACTIONS),headPermissions:permissionsFor(module,headActions),createdAt:timestamp,updatedAt:timestamp});
+}
 
 export function ensureDefaultDepartments(state,companyIds){
   state.departments=Array.isArray(state.departments)?state.departments:[];
@@ -32,8 +54,10 @@ export function ensureDefaultDepartments(state,companyIds){
       if(!row){const timestamp=new Date().toISOString();row={id:stableDepartmentId(companyId,item.code),companyId,name:item.name,code:item.code,active:true,isSystem:true,systemDefault:true,retiredSystemDefault:false,defaultOrder:DEFAULT_DEPARTMENTS.find(entry=>entry.code===item.code).order,createdAt:timestamp,updatedAt:timestamp};state.departments.push(row)}
       else assignChanged(row,{name:item.name,code:item.code,active:true,isSystem:true,systemDefault:true,retiredSystemDefault:false,defaultOrder:DEFAULT_DEPARTMENTS.find(entry=>entry.code===item.code).order});
       claimed.add(row.id);
+      ensureDepartmentDefaultAccess(state,companyId,row.id,item.code);
     }
     for(const row of state.departments.filter(candidate=>candidate.companyId===companyId&&candidate.systemDefault===true&&!claimed.has(candidate.id)))assignChanged(row,{active:false,isSystem:false,retiredSystemDefault:true});
+    for(const row of state.departments.filter(candidate=>candidate.companyId===companyId&&!candidate.isSystem&&!candidate.systemDefault&&candidate.active!==false&&RETIRED_CUSTOM_DEPARTMENT_NAMES.has(norm(candidate.name))))assignChanged(row,{active:false});
   }
   return state;
 }

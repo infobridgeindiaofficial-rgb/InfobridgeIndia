@@ -131,22 +131,33 @@ test("signup requires matching password confirmation and uses verification retur
   assert.match(source, /location\.replace\("\/login\.html\?accountCreated=1"\)/);
   assert.match(source, /Please confirm your email address before logging in\./);
 });
-test("authenticated routing and setup always resolve to the main page", () => {
+test("authenticated routing and setup always resolve to the main page once the Master Key is configured", () => {
   const gate = readFileSync(new URL("../src/scripts/auth-gate.js", import.meta.url), "utf8");
   const company = readFileSync(new URL("../src/scripts/company-profile.js", import.meta.url), "utf8");
-  assert.match(gate, /profile \? destinationAfterAuth\(temporary\) : "\/company-setup\.html"/);
+  assert.match(gate, /location\.replace\(profile \? \(masterKeyRequired \? "\/company-security\.html" : destinationAfterAuth\(temporary\)\) : "\/company-setup\.html"\)/);
   assert.match(company, /destinationAfterSetup\(sessionStorage\)/);
   assert.match(readFileSync(new URL("../src/auth/core.js", import.meta.url), "utf8"), /consumeIntendedDestination\(storage\); return HOME_ROUTE/);
   assert.match(gate, /location\.replace\("\/login\.html"\)/);
 });
-test("company setup can be skipped into one incomplete owner workspace", () => {
+test("Owner cannot enter the workspace before completing the mandatory Company Master Key setup", () => {
+  const gate = readFileSync(new URL("../src/scripts/auth-gate.js", import.meta.url), "utf8");
+  const company = readFileSync(new URL("../src/scripts/company-profile.js", import.meta.url), "utf8");
+  const auth = readFileSync(new URL("../src/scripts/auth-ui.js", import.meta.url), "utf8");
+  const security = readFileSync(new URL("../src/scripts/company-security.js", import.meta.url), "utf8");
+  assert.match(gate, /companySecurityStatus\(profile\.companyId\)/);
+  assert.match(gate, /isProtectedRoute\(safePath\) && masterKeyRequired\) \{\s*location\.replace\("\/company-security\.html"\)/s);
+  assert.match(company, /masterKeyRequired \? "\/company-security\.html" : destinationAfterSetup\(sessionStorage\)/);
+  assert.match(auth, /masterKeyRequired \? "\/company-security\.html" : destinationAfterAuth\(sessionStorage\)/);
+  assert.match(security, /location\.replace\(destinationAfterAuth\(sessionStorage\)\)/);
+});
+test("company setup no longer offers a Skip path that bypasses profile or Master Key setup", () => {
   const page = readFileSync(new URL("../src/pages/marketing/company.js", import.meta.url), "utf8");
   const script = readFileSync(new URL("../src/scripts/company-profile.js", import.meta.url), "utf8");
   const client = readFileSync(new URL("../src/supabase/client.js", import.meta.url), "utf8");
-  assert.match(page, /data-skip-company>Skip for now/);
-  assert.match(script, /ensureDefaultCompany\(\)/);
-  assert.match(client, /if \(existing\) return existing/);
-  assert.match(client, /profileComplete: false/);
+  assert.doesNotMatch(page, /data-skip-company/);
+  assert.doesNotMatch(page, /Skip for now/);
+  assert.doesNotMatch(script, /ensureDefaultCompany/);
+  assert.doesNotMatch(client, /export async function ensureDefaultCompany/);
 });
 test("empty auth and company banners remain hidden", () => {
   const styles = readFileSync(new URL("../src/styles/components.css", import.meta.url), "utf8");

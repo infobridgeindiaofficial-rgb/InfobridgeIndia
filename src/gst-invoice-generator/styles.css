@@ -125,19 +125,41 @@
 .pdf-status { min-height: 14px; margin: var(--sp-2) 0 0; color: var(--ink-400); text-align: center; font-size: var(--fs-12); }
 
 /* -------------------- Print: one clean A4 invoice -------------------- */
+/* Root cause of the multi-page/blank-page print bug: visibility:hidden hides content
+   but never removes it from layout, so the full on-screen height of the site header,
+   hero section, the entry form (four sections plus the item table) and the site footer
+   were all still being reserved as blank space during print pagination -- the browser
+   paginated across that whole (invisible) height, not just the invoice. The fix below
+   removes those sections from layout entirely with display:none (a real height of 0,
+   not just invisible), and keeps #invoicePreview in normal document flow (not absolutely
+   positioned) so its own actual height -- one page or several -- is exactly what gets
+   paginated, with nothing clipped and nothing extra. */
 @media print {
   @page { size: A4 portrait; margin: 7mm; }
-  html, body { width: 210mm !important; min-height: 297mm !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  html, body { width: auto !important; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; background: #fff !important; }
   body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body * { visibility: hidden !important; }
+
+  /* These are the only sections on the page besides the invoice itself. display:none
+     collapses their reserved height to zero instead of merely hiding their content. */
+  .site-header, .service-hero, #invoiceForm, .preview-top, .preview-actions, #pdfStatus, .site-footer {
+    display: none !important;
+  }
+  .section, .container, .invoice-workspace, .preview-panel {
+    display: block !important; position: static !important; width: auto !important;
+    max-width: none !important; margin: 0 !important; padding: 0 !important;
+  }
+
   #invoicePreview, #invoicePreview * { visibility: visible !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   #invoicePreview {
-    position: absolute !important; left: 0 !important; top: 0 !important; width: 196mm !important;
-    min-height: 0 !important; max-height: none !important; margin: 0 !important; overflow: visible !important;
+    position: static !important; width: 196mm !important; max-width: 196mm !important;
+    min-height: 0 !important; max-height: none !important; margin: 0 auto !important; overflow: visible !important;
     border: 1px solid #94a3b8 !important; box-shadow: none !important; background: #fff !important; color: #0f172a !important;
   }
   #invoicePreview .preview-table-wrap { overflow: visible !important; }
   #invoicePreview .preview-table { width: 100% !important; min-width: 0 !important; table-layout: fixed !important; }
+  #invoicePreview .preview-table thead { display: table-header-group; }
+  #invoicePreview .preview-table tr { page-break-inside: avoid !important; break-inside: avoid !important; }
   #invoicePreview .preview-table th { color: #fff !important; background: var(--brand-700) !important; font-weight: 800 !important; }
   #invoicePreview .preview-table td { color: #0f172a !important; font-weight: 600 !important; }
   #invoicePreview .totals .grand, #invoicePreview .totals .grand * { color: #fff !important; background: var(--brand-700) !important; font-weight: 800 !important; }

@@ -48,11 +48,35 @@ export async function ownedCompany() {
   return companyCache.promise;
 }
 
+async function activeMembershipCompany(client,userId){
+  const{data,error}=await client.from("company_members").select("company_id,system_role,status,permissions,companies(*)").eq("user_id",userId).eq("status","active").limit(1).maybeSingle();
+  if(error)throw error;
+  const company=Array.isArray(data?.companies)?data.companies[0]:data?.companies;
+  return company?{...company,access_role:data.system_role,access_permissions:data.permissions||{}}:null;
+}
+
+// A Company Owner appoints a member by email only (no invitation token, no frontend-supplied
+// email is ever trusted). When this authenticated session has no owned or linked company yet,
+// try once to link any pending appointment(s) matching this session's server-verified email
+// (auth.jwt()->>'email' inside the RPC) before concluding there is truly no company -- this
+// keeps normal signup/company-setup for users with no appointment completely unaffected.
+async function linkPendingAppointmentIfAny(client){
+  const{data,error}=await client.rpc("link_pending_company_member",{});
+  if(error)throw error;
+  return Number(data)>0;
+}
+
 export async function currentCompany() {
   const client=requireSupabase(),user=await currentUser();if(!user)return null;
   if(currentCompanyCache.userId===user.id&&currentCompanyCache.value)return currentCompanyCache.value;
   if(currentCompanyCache.userId===user.id&&currentCompanyCache.promise)return currentCompanyCache.promise;
-  currentCompanyCache={userId:user.id,value:null,promise:(async()=>{const owned=await ownedCompany();if(owned)return{...owned,access_role:"owner",access_permissions:{}};const{data,error}=await client.from("company_members").select("company_id,system_role,status,permissions,companies(*)").eq("user_id",user.id).eq("status","active").limit(1).maybeSingle();if(error)throw error;const company=Array.isArray(data?.companies)?data.companies[0]:data?.companies;return company?{...company,access_role:data.system_role,access_permissions:data.permissions||{}}:null})()};
+  currentCompanyCache={userId:user.id,value:null,promise:(async()=>{
+    const owned=await ownedCompany();
+    if(owned)return{...owned,access_role:"owner",access_permissions:{}};
+    let company=await activeMembershipCompany(client,user.id);
+    if(!company&&await linkPendingAppointmentIfAny(client))company=await activeMembershipCompany(client,user.id);
+    return company;
+  })()};
   try{const value=await currentCompanyCache.promise;currentCompanyCache.value=value;return value}finally{currentCompanyCache.promise=null}
 }
 
@@ -96,18 +120,6 @@ export async function saveOwnedCompany(input) {
   companyCache = { userId: user.id, value: data, promise: null };
   currentCompanyCache = { userId: user.id, value: { ...data, access_role: "owner" }, promise: null };
   return data;
-}
-
-export async function ensureDefaultCompany() {
-  const existing = await ownedCompany();
-  if (existing) return existing;
-  const user = await currentUser();
-  if (!user) throw new Error("Sign in before creating a company workspace.");
-  const metadataName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name;
-  const emailName = String(user.email || "Account").split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-  const displayName = String(metadataName || emailName || "My").trim();
-  const year = new Date().getFullYear(), start = new Date().getMonth() >= 3 ? year : year - 1;
-  return saveOwnedCompany({ name: `${displayName} Workspace`, legalName: `${displayName} Workspace`, businessType: "Other", state: "Not provided", gstRegistered: false, financialYear: `${start}-${String(start + 1).slice(-2)}`, profileComplete: false });
 }
 
 export function companyToProfile(row) {
