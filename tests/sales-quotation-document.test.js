@@ -28,7 +28,8 @@ test("UAE quotation renders as a dedicated professional A4 document", () => {
   assert.doesNotMatch(html, /localhost|Sales &amp; CRM|window\.print|overflow-x/);
   assert.match(html, /For Shayay Hospitality/);
   assert.match(html, /Authorized Signatory/);
-  assert.doesNotMatch(html, /document-footer|<footer/);
+  assert.match(html, /<footer class="report-footer">/);
+  assert.match(html, /Generated with InfoBridgeIndia/);
 });
 
 test("India quotation uses the same document structure with GST-only fields", () => {

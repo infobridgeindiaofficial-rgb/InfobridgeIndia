@@ -296,6 +296,17 @@ function escapeXml(s) {
 function sheetToXml(sheet) {
   const ref = sheet["!ref"] || "A1:A1";
   const range = decode_range(ref);
+  const branded = Boolean(sheet["!branding"]);
+  const headerRow = Number(sheet["!headerRow"] || 0) - 1;
+  const brandedStyle = (row) => {
+    if (!branded) return 0;
+    if (row === 0) return 4;
+    if (row === 1) return 5;
+    if (row === 2) return 6;
+    if (row === headerRow) return 7;
+    if (row > headerRow) return 8;
+    return 0;
+  };
   const rowsXml = [];
   for (let r = range.s.r; r <= range.e.r; r++) {
     let rowHasCell = false;
@@ -306,13 +317,15 @@ function sheetToXml(sheet) {
       if (!cell) continue;
       rowHasCell = true;
       if (cell.t === "n") {
-        const styleIdx = cell.z === "#,##0.00" ? 1 : cell.z?.includes("AED") ? 2 : cell.z?.includes("₹") ? 3 : 0;
+        const styleIdx = r === headerRow && branded ? 7 : cell.z === "#,##0.00" ? 1 : cell.z?.includes("AED") ? 2 : cell.z?.includes("₹") ? 3 : brandedStyle(r);
         cellsXml += `<c r="${addr}" s="${styleIdx}"><v>${cell.v}</v></c>`;
       } else {
-        cellsXml += `<c r="${addr}" t="inlineStr"><is><t xml:space="preserve">${escapeXml(cell.v)}</t></is></c>`;
+        const styleIdx = brandedStyle(r);
+        cellsXml += `<c r="${addr}"${styleIdx ? ` s="${styleIdx}"` : ""} t="inlineStr"><is><t xml:space="preserve">${escapeXml(cell.v)}</t></is></c>`;
       }
     }
-    if (rowHasCell) rowsXml.push(`<row r="${r + 1}">${cellsXml}</row>`);
+    const height = sheet["!rows"]?.[r]?.hpt;
+    if (rowHasCell) rowsXml.push(`<row r="${r + 1}"${height ? ` ht="${height}" customHeight="1"` : ""}>${cellsXml}</row>`);
   }
 
   let extras = "";
@@ -331,8 +344,11 @@ function sheetToXml(sheet) {
   const printSetup = sheet["!print"] ? `<pageSetup orientation="${print.orientation || "portrait"}" fitToWidth="${print.fitToWidth || 1}" fitToHeight="0"/>` : "";
   const footer = sheet["!footer"] ? `<headerFooter><oddFooter>&amp;C${escapeXml(sheet["!footer"])}</oddFooter></headerFooter>` : "";
   const repeatRows = print.repeatRows ? `<printOptions horizontalCentered="0" verticalCentered="0"/>` : "";
+  const merges = sheet["!merges"]?.length ? `<mergeCells count="${sheet["!merges"].length}">${sheet["!merges"].map((merge) => `<mergeCell ref="${encode_range(merge)}"/>`).join("")}</mergeCells>` : "";
 
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${extras}${cols}<sheetData>${rowsXml.join("")}</sheetData>${autofilter}${repeatRows}${printSetup}${footer}</worksheet>`;
+  // SpreadsheetML requires autoFilter before mergeCells. Excel repairs a
+  // worksheet when these otherwise valid elements are serialized out of order.
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${extras}${cols}<sheetData>${rowsXml.join("")}</sheetData>${autofilter}${merges}${repeatRows}${printSetup}${footer}</worksheet>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -421,7 +437,7 @@ function workbookToXlsxBytes(workbook) {
   const workbookRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${workbook.SheetNames.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${workbook.SheetNames.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
   files.push({ name: "xl/_rels/workbook.xml.rels", data: enc.encode(workbookRels) });
 
-  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="[$AED] #,##0.00;[Red]-[$AED] #,##0.00"/><numFmt numFmtId="166" formatCode="[$₹-en-IN]#,##0.00;[Red]-[$₹-en-IN]#,##0.00"/></numFmts><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`;
+  const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0.00"/><numFmt numFmtId="165" formatCode="[$AED] #,##0.00;[Red]-[$AED] #,##0.00"/><numFmt numFmtId="166" formatCode="[$₹-en-IN]#,##0.00;[Red]-[$₹-en-IN]#,##0.00"/></numFmts><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="16"/><color rgb="FF12352D"/><name val="Calibri"/></font><font><b/><sz val="13"/><color rgb="FF0D6658"/><name val="Calibri"/></font><font><sz val="9"/><color rgb="FF6B7C81"/><name val="Calibri"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF12352D"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FFD9E1E2"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf><xf numFmtId="0" fontId="4" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top"/></xf></cellXfs></styleSheet>`;
   files.push({ name: "xl/styles.xml", data: enc.encode(stylesXml) });
 
   workbook.SheetNames.forEach((name, i) => {

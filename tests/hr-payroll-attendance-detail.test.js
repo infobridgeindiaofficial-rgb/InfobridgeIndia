@@ -160,21 +160,40 @@ test("the new attendance detail/edit code only ever reads and writes through the
 
 // ---- 16: existing Excel import path is untouched ----
 
-// ---- Follow-up correction: HR & Payroll -> Employees -> Employee Master shows only one
-// "Open" action per employee, which opens the attendance sheet -- never the employee
-// edit/view modal -- and the attendance sheet itself shows a full header plus a selectable
-// month, generated dynamically for every employee. ----
+// ---- Employee Master keeps one Open action per employee, but employee profile and
+// attendance remain separate entry points. ----
 
 test("the Employee Master table shows only one dynamic Open action per employee -- View, Edit and Deactivate buttons are gone from this table", () => {
   const employeesFn = app.slice(app.indexOf("function employees()"), app.indexOf("function employees()") + 2500);
-  assert.match(employeesFn, /action:`<button class="text-button" data-open-employee-attendance="\$\{e\.id\}">Open<\/button>`/);
-  assert.doesNotMatch(employeesFn, /data-view-employee="\$\{e\.id\}"|data-edit-employee="\$\{e\.id\}"|data-toggle-employee="\$\{e\.id\}"/);
+  assert.match(employeesFn, /action:`<button class="text-button" data-edit-employee="\$\{e\.id\}">Open<\/button>`/);
+  assert.doesNotMatch(employeesFn, /data-open-employee-attendance="\$\{e\.id\}"|data-view-employee="\$\{e\.id\}"|data-toggle-employee="\$\{e\.id\}"/);
 });
 
-test("Open never opens the employee edit/view modal (openEmployee) -- it opens the attendance detail sheet", () => {
+test("Employee Master Open uses the existing employee profile editor and never opens attendance", () => {
   const employeesFn = app.slice(app.indexOf("function employees()"), app.indexOf("function employees()") + 2500);
-  assert.doesNotMatch(employeesFn, /openEmployee\(e\.id\)|data-view-employee|data-edit-employee/);
+  assert.match(employeesFn, /data-edit-employee="\$\{e\.id\}"/);
+  assert.doesNotMatch(employeesFn, /data-open-employee-attendance="\$\{e\.id\}"/);
+  assert.match(app, /data-edit-employee\]"\)\.forEach\(\(b=>b\.onclick=\(\)=>openEmployee\(b\.dataset\.editEmployee,"IN",false,false\)\)\)/);
+});
+
+test("Attendance keeps its own employee action inside the Attendance workflow", () => {
+  const attendanceFn = app.slice(app.indexOf("function attendanceWorkflow()"), app.indexOf("function payrollWorkflow()"));
+  assert.match(attendanceFn, /data-open-employee-attendance="\$\{e\.id\}"/);
   assert.match(app, /button\.onclick=\(\)=>showEmployeeAttendanceDetail\(button\.dataset\.openEmployeeAttendance\)/);
+});
+
+test("the existing country-aware employee profile exposes UAE master fields and updates the same employee record", () => {
+  const formFn = app.slice(app.indexOf("function employeeForm"), app.indexOf("function openEmployee"));
+  const openFn = app.slice(app.indexOf("function openEmployee"), app.indexOf("function downloadEmployeeTemplate"));
+  for (const field of ["employeeId","firstName","lastName","email","phone","dateOfBirth","gender","nationality","departmentId","designation","joiningDate","employmentType","workLocation","employmentStatus","basicSalary","housingAllowance","transportAllowance","otherAllowances","emiratesId","workPermitNumber","visaNumber","visaExpiry","workPermitExpiry","salaryPaymentMethod","bankName","accountHolderName","bankAccount","iban"]) {
+    assert.match(formFn, new RegExp(`(?:field|select)\\(\\"${field}\\"`), `${field} must remain available in the employee profile`);
+  }
+  assert.match(openFn, /prepareEmployeeRecord\(old,/);
+  assert.match(openFn, /Employee Profile/);
+  assert.match(openFn, /record\.active=v\.employmentStatus!=="inactive"/);
+  assert.match(openFn, /await put\("employees",/);
+  assert.match(openFn, /if\(recalculate\)await recalculateDraftPayrolls\(\)/);
+  assert.doesNotMatch(openFn, /put\("attendance"|put\("leaveTransactions"/);
 });
 
 test("Add Employee is untouched and still uses the existing employee edit modal (openEmployee) -- only per-row View/Edit/Deactivate were removed", () => {
