@@ -21,8 +21,6 @@ const plans = [
       "PDF and Word utilities",
       "Shipping Label 4-in-1",
     ],
-    cta: "Explore Free Tools",
-    href: "/solutions.html",
     available: true,
   },
   {
@@ -68,7 +66,7 @@ const plans = [
 
 function planCard(plan) {
   const action = plan.available
-    ? `<a href="${plan.href}" class="btn btn-primary btn-block" style="margin-top:20px;">${plan.cta}</a>`
+    ? ""
     : `<button type="button" class="btn btn-secondary btn-block" style="margin-top:20px;" disabled>${plan.cta}</button>`;
 
   return `<article class="card" style="display:flex; flex-direction:column;${plan.available ? " border-color:var(--brand-500); box-shadow:var(--shadow-md);" : ""}">

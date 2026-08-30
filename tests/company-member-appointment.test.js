@@ -246,45 +246,31 @@ test("departmentDefaultAccessFor returns an empty-but-valid template for a depar
   assert.deepEqual(access.headPermissions, {});
 });
 
-// ---- departments.js: automatic seeding, Head vs Member distinction, Administration special case ----
+// ---- departments.js: organization membership and module permissions stay separate ----
 
-test("every system-default department automatically seeds Member and Head default access mapped to its corresponding module", () => {
-  const state = { departments: [], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
+test("an empty company receives neither application-module departments nor automatic access", () => {
+  const state = { departments: [], departmentDefaultAccess: [], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
   ensureDefaultDepartments(state, ["CO-1"]);
-  assert.equal(state.departmentDefaultAccess.length, 11);
-  for (const dept of state.departments) {
-    const module = DEPARTMENT_MODULE_BY_CODE[dept.code];
-    const access = state.departmentDefaultAccess.find((x) => x.departmentId === dept.id);
-    assert.ok(access, `missing default access for ${dept.code}`);
-    if (module) { assert.ok(access.memberPermissions[module], `member tier missing module for ${dept.code}`); assert.ok(access.headPermissions[module], `head tier missing module for ${dept.code}`); }
-  }
+  assert.deepEqual(state.departments, []);
+  assert.deepEqual(state.departmentDefaultAccess, []);
+  assert.deepEqual(DEPARTMENT_MODULE_BY_CODE, {});
 });
 
-test("a Department Head gets more default access than a regular member of the same department (limited members must not equal their Head)", () => {
-  const state = { departments: [], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
-  ensureDefaultDepartments(state, ["CO-1"]);
-  const hr = state.departments.find((d) => d.code === "HR");
-  const access = state.departmentDefaultAccess.find((a) => a.departmentId === hr.id);
-  const countTrue = (perm) => Object.values(perm["HR & Payroll"] || {}).filter(Boolean).length;
-  assert.ok(countTrue(access.headPermissions) > countTrue(access.memberPermissions));
+test("an Owner can explicitly configure different Member and Head access for a real department", () => {
+  let state = { ...defaultState(), currentCompanyId: "CO-1", companies: [{ id: "CO-1" }], departments: [{ id: "DEP-HK", companyId: "CO-1", name: "Housekeeping", code: "HK", active: true }] };
+  state = saveDepartmentDefaultAccess(state, "DEP-HK", "member", { Documents: { View: true } }).state;
+  state = saveDepartmentDefaultAccess(state, "DEP-HK", "head", { Documents: { View: true, Approve: true } }).state;
+  const access = departmentDefaultAccessFor(state, "DEP-HK");
+  assert.equal(access.memberPermissions.Documents.Approve, undefined);
+  assert.equal(access.headPermissions.Documents.Approve, true);
 });
 
-test("only the Administration department's Head tier includes Manage Users / Manage Permissions by default; the Administration member tier does not", () => {
-  const state = { departments: [], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
+test("department reconciliation preserves explicitly configured access without creating more", () => {
+  const state = { departments: [{ id: "DEP-HK", companyId: "CO-1", name: "Housekeeping", code: "HK", active: true }], departmentDefaultAccess: [{ id: "DDA-1", companyId: "CO-1", departmentId: "DEP-HK", memberPermissions: { Custom: { View: true } }, headPermissions: {} }], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
   ensureDefaultDepartments(state, ["CO-1"]);
-  const admin = state.departments.find((d) => d.code === "ADMIN");
-  const access = state.departmentDefaultAccess.find((a) => a.departmentId === admin.id);
-  assert.equal(access.headPermissions.Administration["Manage Users"], true);
-  assert.equal(access.memberPermissions.Administration["Manage Users"], undefined);
-});
-
-test("seeding is idempotent and never overwrites an Owner's already-configured default access on subsequent bootstraps", () => {
-  const state = { departments: [], companies: [{ id: "CO-1" }], currentCompanyId: "CO-1" };
   ensureDefaultDepartments(state, ["CO-1"]);
-  const hr = state.departments.find((d) => d.code === "HR");
-  state.departmentDefaultAccess.find((a) => a.departmentId === hr.id).memberPermissions = { Custom: { View: true } };
-  ensureDefaultDepartments(state, ["CO-1"]);
-  assert.deepEqual(state.departmentDefaultAccess.find((a) => a.departmentId === hr.id).memberPermissions, { Custom: { View: true } });
+  assert.equal(state.departmentDefaultAccess.length, 1);
+  assert.deepEqual(state.departmentDefaultAccess[0].memberPermissions, { Custom: { View: true } });
 });
 
 test("a custom (non-system) department gets no automatic module access -- the Owner must configure it explicitly", () => {

@@ -1,9 +1,9 @@
-import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
+﻿import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
 
 export function mergePdfPageHtml() {
   const body = `
   <section class="service-hero"><div class="container">
-    ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/solutions.html" }, { label: "Merge PDF", href: "#" }])}
+    ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "Merge PDF", href: "#" }])}
     <div style="margin-top:18px; max-width:640px;"><span class="eyebrow">Business Tools</span><h1 class="h-1">Merge PDF</h1>
       <p class="text-lead">Combine two or more PDF files into one document in the order you choose. Everything runs in your browser &mdash; your documents are never uploaded or stored on our servers.</p>
     </div>

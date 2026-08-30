@@ -1,4 +1,4 @@
-import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
+﻿import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
 
 const ROUTE = "/shipping-label-4in1.html";
 
@@ -6,7 +6,7 @@ export function shippingLabel4in1PageHtml() {
   const body = `
   <section class="service-hero">
     <div class="container">
-      ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/solutions.html" }, { label: "Shipping Label 4-in-1 PDF", href: "#" }])}
+      ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "Shipping Label 4-in-1 PDF", href: "#" }])}
       <div style="margin-top:18px; max-width:640px;">
         <span class="eyebrow">Business Tools</span>
         <h1 class="h-1">Shipping Label 4-in-1 PDF</h1>

@@ -22,12 +22,10 @@ import {
 import { financeAccountingPage, financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
 import { gstOverviewPage, gstr1Page, gstr3bPage } from "./src/pages/marketing/gst.js";
 import { hrOverviewPage, payrollPage } from "./src/pages/marketing/hr.js";
-import { solutionsPage } from "./src/pages/marketing/solutions.js";
 import { pricingPage } from "./src/pages/marketing/pricing.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
 import { privacyPage, termsPage } from "./src/pages/marketing/legal.js";
-import { aboutPage } from "./src/pages/marketing/about.js";
 import { companySetupPage, companyProfilePage, companySecurityPage } from "./src/pages/marketing/company.js";
 import { loginPageHtml, resetPasswordPageHtml, signupPageHtml } from "./src/pages/marketing/login.js";
 import { pdfToWordPageHtml } from "./src/pages/marketing/pdf-to-word.js";
@@ -105,13 +103,11 @@ const marketingPages = [
   gstr3bPage(),
   hrOverviewPage(),
   payrollPage(),
-  solutionsPage(),
   pricingPage(),
   resourcesPage(),
   securityPage(),
   privacyPage(),
   termsPage(),
-  aboutPage(),
   companySetupPage(),
   companyProfilePage(),
   companySecurityPage(),

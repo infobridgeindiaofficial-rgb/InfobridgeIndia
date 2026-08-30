@@ -1,10 +1,10 @@
-import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
+﻿import { breadcrumbs, renderHead, renderHeader, renderFooter, renderClientScript } from "../../components/layout.js";
 
 export function gstInvoiceGeneratorPageHtml() {
   const body = `
   <section class="service-hero">
     <div class="container">
-      ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/solutions.html" }, { label: "GST Invoice Generator", href: "#" }])}
+      ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "GST Invoice Generator", href: "#" }])}
       <div style="margin-top:18px; max-width:680px;">
         <span class="eyebrow">Business Tools</span>
         <h1 class="h-1">GST Invoice Generator</h1>

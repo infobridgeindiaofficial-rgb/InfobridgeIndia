@@ -47,7 +47,7 @@ export const mainNav = [
   {
     key: "solutions",
     label: "Business Tools",
-    href: "/solutions.html",
+    href: "/gst-calculator.html",
     mega: {
       columns: [
         {
@@ -85,11 +85,6 @@ export const mainNav = [
     label: "GST Workspace",
     href: "/app/gst/index.html",
   },
-  {
-    key: "about",
-    label: "About Us",
-    href: "/about.html",
-  },
   { key: "pricing", label: "Pricing", href: "/pricing.html" },
 ];
 
@@ -110,8 +105,6 @@ export const footerColumns = [
     links: [
       { title: "Reports & Analytics", href: "/app/reports.html" },
       { title: "Internal Requests", href: "/app/approvals.html" },
-      { title: "Multi-branch & Enterprise", href: "/solutions.html#enterprise" },
-      { title: "Service Business", href: "/solutions.html#service" },
     ],
   },
   {

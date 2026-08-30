@@ -17,7 +17,8 @@ const sql = read("../supabase/company-member-appointments.sql");
 // end-to-end with real values, without touching a live database.
 function seedDepartmentAccess(moduleGrants, { isDepartmentHead = true } = {}) {
   let state = ensureDefaultDepartments(bootstrap(defaultState()));
-  const department = state.departments.find((d) => d.name === "Internal Requests");
+  const department = { id: "DEP-OPERATIONS", companyId: state.currentCompanyId, name: "Operations", code: "OPS", active: true };
+  state.departments.push(department);
   const permissions = Object.fromEntries(MODULES.map((m) => [m, Object.fromEntries(ACTIONS.map((a) => [a, false]))]));
   for (const [module, actions] of Object.entries(moduleGrants)) for (const action of actions) permissions[module][action] = true;
   const { state: nextState } = saveDepartmentDefaultAccess(state, department.id, isDepartmentHead ? "head" : "member", permissions);

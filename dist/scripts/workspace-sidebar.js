@@ -3,10 +3,38 @@ const MODULES = [
   [/inventory/, "Inventory & Warehouse"], [/hr-payroll|\/app\/hr\//, "HR & Payroll"], [/projects/, "Projects & Operations"],
   [/documents/, "Documents"], [/approvals/, "Internal Requests"], [/banking/, "Banking"],
   [/reports/, "Reports & Analytics"], [/admin/, "Administration"], [/gst/, "GST Workspace"],
+  [/import-export/, "Import & Export"], [/settings/, "Settings"],
 ];
+
+import { sidebarScrollStorageKey, visibleSidebarScrollTop } from "/scripts/workspace-sidebar-scroll.js";
 
 const moduleName = MODULES.find(([pattern]) => pattern.test(location.pathname))?.[1] || "Workspace";
 const backIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/><path d="M9 12h11"/></svg>';
+const scrollStorageKey = sidebarScrollStorageKey(moduleName);
+let sidebarScrollTop = readSidebarScrollTop();
+
+function readSidebarScrollTop() {
+  try {
+    const value = Number(sessionStorage.getItem(scrollStorageKey));
+    return Number.isFinite(value) && value >= 0 ? value : 0;
+  } catch { return 0; }
+}
+
+function saveSidebarScrollTop(nav) {
+  if (!(nav instanceof HTMLElement)) return;
+  sidebarScrollTop = Math.max(0, nav.scrollTop);
+  try { sessionStorage.setItem(scrollStorageKey, String(sidebarScrollTop)); } catch {}
+}
+
+function restoreSidebarScroll(sidebar) {
+  const nav = sidebar.querySelector(":scope > nav");
+  if (!(nav instanceof HTMLElement)) return;
+  nav.scrollTop = sidebarScrollTop;
+  const active = nav.querySelector(".active, [aria-current='page']");
+  if (!(active instanceof HTMLElement) || nav.clientHeight === 0) return;
+  nav.scrollTop = visibleSidebarScrollTop(nav.scrollTop, nav.clientHeight, active.offsetTop, active.offsetHeight);
+  saveSidebarScrollTop(nav);
+}
 
 function companyLabel() {
   const company = globalThis.InfoBridgeCompany;
@@ -68,6 +96,7 @@ function normalizeSidebar(sidebar) {
   makeBrandNonInteractive(sidebar);
   normalizeLabel(sidebar);
   normalizeFooter(sidebar);
+  restoreSidebarScroll(sidebar);
 }
 
 function applyWorkspaceChrome() {
@@ -86,4 +115,12 @@ else { applyWorkspaceChrome(); observer.observe(document.body, { childList: true
 
 addEventListener("infobridge:company-ready", applyWorkspaceChrome);
 listenForAdministrationCompany(applyWorkspaceChrome);
+document.addEventListener("scroll", event => {
+  const nav = event.target;
+  if (nav instanceof HTMLElement && nav.matches("aside.sidebar > nav, aside.gst-sidebar > nav, aside.workspace-sidebar > nav, aside.app-sidebar > nav")) saveSidebarScrollTop(nav);
+}, true);
+document.addEventListener("click", event => {
+  const item = event.target.closest?.("aside.sidebar > nav a, aside.sidebar > nav button, aside.gst-sidebar > nav a, aside.gst-sidebar > nav button, aside.workspace-sidebar > nav a, aside.workspace-sidebar > nav button, aside.app-sidebar > nav a, aside.app-sidebar > nav button");
+  if (item) saveSidebarScrollTop(item.closest("nav"));
+}, true);
 import { currentCompanyName, listenForAdministrationCompany } from "/administration-workspace/company.js";
