@@ -3,6 +3,25 @@ import { BRAND, mainNav, footerColumns, appNav } from "../data/nav.js";
 import { renderSeoTags, seoForRoute } from "../data/seo.js";
 
 const YEAR = 2026;
+const GA4_MEASUREMENT_ID = "G-WDV9HEL5DX";
+const ANALYTICS_EXCLUDED_ROUTES = new Set([
+  "/company-setup.html",
+  "/company-profile.html",
+  "/company-security.html",
+]);
+
+function renderGoogleAnalyticsTag(route) {
+  if (!route || ANALYTICS_EXCLUDED_ROUTES.has(route)) return "";
+  return `
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${GA4_MEASUREMENT_ID}');
+  </script>`;
+}
 
 export function renderHead({ title, description, exactTitle = false, route = "" }) {
   const seo = seoForRoute(route);
@@ -13,7 +32,7 @@ export function renderHead({ title, description, exactTitle = false, route = "" 
     : `\n  <meta name="description" content="${effectiveDescription || BRAND.tagline}" />`;
   return `<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${renderSeoTags(seo)}
+  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />
