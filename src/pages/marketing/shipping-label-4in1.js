@@ -9,7 +9,7 @@ export function shippingLabel4in1PageHtml() {
       ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "Shipping Label 4-in-1 PDF", href: "#" }])}
       <div style="margin-top:18px; max-width:640px;">
         <span class="eyebrow">Business Tools</span>
-        <h1 class="h-1">Shipping Label 4-in-1 PDF</h1>
+        <h1 class="h-1">4-in-1 Shipping Label Generator</h1>
         <p class="text-lead">Arrange up to 4 marketplace shipping labels on each A4 page for easy printing. Works with Meesho, Amazon, Flipkart and other marketplace label PDFs &mdash; processed entirely in your browser, never uploaded anywhere.</p>
       </div>
     </div>
@@ -92,7 +92,7 @@ export function shippingLabel4in1PageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "Shipping Label 4-in-1 PDF", description: "Arrange up to 4 marketplace shipping labels (Meesho, Amazon, Flipkart) on each A4 page for easy printing, entirely in your browser." })}
+${renderHead({ title: "Shipping Label 4-in-1 PDF", description: null, route: "/shipping-label-4in1.html" })}
 <link rel="stylesheet" href="/shipping-label-4in1/styles.css" />
 </head>
 <body>

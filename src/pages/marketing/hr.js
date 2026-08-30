@@ -10,7 +10,7 @@ export function hrOverviewPage() {
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">HR & Payroll</span>
-          <h1 class="h-1">People operations for a growing Indian company</h1>
+          <h1 class="h-1">HR Management Software for Indian Businesses</h1>
           <p class="text-lead">Recruitment, attendance, leave and statutory payroll — with a self-service workspace for every employee and a payroll run that posts straight into accounting.</p>
         </div>
         <div class="service-icon-badge">${icon("hr")}</div>
@@ -32,7 +32,7 @@ export function hrOverviewPage() {
         ${subserviceCard({ icon: "briefcase", title: "Recruitment", desc: "Job openings, candidates, interviews and offers.", href: "/hr-payroll/index.html" })}
         ${subserviceCard({ icon: "clock", title: "Attendance & Shifts", desc: "Check-in/out, shifts, late marks and overtime.", href: "/hr-payroll/index.html#attendance" })}
         ${subserviceCard({ icon: "calendar", title: "Leave Management", desc: "Balances, requests and manager approvals.", href: "/hr-payroll/index.html#leave" })}
-        ${subserviceCard({ icon: "payroll", title: "Payroll", desc: "Salary structures, statutory deductions, payslips.", href: "/hr-payroll/index.html#payroll", status: { tone: "brand", label: "Runs on the 28th" } })}
+        ${subserviceCard({ icon: "payroll", title: "Payroll", desc: "Salary structures, statutory deductions, payslips.", href: "/hr/payroll.html", status: { tone: "brand", label: "Runs on the 28th" } })}
         ${subserviceCard({ icon: "star", title: "Performance", desc: "KPIs, appraisals, increments and promotions.", href: "/hr-payroll/index.html" })}
         ${subserviceCard({ icon: "wallet", title: "Employee Expenses & Advances", desc: "Claims, travel and loans, tracked against payroll.", href: "/hr-payroll/index.html" })}
         ${subserviceCard({ icon: "documents", title: "Documents & Onboarding", desc: "Offer letters, IDs and onboarding checklists.", href: "/hr-payroll/index.html" })}
@@ -73,13 +73,13 @@ export function payrollPage() {
     <div class="container">
       ${breadcrumbs([
         { label: "Home", href: "/index.html" },
-        { label: "HR & Payroll", href: "/hr-payroll/index.html" },
+        { label: "HR & Payroll", href: "/hr.html" },
         { label: "Payroll", href: "#" },
       ])}
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">HR & Payroll / Payroll</span>
-          <h1 class="h-1">The Payroll workspace</h1>
+          <h1 class="h-1">Payroll Software for Indian Businesses</h1>
           <p class="text-lead">Select a period, calculate earnings and statutory deductions for every employee, route the run for approval, then generate payslips and the accounting entry — in one place.</p>
         </div>
         <div class="service-icon-badge">${icon("payroll")}</div>
@@ -117,7 +117,7 @@ export function payrollPage() {
         title: "See the live payroll workspace",
         desc: "Log in to open this month's payroll run with sample employee data.",
         primary: { href: "/signup.html", label: "Open in the app" },
-        secondary: { href: "/hr-payroll/index.html", label: "Back to HR & Payroll" },
+        secondary: { href: "/hr.html", label: "Back to HR & Payroll" },
       })}
     </div>
   </section>

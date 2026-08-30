@@ -10,7 +10,7 @@ export function gstOverviewPage() {
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">GST & Tax Compliance</span>
-          <h1 class="h-1">Compliance built into the workflow, not bolted on after</h1>
+          <h1 class="h-1">GST Billing Software for Indian Businesses</h1>
           <p class="text-lead">Every GST service â€” returns, reconciliation, e-invoicing, e-way bills â€” has its own dedicated workspace that validates your data before filing, backed by a compliance calendar that never lets a due date slip.</p>
         </div>
         <div class="service-icon-badge">${icon("gst")}</div>
@@ -87,7 +87,7 @@ export function gstr1Page() {
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">GST & Compliance / GSTR-1</span>
-          <h1 class="h-1">The GSTR-1 workspace</h1>
+          <h1 class="h-1">GSTR-1 Filing Guide & Tools</h1>
           <p class="text-lead">Every outward-supply invoice for the period, validated against GST rules automatically â€” reviewed, corrected and exported without leaving InfoBridgeIndia.</p>
         </div>
         <div class="service-icon-badge">${icon("gst")}</div>
@@ -144,7 +144,7 @@ export function gstr3bPage() {
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">GST & Compliance / GSTR-3B</span>
-          <h1 class="h-1">Summary return & tax liability, calculated automatically</h1>
+          <h1 class="h-1">GSTR-3B Filing Guide & Tools</h1>
           <p class="text-lead">Outward tax liability, eligible ITC and the net payable â€” pulled from GSTR-1 data and purchase records, not recalculated by hand.</p>
         </div>
         <div class="service-icon-badge">${icon("gst")}</div>

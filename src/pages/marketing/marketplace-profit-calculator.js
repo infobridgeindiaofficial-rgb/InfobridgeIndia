@@ -128,7 +128,7 @@ export function marketplaceProfitCalculatorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "Marketplace Profit Calculator", description: "Calculate Amazon, Flipkart and Meesho marketplace fees, shipping charges, settlement amount and estimated profit." })}
+${renderHead({ title: "Marketplace Profit Calculator", description: null, route: "/marketplace-profit-calculator.html" })}
 <link rel="stylesheet" href="/marketplace-profit-calculator/styles.css" />
 </head>
 <body>

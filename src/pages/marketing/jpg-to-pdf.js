@@ -49,7 +49,7 @@ export function jpgToPdfPageHtml() {
   </section>`;
 
   return `<!DOCTYPE html><html lang="en"><head>
-${renderHead({ title: "JPG to PDF", description: "Combine JPG, JPEG and PNG images into one PDF securely in your browser." })}
+${renderHead({ title: "JPG to PDF", description: "Combine JPG, JPEG and PNG images into one PDF securely in your browser.", route: "/jpg-to-pdf.html" })}
 <link rel="stylesheet" href="/jpg-to-pdf/styles.css" />
 </head><body>${renderHeader("solutions")}${body}${renderFooter()}${renderClientScript()}
 <script src="/vendor/jspdf.umd.min.js"></script><script type="module" src="/jpg-to-pdf/app.js"></script>

@@ -50,7 +50,7 @@ export function salesCrmPage() {
     navKey: "products",
     icon: "sales",
     eyebrow: "Products / Sales & CRM",
-    title: "One pipeline from first conversation to collected payment",
+    title: "CRM & Sales Management Software for Indian Businesses",
     lead: "Track leads and opportunities, send quotations, raise GST-compliant invoices and collect payment â€” with every step visible to the salesperson and the finance team at once.",
     crumb: [...crumbBase, { label: "Sales & CRM", href: "#" }],
     highlights: [
@@ -88,7 +88,7 @@ export function purchasesPage() {
     navKey: "products",
     icon: "purchase",
     eyebrow: "Products / Purchases & Procurement",
-    title: "Procurement with approvals that actually happen",
+    title: "Purchase & Procurement Management Software",
     lead: "Purchase requests, RFQs, vendor comparison, purchase orders, goods receipt and supplier payments â€” routed through the approval chain your business already uses.",
     crumb: [...crumbBase, { label: "Purchases & Procurement", href: "#" }],
     subservices: [
@@ -151,7 +151,7 @@ export function bankingPage() {
     navKey: "products",
     icon: "bank",
     eyebrow: "Products / Banking",
-    title: "Every rupee in and out, reconciled",
+    title: "Business Banking & Reconciliation Software",
     lead: "Cash and bank accounts, receipts, payments and transfers â€” reconciled against statements automatically, with marketplace settlements and payroll payments flowing in from the modules that generate them.",
     crumb: [...crumbBase, { label: "Banking", href: "#" }],
     subservices: [
@@ -181,7 +181,7 @@ export function projectsOpsPage() {
     navKey: "products",
     icon: "projects",
     eyebrow: "Products / Projects & Office Operations",
-    title: "Projects, tasks and the office running behind the business",
+    title: "Project Management Software for Indian Businesses",
     lead: "Projects, milestones and timesheets sit alongside internal requests, office assets and employee claims â€” so operational work is tracked with the same rigour as revenue.",
     crumb: [...crumbBase, { label: "Projects & Operations", href: "#" }],
     subservices: [
@@ -200,7 +200,7 @@ export function documentsPage() {
     navKey: "products",
     icon: "documents",
     eyebrow: "Products / Documents",
-    title: "Every business document, organised and never expiring quietly",
+    title: "Document Management Software for Indian Businesses",
     lead: "Contracts, invoices, employee records and vendor documents â€” organised into folders with permissions, version history and expiry reminders.",
     crumb: [...crumbBase, { label: "Documents", href: "#" }],
     subservices: [
@@ -218,7 +218,7 @@ export function approvalsPage() {
     navKey: "products",
     icon: "approvals",
     eyebrow: "Products / Internal Requests",
-    title: "Internal requests, routed to the team that actually handles them",
+    title: "Approval & Workflow Management Software",
     lead: "Stationery, IT equipment, maintenance, leave and expense requests â€” raised by any employee and routed straight to the responsible team, with Inventory and Purchases & Procurement handling fulfilment where it already lives.",
     crumb: [...crumbBase, { label: "Internal Requests", href: "#" }],
     subservices: [
@@ -247,7 +247,7 @@ export function reportsPage() {
     navKey: "products",
     icon: "reports",
     eyebrow: "Products / Reports & Analytics",
-    title: "A report centre that management actually opens",
+    title: "Business Reports & Analytics Software",
     lead: "Financial, GST, inventory, sales, HR and branch-level reports with real filters and export â€” plus a management view that surfaces what needs attention without burying it in charts.",
     crumb: [...crumbBase, { label: "Reports & Analytics", href: "#" }],
     subservices: [
@@ -268,7 +268,7 @@ export function importExportPage() {
     navKey: "solutions",
     icon: "importexport",
     eyebrow: "Products / Import & Export",
-    title: "International trade, without a separate spreadsheet system",
+    title: "Import & Export Software for Indian Businesses",
     lead: "IEC details, overseas customers and suppliers, foreign currency invoicing, landed cost and shipment tracking â€” integrated with accounting, inventory, banking and tax rather than kept apart from them.",
     crumb: [...crumbBase, { label: "Import & Export", href: "#" }],
     subservices: [
@@ -298,6 +298,7 @@ export function administrationPage() {
     navKey: "products",
     icon: "admin",
     eyebrow: "Products / Administration",
+    h1: "Business Administration Software",
     title: "Companies, branches, roles and permissions â€” governed centrally",
     lead: "One console to manage every company under an account, every branch and department, and exactly what each role is allowed to view, create, edit, delete, approve or export.",
     crumb: [...crumbBase, { label: "Administration", href: "#" }],

@@ -7,7 +7,7 @@ export function gstCalculatorPageHtml() {
       ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "GST Calculator", href: "#" }])}
       <div style="margin-top:18px; max-width:640px;">
         <span class="eyebrow">Business Tools</span>
-        <h1 class="h-1">GST Calculator</h1>
+        <h1 class="h-1">GST Calculator India</h1>
         <p class="text-lead">Calculate GST inclusive, exclusive, CGST, SGST and IGST instantly.</p>
       </div>
     </div>
@@ -85,7 +85,7 @@ export function gstCalculatorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "GST Calculator", description: "Free GST Inclusive and Exclusive Calculator. Calculate taxable value, GST amount, CGST, SGST and IGST instantly." })}
+${renderHead({ title: "GST Calculator", description: "Free GST Inclusive and Exclusive Calculator. Calculate taxable value, GST amount, CGST, SGST and IGST instantly.", route: "/gst-calculator.html" })}
 <link rel="stylesheet" href="/gst-calculator/styles.css" />
 </head>
 <body>

@@ -68,7 +68,7 @@ export function gstInterestCalculatorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "GST Interest Calculator", description: "Free GST Interest Calculator to calculate interest on delayed GST tax payments." })}
+${renderHead({ title: "GST Interest Calculator", description: "Free GST Interest Calculator to calculate interest on delayed GST tax payments.", route: "/gst-interest-calculator.html" })}
 <link rel="stylesheet" href="/gst-interest-calculator/styles.css" />
 </head>
 <body>

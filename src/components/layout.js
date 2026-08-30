@@ -1,13 +1,19 @@
 import { icon } from "./icons.js";
 import { BRAND, mainNav, footerColumns, appNav } from "../data/nav.js";
+import { renderSeoTags, seoForRoute } from "../data/seo.js";
 
 const YEAR = 2026;
 
-export function renderHead({ title, description }) {
+export function renderHead({ title, description, exactTitle = false, route = "" }) {
+  const seo = seoForRoute(route);
+  const effectiveTitle = seo?.title || title;
+  const effectiveDescription = seo?.description ?? description;
+  const descriptionMeta = effectiveDescription === null
+    ? ""
+    : `\n  <meta name="description" content="${effectiveDescription || BRAND.tagline}" />`;
   return `<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title ? `${title} — ${BRAND.name}` : BRAND.name}</title>
-  <meta name="description" content="${description || BRAND.tagline}" />
+  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${renderSeoTags(seo)}
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />
@@ -155,11 +161,11 @@ export function renderClientScript() {
   return `<script src="/scripts/site.js"></script>`;
 }
 
-export function marketingPage({ title, description, active, body, bodyClass = "", extraHead = "", extraScripts = "" }) {
+export function marketingPage({ route, title, description, exactTitle = false, active, body, bodyClass = "", extraHead = "", extraScripts = "" }) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title, description })}
+${renderHead({ title, description, exactTitle, route })}
 ${extraHead}
 </head>
 <body class="${bodyClass}">

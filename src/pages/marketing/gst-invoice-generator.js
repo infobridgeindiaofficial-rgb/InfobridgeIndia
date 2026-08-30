@@ -127,7 +127,7 @@ export function gstInvoiceGeneratorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "GST Invoice Generator", description: "Create, preview, print and download a GST invoice with automatic CGST, SGST or IGST calculation." })}
+${renderHead({ title: "GST Invoice Generator", description: "Create, preview, print and download a GST invoice with automatic CGST, SGST or IGST calculation.", route: "/gst-invoice-generator.html" })}
 <link rel="stylesheet" href="/gst-invoice-generator/styles.css" />
 </head>
 <body>

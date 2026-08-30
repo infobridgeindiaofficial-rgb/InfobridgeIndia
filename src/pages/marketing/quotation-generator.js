@@ -7,7 +7,7 @@ export function quotationGeneratorPageHtml() {
       ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Business Tools", href: "/gst-calculator.html" }, { label: "Quotation Generator", href: "#" }])}
       <div style="margin-top:18px; max-width:680px;">
         <span class="eyebrow">Business Tools</span>
-        <h1 class="h-1">Quotation Generator</h1>
+        <h1 class="h-1">Online Quotation Generator</h1>
         <p class="text-lead">Create a professional quotation with automatic totals and a live preview, ready to print or save as PDF. Nothing is uploaded &mdash; your data stays in this browser.</p>
       </div>
     </div>
@@ -189,7 +189,7 @@ export function quotationGeneratorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "Quotation Generator", description: "Create a professional quotation with automatic totals and a live preview. Print or save as PDF, entirely in your browser." })}
+${renderHead({ title: "Quotation Generator", description: "Create a professional quotation with automatic totals and a live preview. Print or save as PDF, entirely in your browser.", route: "/quotation-generator.html" })}
 <link rel="stylesheet" href="/quotation-generator/styles.css" />
 </head>
 <body>

@@ -33,5 +33,5 @@ export function splitPdfPageHtml() {
     <div class="spdf-note"><p><strong>Examples:</strong> Extract <b>2-4,7</b> to create one PDF containing pages 2, 3, 4 and 7. Split by range with <b>1-3,4-7,8-10</b> to create three separate PDFs.</p></div>
   </div></section>`;
 
-  return `<!DOCTYPE html><html lang="en"><head>${renderHead({ title: "Split PDF", description: "Extract pages or split a PDF into separate documents securely in your browser." })}<link rel="stylesheet" href="/split-pdf/styles.css" /></head><body>${renderHeader("solutions")}${body}${renderFooter()}${renderClientScript()}<script src="/vendor/pdf-lib.min.js"></script><script type="module" src="/split-pdf/app.js"></script></body></html>`;
+  return `<!DOCTYPE html><html lang="en"><head>${renderHead({ title: "Split PDF", description: "Extract pages or split a PDF into separate documents securely in your browser.", route: "/split-pdf.html" })}<link rel="stylesheet" href="/split-pdf/styles.css" /></head><body>${renderHeader("solutions")}${body}${renderFooter()}${renderClientScript()}<script src="/vendor/pdf-lib.min.js"></script><script type="module" src="/split-pdf/app.js"></script></body></html>`;
 }

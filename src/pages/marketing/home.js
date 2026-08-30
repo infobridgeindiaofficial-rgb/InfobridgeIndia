@@ -8,7 +8,7 @@ function hero() {
     <div class="container hero-inner">
       <div class="hero-copy">
         <span class="eyebrow">BUSINESS MANAGEMENT PLATFORM FOR INDIA</span>
-        <h1 class="h-display">Your Entire Business.<br/>One Connected Platform.</h1>
+        <h1 class="h-display">All-in-One Business Management Software for India</h1>
         <p class="text-lead">Manage accounting, GST, sales, purchases, inventory, banking, HR, e-commerce, import &amp; export and business operations from one connected platform.</p>
         <p class="text-lead hero-subline">Built for local businesses, online sellers, growing companies and enterprises across India.</p>
       </div>
@@ -28,7 +28,7 @@ function introSection() {
   return `<section class="story-block story-intro">
     <div class="container story-intro-inner">
       <span class="eyebrow">InfoBridgeIndia</span>
-      <h2 class="h-2">One company.<br/>Every digital solution.</h2>
+      <h2 class="h-2">Everything You Need to Manage Your Business</h2>
       <p class="story-taglist">Mobile Apps<span class="dot">&bull;</span>Business Software<span class="dot">&bull;</span>Websites<span class="dot">&bull;</span>Cloud Systems</p>
       <p class="text-lead">We create connected digital products designed for modern businesses.</p>
     </div>
@@ -176,8 +176,9 @@ export function homePage() {
   `;
   return {
     route: "/index.html",
-    title: "",
-    description: "InfoBridgeIndia is a complete business management, accounting, GST compliance and office operations platform for Indian businesses — from local shops to multi-branch enterprises.",
+    title: "Business Management Software India | InfoBridgeIndia",
+    exactTitle: true,
+    description: "All-in-one business management software for Indian businesses. Manage GST billing, accounting, CRM, inventory, sales, purchases, HR, payroll and projects with InfoBridgeIndia.",
     active: "",
     body,
     extraHead: '<link rel="stylesheet" href="/styles/home-story.css" />',

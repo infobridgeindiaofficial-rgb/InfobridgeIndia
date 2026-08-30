@@ -12,6 +12,7 @@ export function servicePage({
   icon: ic,
   eyebrow,
   title,
+  h1 = "",
   lead,
   crumb,
   highlights = [],
@@ -27,7 +28,7 @@ export function servicePage({
       <div class="service-hero-top" style="margin-top:18px;">
         <div>
           <span class="eyebrow">${eyebrow}</span>
-          <h1 class="h-1">${title}</h1>
+          <h1 class="h-1">${h1 || title}</h1>
           <p class="text-lead">${lead}</p>
         </div>
         <div class="service-icon-badge">${icon(ic)}</div>

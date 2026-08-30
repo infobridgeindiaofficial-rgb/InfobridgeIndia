@@ -98,7 +98,7 @@ export function wordToPdfPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "Word to PDF", description: "Convert a Word (.docx) document into a printable PDF while preserving formatting, tables and images, entirely in your browser." })}
+${renderHead({ title: "Word to PDF", description: "Convert a Word (.docx) document into a printable PDF while preserving formatting, tables and images, entirely in your browser.", route: "/word-to-pdf.html" })}
 <link rel="stylesheet" href="/word-to-pdf/styles.css" />
 </head>
 <body>

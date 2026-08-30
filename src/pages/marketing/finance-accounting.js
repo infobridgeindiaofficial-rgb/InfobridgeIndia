@@ -36,7 +36,7 @@ function renderSection(section) {
 export function financeAccountingPage() {
   const body = `<section class="service-hero"><div class="container">
     ${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "#" }])}
-    <div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Products / Finance & Accounting</span><h1 class="h-1">Finance & Accounting</h1><p class="text-lead">Manage your complete books, cash flow, receivables, payables, assets, budgets and financial reporting from one connected accounting system.</p></div></div>
+    <div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Products / Finance & Accounting</span><h1 class="h-1">Accounting Software for Indian Businesses</h1><p class="text-lead">Manage your complete books, cash flow, receivables, payables, assets, budgets and financial reporting from one connected accounting system.</p></div></div>
   </div></section>
   <section class="section"><div class="container"><div class="finance-hub-intro">${sectionHead({ eyebrow: "Accounting structure", title: "Everything finance teams need, clearly organised", desc: "Start with daily books and move into reporting, closing, control and advanced group accounting when needed." })}</div><div class="finance-hub-list">
     ${financeSections.slice(0, 2).map(renderSection).join("")}

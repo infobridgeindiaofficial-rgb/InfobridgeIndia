@@ -88,7 +88,7 @@ export function pdfToWordPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "PDF to Word", description: "Convert a PDF into an editable Word (.docx) file, entirely in your browser. No upload, no server storage." })}
+${renderHead({ title: "PDF to Word", description: "Convert a PDF into an editable Word (.docx) file, entirely in your browser. No upload, no server storage.", route: "/pdf-to-word.html" })}
 <link rel="stylesheet" href="/pdf-to-word/styles.css" />
 </head>
 <body>

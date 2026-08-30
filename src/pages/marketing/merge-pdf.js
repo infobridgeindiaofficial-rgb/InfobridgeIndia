@@ -31,6 +31,6 @@ export function mergePdfPageHtml() {
     <div class="mpdf-note"><p><strong>Tip:</strong> Use the arrow buttons or drag file rows to arrange them. Every page from the first file is added before every page from the next file.</p></div>
   </div></section>`;
 
-  return `<!DOCTYPE html><html lang="en"><head>${renderHead({ title: "Merge PDF", description: "Combine multiple PDF files into one document securely in your browser." })}<link rel="stylesheet" href="/merge-pdf/styles.css" /></head>
+  return `<!DOCTYPE html><html lang="en"><head>${renderHead({ title: "Merge PDF", description: "Combine multiple PDF files into one document securely in your browser.", route: "/merge-pdf.html" })}<link rel="stylesheet" href="/merge-pdf/styles.css" /></head>
 <body>${renderHeader("solutions")}${body}${renderFooter()}${renderClientScript()}<script src="/vendor/pdf-lib.min.js"></script><script type="module" src="/merge-pdf/app.js"></script></body></html>`;
 }

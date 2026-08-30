@@ -82,7 +82,7 @@ export function gstLateFeeCalculatorPageHtml() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-${renderHead({ title: "GST Late Fee Calculator", description: "Free GST Late Fee Calculator for delayed GSTR-1 and GSTR-3B filing." })}
+${renderHead({ title: "GST Late Fee Calculator", description: "Free GST Late Fee Calculator for delayed GSTR-1 and GSTR-3B filing.", route: "/gst-late-fee-calculator.html" })}
 <link rel="stylesheet" href="/gst-late-fee-calculator/styles.css" />
 </head>
 <body>
