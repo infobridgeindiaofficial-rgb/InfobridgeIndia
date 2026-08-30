@@ -14,6 +14,7 @@ function uaeInvoiceScenario() {
   state = r.state; const quote = r.record;
   r = convertQuotationToOrder(state, quote.id); state = r.state; const order = r.record;
   r = convertOrderToInvoice(state, order.id); state = r.state; const invoice = r.record;
+  invoice.date = "2026-08-25";
   return { state, invoice };
 }
 
