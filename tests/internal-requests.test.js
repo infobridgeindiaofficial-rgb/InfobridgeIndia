@@ -6,6 +6,7 @@ import {
   createInternalRequest, updateInternalRequest, submitInternalRequest, startInternalRequestReview,
   markInternalRequestInProgress, completeInternalRequest, rejectInternalRequest, sendBackInternalRequest,
   cancelInternalRequest, addInternalRequestComment, getMyInternalRequests, getInternalRequestInbox,
+  approveInternalRequest, canActOnInternalRequest, getInternalRequestOversight, internalRequestProgressStatus,
   internalRequestDashboardMetrics,
 } from "../src/approvals/engine.js";
 import { LocalApprovalRepository } from "../src/approvals/repository.js";
@@ -99,12 +100,16 @@ test("Complete can also be called directly from In Review (no forced intermediat
 });
 
 test("reject requires a reason and finalises the request", () => {
+  identityAdapter.configure({ id: "requester", displayName: "Requester", departmentId: "OPS", permissions: {} });
   let s = initialState();
-  let r = createInternalRequest(s, { subject: "Salary advance request", destinationDepartmentId: "DEP-1-FIN", reason: "Medical emergency" }, { submit: true });
+  let r = createInternalRequest(s, { subject: "Salary advance request", destinationDepartmentId: "DEP-1-FIN", destinationDepartmentName: "Finance", reason: "Medical emergency" }, { submit: true });
   s = r.state; const id = r.record.id;
+  identityAdapter.configure({ id: "finance-approver", displayName: "Finance Manager", departmentId: "DEP-1-FIN", departmentName: "Finance", permissions: { "Internal Requests": { Approve: true } } });
   assert.throws(() => rejectInternalRequest(s, id, ""), /rejection reason/);
   r = rejectInternalRequest(s, id, "Policy does not allow this"); s = r.state;
   assert.equal(r.record.status, "Rejected");
+  assert.equal(r.record.approvalHistory[0].actorRef, "finance-approver");
+  identityAdapter.configure(null);
 });
 
 test("send back requires a reason and returns to an editable state", () => {
@@ -150,12 +155,15 @@ test("My Requests shows only requests created by the given actor", () => {
   assert.equal(getMyInternalRequests(s, "someone-else").length, 0);
 });
 
-test("the inbox routing function is keyed on destinationDepartmentId presence (department-based), not a team/category field", () => {
+test("the inbox requires matching destination department and explicit Approve permission", () => {
   let s = initialState();
   let r = createInternalRequest(s, { subject: "Need A4 paper", destinationDepartmentId: "DEP-1-PUR", reason: "Out of stock" }, { submit: true });
   s = r.state;
-  assert.equal(getInternalRequestInbox(s).length, 1);
-  assert.equal(getInternalRequestInbox(s)[0].destinationDepartmentId, "DEP-1-PUR");
+  const authorized = { id: "purchase-supervisor", departmentId: "DEP-1-PUR", permissions: { "Internal Requests": { Approve: true } } };
+  const noPermission = { id: "purchase-assistant", departmentId: "DEP-1-PUR", permissions: { "Internal Requests": { Approve: false } } };
+  assert.equal(getInternalRequestInbox(s, authorized).length, 1);
+  assert.equal(getInternalRequestInbox(s, noPermission).length, 0);
+  assert.equal(getInternalRequestInbox(s, authorized)[0].destinationDepartmentId, "DEP-1-PUR");
 });
 
 test("dashboard metrics expose exactly the four practical cards, nothing from a workflow-builder/approval-rule engine", () => {
@@ -185,6 +193,7 @@ test("existing internal requests saved by the earlier category/team version load
   assert.equal(migrated.subject, "Stationery Request", "subject is backfilled from the old category as a reasonable default");
   assert.equal(migrated.destinationDepartmentName, "Purchase / Inventory Team", "old team label is kept as a readable fallback until a real department is assigned");
   assert.equal(migrated.destinationDepartmentId, null);
+  assert.equal(migrated.currentApproverRoleRef, "Internal Requests Approver");
 });
 
 test("a request already saved in the new shape passes through the migration unchanged", () => {
@@ -263,10 +272,9 @@ test("My Requests is sourced from getMyInternalRequests (requester-scoped)", () 
   assert.match(app, /function myRequestsView\(\)\{const rows=filterInternalRequests\(getMyInternalRequests\(state\)\)/);
 });
 
-test("the sidebar nav still contains exactly Dashboard, My Request Inbox and My Requests", () => {
-  const navMatch = app.match(/const NAV=(\[\[.*?\]\]),LEGACY_ROUTES=/);
-  assert.ok(navMatch);
-  assert.deepEqual(JSON.parse(navMatch[1]), [["dashboard", "Dashboard"], ["inbox", "My Request Inbox"], ["mine", "My Requests"]]);
+test("the sidebar keeps staff navigation and adds Company Requests only for Owner", () => {
+  assert.match(app, /\["dashboard","Dashboard"\].*\["inbox","My Request Inbox"\].*\["mine","My Requests"\]/);
+  assert.match(app, /identityAdapter\.current\(\)\.isOwner\?\[\["oversight","Company Requests"\]\]/);
 });
 
 test("no duplicated global Create Request / Approval Inbox header actions", () => {
@@ -276,12 +284,91 @@ test("no duplicated global Create Request / Approval Inbox header actions", () =
 
 // ---- app.js: detail view actions (Accept/Start, Send Back, Reject, Complete) ----
 
-test("the detail view offers the simple 4-verb action set, not a multi-level workflow builder", () => {
-  assert.match(app, /data-ir-action="start">Accept \/ Start</);
-  assert.match(app, /data-ir-action="send-back">Send Back</);
+test("the detail view offers role-protected Approve and Reject decisions", () => {
+  assert.match(app, /canActOnInternalRequest\(r\)/);
+  assert.match(app, /data-ir-action="approve">Approve</);
   assert.match(app, /data-ir-action="reject">Reject</);
-  assert.match(app, /data-ir-action="complete">Complete</);
-  assert.match(app, /data-ir-action="in-progress">Mark In Progress</);
+  assert.match(app, /internalRequestDecisionModal/);
+});
+
+test("department approver then Owner routing preserves history and scopes each inbox", () => {
+  identityAdapter.configure({ id: "employee", displayName: "Employee", departmentId: "SALES", departmentName: "Sales", permissions: [] });
+  let result = createInternalRequest(initialState(), { subject: "Vacation", destinationDepartmentId: "HR", destinationDepartmentName: "HR", reason: "Annual leave", approvalStages: [{ name: "HR Head Approval", approverRoleRef: "Department Head", approverDepartmentId: "HR", approverDepartmentName: "HR" }, { name: "Owner Approval", approverRoleRef: "Owner" }] }, { submit: true });
+  let state = result.state, id = result.record.id;
+  assert.equal(getMyInternalRequests(state, "employee").length, 1);
+  const hr = { id: "hr-supervisor", displayName: "HR Supervisor", departmentId: "HR", departmentName: "HR", isDepartmentHead: false, permissions: { "Internal Requests": { Approve: true } } };
+  assert.equal(getInternalRequestInbox(state, hr).length, 1);
+  identityAdapter.configure(hr); result = approveInternalRequest(state, id, "Policy checked"); state = result.state;
+  assert.equal(internalRequestProgressStatus(result.record), "Pending Owner Approval");
+  assert.equal(getInternalRequestInbox(state, hr).length, 0);
+  const owner = { id: "owner", displayName: "Owner", systemRole: "Owner", isOwner: true, permissions: [] };
+  assert.equal(getInternalRequestInbox(state, owner).length, 1);
+  assert.equal(getInternalRequestOversight(state, owner).length, 1);
+  identityAdapter.configure(owner); result = approveInternalRequest(state, id, "Approved");
+  assert.equal(result.record.status, "Completed");
+  assert.equal(result.record.approvalHistory.length, 2);
+  identityAdapter.configure(null);
+});
+
+test("self approval and unrelated department access are blocked", () => {
+  identityAdapter.configure({ id: "requester", displayName: "Requester", departmentId: "HR", isDepartmentHead: true, permissions: ["Internal Requests.Approve"] });
+  const result = createInternalRequest(initialState(), { subject: "Vacation", destinationDepartmentId: "HR", destinationDepartmentName: "HR", reason: "Leave" }, { submit: true });
+  assert.equal(canActOnInternalRequest(result.record), false);
+  assert.throws(() => approveInternalRequest(result.state, result.record.id), /not assigned/);
+  assert.equal(getInternalRequestInbox(result.state, { id: "sales-head", departmentId: "SALES", isDepartmentHead: true, permissions: [] }).length, 0);
+  identityAdapter.configure(null);
+});
+
+test("exact HR scenario supports multiple permission-based approvers without duplicate records", () => {
+  const admin = { id: "admin-employee", companyId: "CO-1", displayName: "Admin Employee", departmentId: "ADMIN", departmentName: "Administration", permissions: {} };
+  const hrHead = { id: "hr-head", companyId: "CO-1", displayName: "HR Head", departmentId: "HR", departmentName: "HR & Payroll", isDepartmentHead: true, permissions: { "Internal Requests": { Approve: true } } };
+  const hrStaffOff = { id: "hr-staff", companyId: "CO-1", displayName: "HR Staff", departmentId: "HR", departmentName: "HR & Payroll", permissions: { "Internal Requests": { Approve: false } } };
+  const owner = { id: "owner", companyId: "CO-1", displayName: "Owner", systemRole: "owner", isOwner: true, permissions: {} };
+  identityAdapter.configure(admin);
+  let result = createInternalRequest(initialState(), { companyId: "CO-1", subject: "Vacation Request", destinationDepartmentId: "HR", destinationDepartmentName: "HR & Payroll", reason: "Annual leave" }, { submit: true });
+  let state = result.state;
+  assert.equal(state.internalRequests.length, 1);
+  assert.equal(getMyInternalRequests(state, admin.id).length, 1);
+  assert.equal(getInternalRequestInbox(state, admin).length, 0);
+  assert.equal(getInternalRequestInbox(state, hrHead).length, 1);
+  assert.equal(getInternalRequestInbox(state, hrStaffOff).length, 0);
+  assert.equal(getInternalRequestInbox(state, owner).length, 0);
+  assert.equal(getInternalRequestOversight(state, owner).length, 1);
+
+  const hrStaffOn = { ...hrStaffOff, permissions: { "Internal Requests": { Approve: true } } };
+  assert.equal(getInternalRequestInbox(state, hrStaffOn).length, 1);
+  identityAdapter.configure(hrStaffOn);
+  result = approveInternalRequest(state, result.record.id, "Leave balance checked");
+  state = result.state;
+  assert.equal(state.internalRequests.length, 1);
+  assert.equal(result.record.status, "Completed");
+  assert.equal(result.record.approvalHistory[0].actorRef, hrStaffOn.id);
+  assert.equal(getInternalRequestInbox(state, hrHead).length, 0);
+  assert.throws(() => approveInternalRequest(state, result.record.id), /not assigned/);
+  identityAdapter.configure(null);
+});
+
+test("company boundary is enforced before direct approval", () => {
+  identityAdapter.configure({ id: "creator", companyId: "CO-1", departmentId: "SALES", permissions: {} });
+  const result = createInternalRequest(initialState(), { companyId: "CO-1", subject: "A4 Paper", destinationDepartmentId: "PUR", destinationDepartmentName: "Purchases", reason: "Out of paper" }, { submit: true });
+  const foreignApprover = { id: "foreign", companyId: "CO-2", departmentId: "PUR", permissions: { "Internal Requests": { Approve: true } } };
+  assert.equal(canActOnInternalRequest(result.record, foreignApprover), false);
+  identityAdapter.configure(foreignApprover);
+  assert.throws(() => approveInternalRequest(result.state, result.record.id), /not assigned/);
+  identityAdapter.configure(null);
+});
+
+test("permission-routed assignments and audit history survive repository refresh", () => {
+  const storage = new Map();
+  const repository = new LocalApprovalRepository("IR-PERSIST", { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value) });
+  identityAdapter.configure({ id: "creator", companyId: "CO-1", departmentId: "ADMIN", permissions: {} });
+  const created = createInternalRequest(initialState(), { companyId: "CO-1", subject: "Vacation", destinationDepartmentId: "HR", destinationDepartmentName: "HR & Payroll", reason: "Leave" }, { submit: true });
+  repository.save(created.state);
+  const loaded = repository.load(), request = loaded.internalRequests[0];
+  assert.equal(request.currentApproverRoleRef, "Internal Requests Approver");
+  assert.equal(request.history.some(event => event.action === "Request submitted"), true);
+  assert.equal(getInternalRequestInbox(loaded, { id: "hr-manager", companyId: "CO-1", departmentId: "HR", permissions: { "Internal Requests": { Approve: true } } }).length, 1);
+  identityAdapter.configure(null);
 });
 
 test("no stock-check / issue-stock / procurement-required actions remain (Internal Requests does not duplicate Inventory/Purchases)", () => {

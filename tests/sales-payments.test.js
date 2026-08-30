@@ -18,15 +18,21 @@ test("Outstanding invoices table exposes the required columns and a per-row Reco
   assert.match(source, /outstanding=state\.invoices\.filter\(x=>num\(x\.balanceDue\)>0&&x\.status!=="Cancelled"\)/);
 });
 
-test("Payment register table exposes receipt, invoice, mode, reference and action columns", () => {
-  assert.match(source, /"Receipt No\.","Payment Date","Invoice No\.","Customer","Payment Mode","Reference","Amount","Action"/);
+test("Payment register table exposes receipt, invoice, mode, reference, Finance Status and action columns", () => {
+  assert.match(source, /"Receipt No\.","Payment Date","Invoice No\.","Customer","Payment Mode","Reference","Amount","Finance Status","Action"/);
   assert.match(source, /No collections recorded/);
   assert.match(source, /Record a payment against an invoice\./);
 });
 
+test("A payment shows the Finance review decision (Returned for Correction / Posted) written back by Finance, without Sales ever writing those fields itself", () => {
+  assert.match(source, /function financeStatusCell\(x\)/);
+  assert.match(source, /if\(!x\.financeStatus\)return"—"/);
+  assert.match(source, /financeStatusCell\(x\)/);
+});
+
 test("Record Payment button opens the form with the clicked invoice preselected", () => {
   assert.match(source, /function paymentModal\(invoiceId\)/);
-  assert.match(source, /const selected=inv\.find\(x=>x\.id===invoiceId\)\|\|inv\[0\]/);
+  assert.match(source, /selected=inv\.find\(x=>x\.id===invoiceId\)\|\|inv\[0\]/);
   assert.match(source, /data-record-payment.*\.forEach\(b=>b\.onclick=\(\)=>paymentModal\(b\.dataset\.recordPayment\)\)/);
 });
 
@@ -41,6 +47,7 @@ test("Payment amount is capped at the selected invoice's outstanding balance and
   assert.match(source, /amountInput\.max=current\.balanceDue;amountInput\.value=current\.balanceDue/);
 });
 
-test("Bank / account field is hidden for Cash and shown for other payment modes", () => {
-  assert.match(source, /bankField\.style\.display=modeSelect\.value==="Cash"\?"none":""/);
+test("Bank / account field requires an eligible destination account for every payment mode", () => {
+  assert.match(source, /name="bankAccountId" required/);
+  assert.match(source, /cash\?\["Cash Account","Petty Cash"\]\.includes\(x\.type\):true/);
 });

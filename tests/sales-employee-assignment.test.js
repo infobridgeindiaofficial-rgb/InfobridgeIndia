@@ -58,7 +58,7 @@ test("existing name-only leads remain readable and empty HR lists show guidance"
 
 test("Sales renders from its own persisted state before optional Inventory and HR integrations load",()=>{
   const source=readFileSync(new URL("../src/sales/app.js",import.meta.url),"utf8");
-  const stateReady=source.indexOf('await createWorkspaceStateStorage({recordKey:"infobridgeindia.sales.v1"})');
+  const stateReady=source.indexOf("await createWorkspaceStateStorage()");
   const firstRender=source.lastIndexOf("render();Promise.allSettled");
   const inventoryLoad=source.indexOf('inventoryCloud=await createWorkspaceStore("inventory")');
   const hrLoad=source.indexOf('hrCloud=await createWorkspaceStore("hr-payroll")');

@@ -207,6 +207,15 @@ cpSync(join(__dirname, "src/company"), join(DIST, "company"), { recursive: true 
 cpSync(join(__dirname, "src/security"), join(DIST, "security"), { recursive: true });
 mkdirSync(join(DIST, "vendor"), { recursive: true });
 cpSync(join(__dirname, "node_modules/@supabase/supabase-js/dist/umd/supabase.js"), join(DIST, "vendor/supabase.js"));
+// Keep PDF.js local/offline, but publish it with .js extensions. Some static hosts
+// (including older preview processes) serve unknown .mjs files as octet-stream,
+// which browsers reject for dynamic module imports. The files remain ES modules.
+cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.min.mjs"), join(DIST, "vendor/pdf.js"));
+cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"), join(DIST, "vendor/pdf.worker.min.js"));
+// Retain canonical aliases for direct diagnostics and hosts that correctly map .mjs.
+// Banking intentionally imports the .js aliases for broader static-server compatibility.
+cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.min.mjs"), join(DIST, "vendor/pdf.mjs"));
+cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"), join(DIST, "vendor/pdf.worker.min.mjs"));
 cpSync(join(__dirname, "src/inventory"), join(DIST, "inventory"), { recursive: true });
 cpSync(join(__dirname, "src/hr-payroll"), join(DIST, "hr-payroll"), { recursive: true });
 cpSync(join(__dirname, "src/gst"), join(DIST, "gst-workspace"), { recursive: true });

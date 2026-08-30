@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { initialState as salesInitialState, saveLead, saveQuotation, convertQuotationToOrder, convertOrderToInvoice, recordPayment, reversePayment, createReturn } from "../src/sales/core.js";
-import { initialState as financeInitialState, saveDraft, postJournal, ledger, trialBalance, dashboard, statements, fromMinor, ensureSalesReturnAccounts, uid } from "../src/finance/core.js";
+import { initialState as financeInitialState, saveDraft, postJournal, ledger, trialBalance, dashboard, statements, fromMinor, ensureSalesReturnAccounts, rejectSource, restoreSource, uid } from "../src/finance/core.js";
 import { createCountryDefaultChart } from "../src/finance/country-chart.js";
 import { discoverSources, proposalToDraft } from "../src/finance/adapters.js";
 
@@ -114,7 +114,7 @@ test("Credit note against an unpaid invoice maps to Dr Sales Returns + Output ta
   });
 }));
 
-test("Credit note against a fully-paid invoice with Refund Customer settlement does not touch AR and books a Customer Refunds Payable liability instead", () => withCompany("AE", () => {
+test("Credit note against a fully-paid invoice with Refund Customer settlement pays real cash from Bank, not a liability, and carries a cashLink for Confirm & Post", () => withCompany("AE", () => {
   let { state: sales, invoice } = uaeInvoiceScenario();
   let r = recordPayment(sales, { customerId: invoice.customerId, invoiceId: invoice.id, date: "2026-08-25", amount: invoice.grandTotal, mode: "Cash" });
   sales = r.state;
@@ -125,9 +125,14 @@ test("Credit note against a fully-paid invoice with Refund Customer settlement d
     const p = discoverSources(fin, CO, BR).find(x => x.entityType === "Credit Note");
     assert.ok(balanced(p));
     assert.equal(p.lines.some(l => accountName(fin, l.accountId) === "Accounts Receivable"), false, "must NOT create any AR line — invoice is fully settled");
-    const refundLine = p.lines.find(l => accountName(fin, l.accountId) === "Customer Refunds Payable");
-    assert.ok(refundLine, "must book a Customer Refunds Payable liability line");
-    assert.equal(refundLine.creditMinor, 157500);
+    assert.equal(p.lines.some(l => accountName(fin, l.accountId) === "Customer Refunds Payable"), false, "a real cash refund is money actually leaving the company, not a liability");
+    const bankLine = p.lines.find(l => accountName(fin, l.accountId) === "Bank");
+    assert.ok(bankLine, "must credit Bank — this is Banking Money Out once Finance confirms");
+    assert.equal(bankLine.creditMinor, 157500);
+    assert.equal(p.cashLink?.direction, "Out");
+    assert.equal(p.cashLink?.category, "Customer Refund");
+    assert.equal(p.cashLink?.amount, 1575);
+    assert.equal(p.cashLink?.sourceModule, "Sales");
   });
 }));
 
@@ -146,7 +151,7 @@ test("Credit note with Keep as Customer Credit settlement also books the liabili
   });
 }));
 
-test("Credit note against a partially paid invoice splits correctly between Accounts Receivable and the refund liability", () => withCompany("AE", () => {
+test("Credit note against a partially paid invoice splits correctly between Accounts Receivable and a real cash refund", () => withCompany("AE", () => {
   let { state: sales, invoice } = uaeInvoiceScenario();
   let r = recordPayment(sales, { customerId: invoice.customerId, invoiceId: invoice.id, date: "2026-08-25", amount: 7000, mode: "Cash" });
   sales = r.state;
@@ -157,7 +162,9 @@ test("Credit note against a partially paid invoice splits correctly between Acco
     const p = discoverSources(fin, CO, BR).find(x => x.entityType === "Credit Note");
     assert.ok(balanced(p));
     assert.equal(p.lines.find(l => accountName(fin, l.accountId) === "Accounts Receivable").creditMinor, 87500, "applies only the remaining 875.00 outstanding");
-    assert.equal(p.lines.find(l => accountName(fin, l.accountId) === "Customer Refunds Payable").creditMinor, 70000, "excess 700.00 goes to the refund liability, not AR");
+    assert.equal(p.lines.find(l => accountName(fin, l.accountId) === "Bank").creditMinor, 70000, "excess 700.00 already paid by the customer is a real cash refund out of Bank, not AR or a liability");
+    assert.equal(p.cashLink?.direction, "Out");
+    assert.equal(p.cashLink?.amount, 700);
   });
 }));
 
@@ -199,13 +206,13 @@ test("Full end-to-end posting: balanced entries, no negative AR, correct GL/Tria
     const arBalance = ledger(fin, { companyId: CO, accountId: ar.id }).at(-1)?.balanceMinor || 0;
     assert.equal(arBalance, 0);
     assert.ok(arBalance >= 0, "Accounts Receivable must never go negative");
-    const refund = fin.accounts.find(a => a.name === "Customer Refunds Payable");
-    assert.equal(fromMinor(ledger(fin, { companyId: CO, accountId: refund.id }).at(-1)?.balanceMinor || 0), 1575);
+    const bank = fin.accounts.find(a => a.name === "Bank");
+    assert.equal(fromMinor(ledger(fin, { companyId: CO, accountId: bank.id }).at(-1)?.balanceMinor || 0), -1575, "the cash refund paid out of Bank reduces its balance — this is Banking Money Out once Finance confirms");
     const tb = trialBalance(fin, { companyId: CO });
     assert.equal(tb.balanced, true);
     const dash = dashboard(fin, CO);
     assert.equal(fromMinor(dash.ar), 0);
-    assert.equal(fromMinor(dash.cash), 7875);
+    assert.equal(fromMinor(dash.cash), 6300, "Cash receipt of 7875 net of the 1575 cash refund paid out of Bank");
     assert.equal(fromMinor(dash.income), 6000, "Finance income correctly nets Sales Returns against Sales Revenue, excluding VAT");
     assert.equal(dash.journals, 3);
     const st = statements(fin, { companyId: CO });
@@ -274,18 +281,41 @@ test("A manual Journal Voucher (no source) still saves and posts normally alongs
 
 const app = readFileSync(new URL("../src/finance/app.js", import.meta.url), "utf8");
 
-test("Vouchers page renders a Source Transactions to Review section using the same discoverSources call as the Dashboard", () => {
+test("Vouchers page renders a Source Transactions to Review section using the same discoverSources call as the Dashboard, filterable by module and excluding items returned for correction", () => {
   assert.match(app, /Source Transactions to Review/);
-  assert.match(app, /toReview=vouchers\?discoverSources\(state,companyId\(\),branchId\(\)\):\[\]/);
+  assert.match(app, /discovered=vouchers\?discoverSources\(state,companyId\(\),branchId\(\)\):\[\]/);
   assert.match(app, /unposted=discoverSources\(state,companyId\(\),branchId\(\)\)/);
   assert.match(app, /data-review-source="\$\{esc\(x\.key\)\}"/);
+  assert.match(app, /rejected=state\.rejectedSources\|\|\[\]/);
+  assert.match(app, /id="review-module-filter"/);
+  assert.match(app, /data-restore-source="\$\{esc\(x\.key\)\}"/);
 });
 
-test("Review opens a proposed voucher with source details and posts via the existing saveDraft + postJournal pipeline", () => {
+test("Review opens a proposed voucher with source details and posts via the existing saveDraft + postJournal pipeline, syncing a linked Banking transaction when real money moved", () => {
   assert.match(app, /function sourceReviewModal\(key\)/);
-  assert.match(app, /const draft=saveDraft\(state,proposalToDraft\(p\)\),posted=postJournal\(draft\.state,draft\.record\.id\);persist\(posted\.state\)/);
+  assert.match(app, /const draft=saveDraft\(state,proposalToDraft\(p\)\),posted=postJournalAndSync\(draft\.state,draft\.record\.id,\{accountId:v\.bankAccountId\}\);persist\(posted\.state\)/);
   assert.match(app, /data-action="journal">New voucher/);
 });
+
+test("Review modal offers Reject / Return for correction, which records a reason without posting anything", () => {
+  assert.match(app, /data-reject-review>Reject \/ Return for correction/);
+  assert.match(app, /const next=rejectSource\(state,key,reason\)/);
+});
+
+test("rejectSource hides a source from review without posting it, and restoreSource brings it back", () => withCompany("AE", () => {
+  const { state: sales, invoice } = uaeInvoiceScenario();
+  withSalesState(sales, () => {
+    const fin = financeChart("AE");
+    const p = discoverSources(fin, CO, BR).find(x => x.entityType === "Invoice");
+    let r = rejectSource(fin, p.key, "Amount does not match the signed quotation");
+    assert.equal(discoverSources(r.state, CO, BR).some(x => x.key === p.key), true, "rejectSource only records a reason -- discoverSources itself stays a pure, unfiltered read");
+    assert.equal(r.state.rejectedSources.length, 1);
+    assert.equal(r.state.rejectedSources[0].reason, "Amount does not match the signed quotation");
+    assert.throws(() => rejectSource(fin, p.key, ""), /reason is required/);
+    r = restoreSource(r.state, p.key);
+    assert.equal(r.state.rejectedSources.length, 0);
+  });
+}));
 
 test("Finance render() self-heals missing Sales Returns / Customer Refund accounts on legacy charts", () => {
   assert.match(app, /ensureSalesReturnAccounts\(state,companyId\(\)\)/);

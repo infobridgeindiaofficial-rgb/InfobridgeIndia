@@ -2,7 +2,7 @@ import { calculateCountryTax, formatCountryMoney, resolveCountryConfig } from ".
 import { employeeFullName } from "./employees.js";
 export const STAGES=["New Lead","Contacted","Qualified","Quotation Sent","Negotiation","Won","Lost"];
 export const ACTIVITY_TYPES=["Call","WhatsApp","Email","Meeting","Task","Note"];
-export const today=()=>new Date().toISOString().slice(0,10);
+export const today=(date=new Date())=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 export const uid=(prefix)=>`${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
 export const num=v=>Number.isFinite(Number(v))?Number(v):0;
 export const round=v=>Math.round((num(v)+Number.EPSILON)*100)/100;

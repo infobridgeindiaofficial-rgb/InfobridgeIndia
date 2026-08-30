@@ -4,9 +4,9 @@ import {readFileSync} from "node:fs";
 
 const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),"utf8");
 
-test("Sales startup scopes persistence hydration to the Sales state record",()=>{
+test("Sales startup hydrates the shared company state needed for atomic Sales and Banking coordination",()=>{
   const app=read("src/sales/app.js"),workspace=read("src/supabase/workspace.js");
-  assert.match(app,/createWorkspaceStateStorage\(\{recordKey:"infobridgeindia\.sales\.v1"\}\)/);
+  assert.match(app,/createWorkspaceStateStorage\(\),bankingRepository=createBankingRepository\(localStorage\)/);
   assert.match(workspace,/if \(recordKey\) query = query\.eq\("record_id", recordKey\)/);
 });
 
