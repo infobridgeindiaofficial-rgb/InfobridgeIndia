@@ -176,7 +176,7 @@ function structuredData(route, seo) {
   return {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Organization", "@id": `${DOMAIN}/#organization`, name: "InfoBridgeIndia", url: `${DOMAIN}/`, logo: `${DOMAIN}/infobridgeindia-logo.png` },
+      { "@type": "Organization", "@id": `${DOMAIN}/#organization`, name: "InfoBridgeIndia", url: `${DOMAIN}/`, logo: `${DOMAIN}/logo/infobridgeindia-brand-logo.png` },
       { ...application, "@id": `${DOMAIN}/#software`, publisher: { "@id": `${DOMAIN}/#organization` } },
     ],
   };

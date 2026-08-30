@@ -23,6 +23,17 @@ function renderGoogleAnalyticsTag(route) {
   </script>`;
 }
 
+function renderBrandIconTags(route) {
+  if (!route || ANALYTICS_EXCLUDED_ROUTES.has(route)) {
+    return '<link rel="icon" type="image/png" href="/infobridgeindia-logo.png" />';
+  }
+  return `<link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/logo/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/logo/favicon-48x48.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />`;
+}
+
 export function renderHead({ title, description, exactTitle = false, route = "" }) {
   const seo = seoForRoute(route);
   const effectiveTitle = seo?.title || title;
@@ -36,7 +47,7 @@ export function renderHead({ title, description, exactTitle = false, route = "" 
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />
-  <link rel="icon" type="image/png" href="/infobridgeindia-logo.png" />
+  ${renderBrandIconTags(route)}
   <script src="/vendor/supabase.js"></script>
   <script src="/supabase-config.js"></script>
   <script type="module" src="/scripts/auth-gate.js"></script>`;
