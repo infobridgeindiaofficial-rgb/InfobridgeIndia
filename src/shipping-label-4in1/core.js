@@ -511,23 +511,47 @@ export function sourcePageGeometry(objects, pageDict) {
 
 export const A4_WIDTH = 595.28; // 210mm in points
 export const A4_HEIGHT = 841.89; // 297mm in points
-export const PAGE_MARGIN = 20; // outer margin, points
-export const SLOT_GAP = 14; // gap between the four slots, points
-
-const COL_W = (A4_WIDTH - 2 * PAGE_MARGIN - SLOT_GAP) / 2;
-const ROW_H = (A4_HEIGHT - 2 * PAGE_MARGIN - SLOT_GAP) / 2;
-const TOP_Y = A4_HEIGHT - PAGE_MARGIN - ROW_H;
+// Fixed geometry measured from the supplied reference.pdf. These coordinates
+// are the source of truth for this tool; do not derive them from generic page
+// margins or quarter-page padding.
+export const REFERENCE_SCALE = 0.4169;
+export const REFERENCE_SOURCE_WIDTH = 595;
+export const REFERENCE_SOURCE_HEIGHT = 842;
+export const SLOT_WIDTH = 248.03;
+export const SLOT_HEIGHT = 351;
+export const BORDER_WIDTH = 0.85;
+export const PAGE_MARGIN = 42.5197; // retained export for existing consumers
+export const SLOT_GAP = 14.1747; // retained export for existing consumers
+export const SLOT_POSITIONS = [
+  { x: 42.5197, y: 438.2029 },
+  { x: 304.7244, y: 438.2029 },
+  { x: 42.5197, y: 52.6911 },
+  { x: 304.7244, y: 52.6911 },
+];
 
 // Slot order is fixed: 0=top-left, 1=top-right, 2=bottom-left, 3=bottom-right.
 export function slotBox(index) {
-  const col = index % 2;
-  const row = Math.floor(index / 2);
+  const position = SLOT_POSITIONS[index];
+  if (!position) throw new RangeError("Shipping-label slot index must be between 0 and 3.");
   return {
-    x: PAGE_MARGIN + col * (COL_W + SLOT_GAP),
-    y: row === 0 ? TOP_Y : PAGE_MARGIN,
-    w: COL_W,
-    h: ROW_H,
+    x: position.x,
+    y: position.y,
+    w: SLOT_WIDTH,
+    h: SLOT_HEIGHT,
   };
+}
+
+function referencePlacement(effW, effH, box) {
+  if (Math.abs(effW - REFERENCE_SOURCE_WIDTH) < 0.01 && Math.abs(effH - REFERENCE_SOURCE_HEIGHT) < 0.01) {
+    return {
+      scale: REFERENCE_SCALE,
+      placedW: effW * REFERENCE_SCALE,
+      placedH: effH * REFERENCE_SCALE,
+      offX: box.x,
+      offY: box.y,
+    };
+  }
+  return computePlacement(effW, effH, box);
 }
 
 // Proportionally fits a effW x effH box into a slot, preserving aspect ratio
@@ -742,12 +766,13 @@ export async function buildFourInOnePdf(files, { onProgress } = {}) {
       const slip = group[slot];
       const { formNum, effW, effH } = await embedSlipAsForm(builder, slip.sourceCtx, slip.pageDict);
       const box = slotBox(slot);
-      const { scale, offX, offY } = computePlacement(effW, effH, box);
+      const { scale, offX, offY } = referencePlacement(effW, effH, box);
       const name = `S${slot}`;
       xobjectDict["/" + name] = { ref: formNum, gen: 0 };
-      // Clip only to the destination slot. The embedded Form's BBox remains
-      // the complete source MediaBox, including every blank/white area.
-      contentLines.push(`q ${formatNumber(box.x)} ${formatNumber(box.y)} ${formatNumber(box.w)} ${formatNumber(box.h)} re W n\nq ${formatNumber(scale)} 0 0 ${formatNumber(scale)} ${formatNumber(offX)} ${formatNumber(offY)} cm /${name} Do Q\nQ`);
+      // Contain scaling guarantees the complete source MediaBox fits inside
+      // its quarter, so no clipping path is needed (or allowed) here.
+      contentLines.push(`q ${formatNumber(scale)} 0 0 ${formatNumber(scale)} ${formatNumber(offX)} ${formatNumber(offY)} cm /${name} Do Q`);
+      contentLines.push(`q ${formatNumber(BORDER_WIDTH)} w 0 G ${formatNumber(box.x)} ${formatNumber(box.y)} ${formatNumber(box.w)} ${formatNumber(box.h)} re S Q`);
     }
 
     const contentBytes = new TextEncoder().encode(contentLines.join("\n") + "\n");

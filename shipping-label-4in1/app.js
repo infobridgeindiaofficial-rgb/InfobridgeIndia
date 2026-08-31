@@ -15,6 +15,10 @@ const states = {
 
 let items = []; // { id, file, name, size, pageCount, error }
 let resultBlobUrl = null;
+let previewBlobUrl = null;
+let previewPage = 1;
+let previewPageCount = 0;
+let previewRevision = 0;
 
 function showState(name) {
   for (const [key, el] of Object.entries(states)) el.style.display = key === name ? "" : "none";
@@ -36,6 +40,64 @@ function revokeResultUrl() {
   if (resultBlobUrl) {
     URL.revokeObjectURL(resultBlobUrl);
     resultBlobUrl = null;
+  }
+}
+
+function revokePreviewUrl() {
+  if (previewBlobUrl) {
+    URL.revokeObjectURL(previewBlobUrl);
+    previewBlobUrl = null;
+  }
+}
+
+function showPreviewPage() {
+  const frame = $("sl4-preview-frame");
+  if (!previewBlobUrl || !previewPageCount) return;
+  previewPage = Math.min(Math.max(previewPage, 1), previewPageCount);
+  frame.src = `${previewBlobUrl}#page=${previewPage}&toolbar=0&navpanes=0&scrollbar=0&view=Fit`;
+  frame.hidden = false;
+  $("sl4-preview-status").hidden = true;
+  $("sl4-preview-page").textContent = `Page ${previewPage} of ${previewPageCount}`;
+  $("sl4-preview-prev").disabled = previewPage === 1;
+  $("sl4-preview-next").disabled = previewPage === previewPageCount;
+  $("sl4-preview-pagination").hidden = previewPageCount <= 1;
+}
+
+async function updatePreview() {
+  const revision = ++previewRevision;
+  const validItems = items.filter((item) => !item.error && item.pageCount != null && item.bytes);
+  const reading = items.some((item) => !item.error && item.pageCount == null);
+  const preview = $("sl4-live-preview");
+  const frame = $("sl4-preview-frame");
+  const status = $("sl4-preview-status");
+
+  if (!validItems.length && !reading) {
+    preview.hidden = true;
+    frame.hidden = true;
+    frame.removeAttribute("src");
+    revokePreviewUrl();
+    return;
+  }
+
+  preview.hidden = false;
+  frame.hidden = true;
+  status.hidden = false;
+  status.textContent = reading ? "Reading your shipping labels…" : "Preparing A4 preview…";
+  $("sl4-preview-pagination").hidden = true;
+  if (reading) return;
+
+  try {
+    const result = await buildFourInOnePdf(validItems.map((item) => ({ name: item.name, bytes: item.bytes })));
+    if (revision !== previewRevision) return;
+    revokePreviewUrl();
+    previewBlobUrl = URL.createObjectURL(new Blob([result.bytes], { type: PDF_MIME }));
+    previewPageCount = result.pageCount;
+    previewPage = Math.min(previewPage, previewPageCount) || 1;
+    $("sl4-preview-count").textContent = `${result.slipCount} ${result.slipCount === 1 ? "label" : "labels"}`;
+    showPreviewPage();
+  } catch (err) {
+    if (revision !== previewRevision) return;
+    status.textContent = err && err.message ? err.message : "Preview unavailable.";
   }
 }
 
@@ -73,6 +135,7 @@ function escapeHtml(s) {
 function render() {
   if (!items.length) {
     showState("idle");
+    updatePreview();
     return;
   }
   showState("files");
@@ -90,6 +153,7 @@ function render() {
   const genBtn = $("sl4-generate-btn");
   genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0;
   genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : "Create 4-in-1 PDF";
+  updatePreview();
 }
 
 function removeItem(id) {
@@ -105,7 +169,7 @@ async function addFiles(fileList) {
   const incoming = Array.from(fileList || []);
   for (const file of incoming) {
     if (!isPdfFile(file)) continue; // silently skip non-PDF drops; dropzone label already scopes accept to PDFs
-    const item = { id: newId(), file, name: file.name, size: file.size, pageCount: null, error: null };
+    const item = { id: newId(), file, name: file.name, size: file.size, pageCount: null, error: null, bytes: null };
     items.push(item);
     render();
 
@@ -114,6 +178,7 @@ async function addFiles(fileList) {
         throw new Error(`Over the ${formatSize(MAX_FILE_SIZE)} limit.`);
       }
       const buffer = await file.arrayBuffer();
+      item.bytes = new Uint8Array(buffer);
       item.pageCount = await getPageCount(buffer);
     } catch (err) {
       item.error = err && err.message ? err.message : "Could not read this PDF.";
@@ -125,6 +190,7 @@ async function addFiles(fileList) {
 function resetAll() {
   items = [];
   revokeResultUrl();
+  revokePreviewUrl();
   $("sl4-file-input").value = "";
   render();
 }
@@ -139,8 +205,7 @@ async function generate() {
   try {
     const files = [];
     for (const item of items) {
-      const buffer = await item.file.arrayBuffer();
-      files.push({ name: item.name, bytes: new Uint8Array(buffer) });
+      files.push({ name: item.name, bytes: item.bytes });
     }
 
     const result = await buildFourInOnePdf(files, {
@@ -201,6 +266,8 @@ function wire() {
   $("sl4-clear-btn").addEventListener("click", resetAll);
   $("sl4-error-retry-btn").addEventListener("click", () => showState(items.length ? "files" : "idle"));
   $("sl4-start-over-btn").addEventListener("click", resetAll);
+  $("sl4-preview-prev").addEventListener("click", () => { previewPage -= 1; showPreviewPage(); });
+  $("sl4-preview-next").addEventListener("click", () => { previewPage += 1; showPreviewPage(); });
 
   $("sl4-download-btn").addEventListener("click", () => {
     if (!resultBlobUrl) return;
