@@ -118,6 +118,11 @@ export const SEO_PAGES = Object.freeze({
     "Arrange up to four marketplace shipping labels on each A4 page for efficient printing, processed entirely in your browser.",
     "webapp"
   ),
+  "/company-letterhead-generator.html": page(
+    "Company Letterhead Generator | InfoBridgeIndia",
+    "Create a professional company letterhead, write a business letter, preview it on A4 and download a print-ready PDF.",
+    "webapp"
+  ),
   "/jpg-to-pdf.html": page(
     "JPG to PDF Converter | InfoBridgeIndia",
     "Convert JPG, JPEG and PNG images into one PDF in your browser, with page size, orientation and image-fit controls.",

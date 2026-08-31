@@ -35,6 +35,7 @@ import { gstLateFeeCalculatorPageHtml } from "./src/pages/marketing/gst-late-fee
 import { marketplaceProfitCalculatorPageHtml } from "./src/pages/marketing/marketplace-profit-calculator.js";
 import { gstInvoiceGeneratorPageHtml } from "./src/pages/marketing/gst-invoice-generator.js";
 import { shippingLabel4in1PageHtml } from "./src/pages/marketing/shipping-label-4in1.js";
+import { companyLetterheadGeneratorPageHtml } from "./src/pages/marketing/company-letterhead-generator.js";
 import { quotationGeneratorPageHtml } from "./src/pages/marketing/quotation-generator.js";
 import { wordToPdfPageHtml } from "./src/pages/marketing/word-to-pdf.js";
 import { jpgToPdfPageHtml } from "./src/pages/marketing/jpg-to-pdf.js";
@@ -147,6 +148,8 @@ writeRoute("/gst-invoice-generator.html", gstInvoiceGeneratorPageHtml());
 count++;
 writeRoute("/shipping-label-4in1.html", shippingLabel4in1PageHtml());
 count++;
+writeRoute("/company-letterhead-generator.html", companyLetterheadGeneratorPageHtml());
+count++;
 writeRoute("/quotation-generator.html", quotationGeneratorPageHtml());
 count++;
 writeRoute("/word-to-pdf.html", wordToPdfPageHtml());
@@ -229,6 +232,7 @@ cpSync(join(__dirname, "src/gst-late-fee-calculator"), join(DIST, "gst-late-fee-
 cpSync(join(__dirname, "src/marketplace-profit-calculator"), join(DIST, "marketplace-profit-calculator"), { recursive: true });
 cpSync(join(__dirname, "src/gst-invoice-generator"), join(DIST, "gst-invoice-generator"), { recursive: true });
 cpSync(join(__dirname, "src/shipping-label-4in1"), join(DIST, "shipping-label-4in1"), { recursive: true });
+cpSync(join(__dirname, "src/company-letterhead-generator"), join(DIST, "company-letterhead-generator"), { recursive: true });
 cpSync(join(__dirname, "src/quotation-generator"), join(DIST, "quotation-generator"), { recursive: true });
 cpSync(join(__dirname, "src/word-to-pdf"), join(DIST, "word-to-pdf"), { recursive: true });
 cpSync(join(__dirname, "src/jpg-to-pdf"), join(DIST, "jpg-to-pdf"), { recursive: true });

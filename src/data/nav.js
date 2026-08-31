@@ -75,6 +75,7 @@ export const mainNav = [
           items: [
             { icon: "file", title: "GST Invoice Generator", desc: "Create GST-compliant invoices in minutes", href: "/gst-invoice-generator.html" },
             { icon: "briefcase", title: "Quotation Generator", desc: "Create professional quotations for customers", href: "/quotation-generator.html" },
+            { icon: "file", title: "Company Letterhead Generator", desc: "Create professional letterheads and business letters", href: "/company-letterhead-generator.html" },
           ],
         },
       ],
