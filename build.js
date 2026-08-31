@@ -11,17 +11,10 @@ import { homePage } from "./src/pages/marketing/home.js";
 import {
   salesCrmPage,
   purchasesPage,
-  bankingPage,
   projectsOpsPage,
-  documentsPage,
-  approvalsPage,
   reportsPage,
-  importExportPage,
-  administrationPage,
 } from "./src/pages/marketing/products.js";
-import { financeAccountingPage, financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
-import { gstOverviewPage, gstr1Page, gstr3bPage } from "./src/pages/marketing/gst.js";
-import { hrOverviewPage, payrollPage } from "./src/pages/marketing/hr.js";
+import { financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
 import { pricingPage } from "./src/pages/marketing/pricing.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
@@ -88,22 +81,11 @@ function withWorkspaceChrome(html) {
 // ---- Marketing pages (need layout wrapper) ----
 const marketingPages = [
   homePage(),
-  financeAccountingPage(),
   ...financeAccountingDetailPages(),
   salesCrmPage(),
   purchasesPage(),
-  bankingPage(),
   projectsOpsPage(),
-  documentsPage(),
-  approvalsPage(),
   reportsPage(),
-  importExportPage(),
-  administrationPage(),
-  gstOverviewPage(),
-  gstr1Page(),
-  gstr3bPage(),
-  hrOverviewPage(),
-  payrollPage(),
   pricingPage(),
   resourcesPage(),
   securityPage(),

@@ -4,46 +4,6 @@ import { breadcrumbs } from "../../components/layout.js";
 
 const crumbBase = [{ label: "Home", href: "/index.html" }, { label: "Products", href: "/index.html" }];
 
-export function financeAccountingPage() {
-  return servicePage({
-    route: "/products/finance-accounting.html",
-    navKey: "products",
-    icon: "ledger",
-    eyebrow: "Products / Finance & Accounting",
-    title: "Accounting built for real businesses, not a hobby ledger",
-    lead: "A complete double-entry accounting system â€” chart of accounts, general ledger, financial statements, cost centres and multi-company books â€” that GST, sales, purchases and payroll all post into automatically.",
-    crumb: [...crumbBase, { label: "Finance & Accounting", href: "#" }],
-    highlights: [
-      { label: "Core registers", value: "12+" },
-      { label: "Standard reports", value: "10" },
-      { label: "Financial years", value: "Unlimited" },
-      { label: "Companies per account", value: "Unlimited" },
-    ],
-    subservices: [
-      { icon: "ledger", title: "Chart of Accounts & General Ledger", desc: "A structured, extensible account hierarchy behind every report.", href: "/products/finance-accounting.html#coa" },
-      { icon: "file", title: "Journal Entries & Adjustments", desc: "Manual entries with full approval and audit trail.", href: "/products/finance-accounting.html#journals" },
-      { icon: "reports", title: "Trial Balance, P&L & Balance Sheet", desc: "Always current, drillable down to the source voucher.", href: "/products/finance-accounting.html#statements" },
-      { icon: "bank", title: "Cash Book & Bank Book", desc: "Every cash and bank movement, reconciled continuously.", href: "/products/finance-accounting.html#cashbank" },
-      { icon: "users", title: "Receivables & Payables", desc: "Customer and supplier ledgers with ageing built in.", href: "/products/finance-accounting.html#ledgers" },
-      { icon: "briefcase", title: "Fixed Assets & Depreciation", desc: "Asset register with automated depreciation schedules.", href: "/products/finance-accounting.html#assets" },
-      { icon: "branches", title: "Cost Centres, Departments & Branches", desc: "Slice every report by where the money actually moved.", href: "/products/finance-accounting.html#costcentres" },
-      { icon: "target", title: "Budgets", desc: "Plan by department or cost centre, track variance live.", href: "/products/finance-accounting.html#budgets" },
-      { icon: "calendar", title: "Financial Year & Closing", desc: "Structured year-end close with a locked, auditable trail.", href: "/products/finance-accounting.html#yearclose" },
-    ],
-    workflow: {
-      title: "From transaction to financial statement",
-      desc: "Every module below feeds accounting directly â€” nothing is re-entered.",
-      steps: [
-        { title: "Transaction occurs", desc: "Sale, purchase, payroll or bank entry" },
-        { title: "Journal posts", desc: "Auto-generated, always balanced" },
-        { title: "Ledgers update", desc: "Customer, supplier & GL accounts" },
-        { title: "Statements refresh", desc: "Trial balance, P&L, balance sheet" },
-        { title: "Year closes", desc: "Locked, carried forward, audited" },
-      ],
-    },
-  });
-}
-
 export function salesCrmPage() {
   return servicePage({
     route: "/products/sales-crm.html",
@@ -145,36 +105,6 @@ export function inventoryPage() {
   });
 }
 
-export function bankingPage() {
-  return servicePage({
-    route: "/products/banking.html",
-    navKey: "products",
-    icon: "bank",
-    eyebrow: "Products / Banking",
-    title: "Business Banking & Reconciliation Software",
-    lead: "Cash and bank accounts, receipts, payments and transfers â€” reconciled against statements automatically, with marketplace settlements and payroll payments flowing in from the modules that generate them.",
-    crumb: [...crumbBase, { label: "Banking", href: "#" }],
-    subservices: [
-      { icon: "wallet", title: "Cash & Bank Accounts", desc: "Every account your business operates, in one view.", href: "/products/banking.html#accounts" },
-      { icon: "creditCard", title: "Receipts & Payments", desc: "Customer receipts and supplier payments, categorised.", href: "/products/banking.html#transactions" },
-      { icon: "checkCircle", title: "Bank Reconciliation", desc: "Statement lines matched to book entries automatically.", href: "/products/banking.html#reconciliation" },
-      { icon: "ecommerce", title: "Marketplace Settlements", desc: "E-commerce payouts reconciled against orders and fees.", href: "/products/banking.html#settlements" },
-      { icon: "payroll", title: "Payroll & Statutory Payments", desc: "Salary and statutory dues paid and posted together.", href: "/products/banking.html#payroll" },
-    ],
-    workflow: null,
-    extraSections: `<section class="section">
-      <div class="container">
-        ${sectionHead({ eyebrow: "Always reconciled", title: "Unmatched transactions don't hide" })}
-        <div class="grid g-3">
-          ${featureCard({ icon: "checkCircle", title: "Auto-matching", desc: "Statement imports matched to book entries by amount, date and reference." })}
-          ${featureCard({ icon: "alertTriangle", title: "Exceptions surfaced", desc: "Unmatched lines flagged for review â€” never silently ignored." })}
-          ${featureCard({ icon: "reports", title: "Reconciliation reports", desc: "A clean audit trail for every bank account, every period." })}
-        </div>
-      </div>
-    </section>`,
-  });
-}
-
 export function projectsOpsPage() {
   return servicePage({
     route: "/products/projects-operations.html",
@@ -191,53 +121,6 @@ export function projectsOpsPage() {
       { icon: "file", title: "Internal Requests & Travel", desc: "Requests and claims routed through approvals.", href: "/products/projects-operations.html#requests" },
     ],
     workflow: null,
-  });
-}
-
-export function documentsPage() {
-  return servicePage({
-    route: "/products/documents.html",
-    navKey: "products",
-    icon: "documents",
-    eyebrow: "Products / Documents",
-    title: "Document Management Software for Indian Businesses",
-    lead: "Contracts, invoices, employee records and vendor documents â€” organised into folders with permissions, version history and expiry reminders.",
-    crumb: [...crumbBase, { label: "Documents", href: "#" }],
-    subservices: [
-      { icon: "folder", title: "Folders & Access Permissions", desc: "Organised the way your business actually works.", href: "/products/documents.html#folders" },
-      { icon: "calendar", title: "Expiry Reminders", desc: "Contracts, licences and agreements â€” tracked before they lapse.", href: "/products/documents.html#expiry" },
-      { icon: "file", title: "Version & Document History", desc: "Know what changed, when, and who changed it.", href: "/products/documents.html#history" },
-    ],
-    workflow: null,
-  });
-}
-
-export function approvalsPage() {
-  return servicePage({
-    route: "/products/approvals-workflows.html",
-    navKey: "products",
-    icon: "approvals",
-    eyebrow: "Products / Internal Requests",
-    title: "Approval & Workflow Management Software",
-    lead: "Stationery, IT equipment, maintenance, leave and expense requests â€” raised by any employee and routed straight to the responsible team, with Inventory and Purchases & Procurement handling fulfilment where it already lives.",
-    crumb: [...crumbBase, { label: "Internal Requests", href: "#" }],
-    subservices: [
-      { icon: "purchase", title: "Material & Office Requests", desc: "Stationery, supplies, uniform and equipment, routed to Purchase & Inventory.", href: "/products/approvals-workflows.html#material" },
-      { icon: "documents", title: "IT Requests", desc: "Laptops, accessories, software and access, routed to the IT team.", href: "/products/approvals-workflows.html#it" },
-      { icon: "hr", title: "Employee Requests", desc: "Leave, overtime, shift change and salary advance, routed to HR.", href: "/products/approvals-workflows.html#employee" },
-      { icon: "wallet", title: "Expense Reimbursement", desc: "Claims routed straight to Finance.", href: "/products/approvals-workflows.html#expense" },
-    ],
-    workflow: {
-      title: "One request, routed to the right team",
-      desc: null,
-      steps: [
-        { title: "Request raised", desc: "By any employee" },
-        { title: "Routed by category", desc: "To the responsible team" },
-        { title: "Stock checked", desc: "For material requests" },
-        { title: "Issued or procured", desc: "From stock, or via Purchases & Procurement" },
-        { title: "Completed", desc: "With a full audit trail" },
-      ],
-    },
   });
 }
 
@@ -262,56 +145,6 @@ export function reportsPage() {
   });
 }
 
-export function importExportPage() {
-  return servicePage({
-    route: "/products/import-export.html",
-    navKey: "solutions",
-    icon: "importexport",
-    eyebrow: "Products / Import & Export",
-    title: "Import & Export Software for Indian Businesses",
-    lead: "IEC details, overseas customers and suppliers, foreign currency invoicing, landed cost and shipment tracking â€” integrated with accounting, inventory, banking and tax rather than kept apart from them.",
-    crumb: [...crumbBase, { label: "Import & Export", href: "#" }],
-    subservices: [
-      { icon: "globe", title: "Overseas Customers & Suppliers", desc: "IEC, country and currency held against every party.", href: "/products/import-export.html#parties" },
-      { icon: "creditCard", title: "Foreign Currency & Exchange Rates", desc: "Forex gain/loss calculated automatically at settlement.", href: "/products/import-export.html#forex" },
-      { icon: "truck", title: "Shipping, Freight & Landed Cost", desc: "True cost per unit once freight and insurance are in.", href: "/products/import-export.html#landedcost" },
-      { icon: "file", title: "Export Invoices & LUT", desc: "Export GST workflow, including LUT-based supplies.", href: "/products/import-export.html#exportgst" },
-      { icon: "wallet", title: "International Receivables & Payables", desc: "Overseas ledgers alongside your domestic books.", href: "/products/import-export.html#ledgers" },
-    ],
-    workflow: {
-      title: "Shipment to settlement",
-      desc: null,
-      steps: [
-        { title: "Order confirmed", desc: "Overseas customer/supplier" },
-        { title: "Shipment", desc: "Freight, insurance, customs" },
-        { title: "Landed cost", desc: "Calculated per unit" },
-        { title: "Invoice", desc: "Foreign currency, GST-aware" },
-        { title: "Settlement", desc: "Forex gain/loss posted" },
-      ],
-    },
-  });
-}
-
-export function administrationPage() {
-  return servicePage({
-    route: "/products/administration.html",
-    navKey: "products",
-    icon: "admin",
-    eyebrow: "Products / Administration",
-    h1: "Business Administration Software",
-    title: "Companies, branches, roles and permissions â€” governed centrally",
-    lead: "One console to manage every company under an account, every branch and department, and exactly what each role is allowed to view, create, edit, delete, approve or export.",
-    crumb: [...crumbBase, { label: "Administration", href: "#" }],
-    subservices: [
-      { icon: "branches", title: "Companies & Branches", desc: "Each with its own GSTIN, books and bank accounts.", href: "/products/administration.html#companies" },
-      { icon: "users", title: "Roles & Permissions", desc: "Owner, CFO, accountant, HR, sales â€” or a role you build.", href: "/products/administration.html#roles" },
-      { icon: "shield", title: "Audit Trail", desc: "Every sensitive change, attributed and timestamped.", href: "/products/administration.html#audit" },
-      { icon: "hr", title: "Employee Self-Service Access", desc: "Give employees their own scoped workspace.", href: "/products/administration.html#selfservice" },
-    ],
-    workflow: null,
-  });
-}
-
 export function productsOverviewPage() {
   const groups = [
     {
@@ -327,7 +160,6 @@ export function productsOverviewPage() {
       title: "Compliance & trade",
       items: [
         { icon: "gst", title: "GST & Tax Compliance", desc: "Returns, reconciliation, e-invoicing.", href: "/app/gst/index.html" },
-        { icon: "importexport", title: "Import & Export", desc: "Foreign currency, landed cost, shipments.", href: "/products/import-export.html" },
         { icon: "approvals", title: "Approvals & Workflows", desc: "Configurable multi-level sign-off.", href: "/app/approvals.html" },
       ],
     },
@@ -342,7 +174,7 @@ export function productsOverviewPage() {
     {
       title: "Money & insight",
       items: [
-        { icon: "bank", title: "Banking", desc: "Cash, bank feeds, reconciliation.", href: "/products/banking.html" },
+        { icon: "bank", title: "Banking", desc: "Cash, bank feeds, reconciliation.", href: "/app/banking.html" },
         { icon: "reports", title: "Reports & Analytics", desc: "Financial, GST, inventory and HR reports.", href: "/products/reports-analytics.html" },
         { icon: "admin", title: "Administration", desc: "Companies, branches, roles, permissions.", href: "/app/admin.html" },
       ],

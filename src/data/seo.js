@@ -8,36 +8,6 @@ export const SEO_PAGES = Object.freeze({
     "All-in-one business management software for Indian businesses. Manage GST billing, accounting, CRM, inventory, sales, purchases, HR, payroll and projects with InfoBridgeIndia.",
     "homepage"
   ),
-  "/gst.html": page(
-    "GST Billing Software India | InfoBridgeIndia",
-    "GST billing and invoicing software for Indian businesses, with connected returns, reconciliation and compliance workflows in InfoBridgeIndia.",
-    "software"
-  ),
-  "/gst/gstr-1.html": page(
-    "GSTR-1 Filing Guide & Tools | InfoBridgeIndia",
-    "Prepare, review and validate GSTR-1 outward-supply data with tools for invoices, credit notes, HSN summaries and filing readiness.",
-    "software"
-  ),
-  "/gst/gstr-3b.html": page(
-    "GSTR-3B Filing Guide & Tools | InfoBridgeIndia",
-    "Review GSTR-3B tax liability, eligible input tax credit and set-off calculations using connected GST workflow tools.",
-    "software"
-  ),
-  "/products/finance-accounting.html": page(
-    "Accounting Software India | Finance & Accounting | InfoBridgeIndia",
-    "Business accounting software for Indian companies to manage books, receivables, payables, cash flow, assets, budgets and financial reports.",
-    "software"
-  ),
-  "/hr.html": page(
-    "HR Management Software India | InfoBridgeIndia",
-    "HR management software for Indian businesses to manage employees, attendance, leave, recruitment and connected payroll operations.",
-    "software"
-  ),
-  "/hr/payroll.html": page(
-    "Payroll Software India | InfoBridgeIndia",
-    "Payroll management software for Indian businesses covering salary calculations, attendance inputs, statutory deductions, approvals and payslips.",
-    "software"
-  ),
   "/products/projects-operations.html": page(
     "Project Management Software India | InfoBridgeIndia",
     "Manage business projects, milestones, tasks, timesheets, expenses and operational requests in one connected project workspace.",
@@ -53,34 +23,9 @@ export const SEO_PAGES = Object.freeze({
     "Manage purchase requests, approvals, vendor quotations, purchase orders, goods receipts, bills and supplier payments in one workflow.",
     "software"
   ),
-  "/products/documents.html": page(
-    "Document Management Software India | InfoBridgeIndia",
-    "Business document management software for organizing files, controlling access, tracking versions and monitoring document expiry dates.",
-    "software"
-  ),
   "/products/reports-analytics.html": page(
     "Business Reports & Analytics Software | InfoBridgeIndia",
     "Connected business reporting and analytics for finance, GST, inventory, sales, HR, branches and management decision-making.",
-    "software"
-  ),
-  "/products/import-export.html": page(
-    "Import Export Business Software India | InfoBridgeIndia",
-    "Manage overseas customers, suppliers, foreign-currency documents, landed costs and shipment tracking alongside core business operations.",
-    "software"
-  ),
-  "/products/approvals-workflows.html": page(
-    "Approval Workflow Software | InfoBridgeIndia",
-    "Route material, IT, employee and expense requests through clear business approval workflows with status and decision tracking.",
-    "software"
-  ),
-  "/products/administration.html": page(
-    "Business Administration Software | InfoBridgeIndia",
-    "Manage companies, branches, roles, permissions and governed employee access from a connected business administration workspace.",
-    "software"
-  ),
-  "/products/banking.html": page(
-    "Business Banking & Reconciliation Software | InfoBridgeIndia",
-    "Manage business bank accounts, cash movement, receipts, payments, statement imports and bank reconciliation with connected finance records.",
     "software"
   ),
   "/gst-calculator.html": page(

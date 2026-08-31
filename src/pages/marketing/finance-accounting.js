@@ -1,6 +1,5 @@
 import { icon } from "../../components/icons.js";
 import { breadcrumbs } from "../../components/layout.js";
-import { sectionHead, flow, ctaBand } from "../../components/ui.js";
 
 const crumbBase = [{ label: "Home", href: "/index.html" }, { label: "Products", href: "/index.html" }];
 
@@ -33,24 +32,10 @@ function renderSection(section) {
   </section>`;
 }
 
-export function financeAccountingPage() {
-  const body = `<section class="service-hero"><div class="container">
-    ${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "#" }])}
-    <div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Products / Finance & Accounting</span><h1 class="h-1">Accounting Software for Indian Businesses</h1><p class="text-lead">Manage your complete books, cash flow, receivables, payables, assets, budgets and financial reporting from one connected accounting system.</p></div></div>
-  </div></section>
-  <section class="section"><div class="container"><div class="finance-hub-intro">${sectionHead({ eyebrow: "Accounting structure", title: "Everything finance teams need, clearly organised", desc: "Start with daily books and move into reporting, closing, control and advanced group accounting when needed." })}</div><div class="finance-hub-list">
-    ${financeSections.slice(0, 2).map(renderSection).join("")}
-    <div class="finance-process">${sectionHead({ eyebrow: "Receivables process", title: "From invoice to a reconciled customer account", desc: null })}${flow([{ title: "Invoice", desc: "Amount becomes due" }, { title: "Receivable", desc: "Outstanding is tracked" }, { title: "Collection", desc: "Payment is recorded" }, { title: "Customer Ledger", desc: "Account stays current" }])}</div>
-    ${financeSections.slice(2).map(renderSection).join("")}
-  </div></div></section>
-  <section class="section"><div class="container">${ctaBand({ title: "Open your complete accounting workspace", desc: "Set up your books and activate only the finance tools your business needs.", primary: { href: "/signup.html", label: "Create account" }, secondary: { href: "/index.html", label: "Back to main page" } })}</div></section>`;
-  return { route: "/products/finance-accounting.html", title: "Finance & Accounting", description: "Manage books, cash flow, receivables, payables, assets, budgets and financial reporting in InfoBridgeIndia.", active: "products", body };
-}
-
 export function financeAccountingDetailPages() {
   return financeSections.flatMap((section) => section.tools.map((tool) => {
-    const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "/products/finance-accounting.html" }, { label: tool, href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Finance & Accounting / ${section.title}</span><h1 class="h-1">${tool}</h1><p class="text-lead">A dedicated ${tool.toLowerCase()} workspace within InfoBridgeIndia Finance & Accounting.</p></div><div class="service-icon-badge">${icon(section.icon)}</div></div></div></section>
-    <section class="section"><div class="container"><div class="finance-detail-shell"><span class="eyebrow">Workspace structure</span><h2 class="h-3">Built for the complete ${tool.toLowerCase()} process</h2><p class="text-lead">This route establishes the dedicated page in the finance architecture. Transaction processing and accounting-engine functionality will be connected here in a later implementation phase.</p><a class="btn btn-secondary" href="/products/finance-accounting.html#${section.id}">Back to ${section.title}</a></div></div></section>`;
+    const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "/index.html" }, { label: tool, href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Finance & Accounting / ${section.title}</span><h1 class="h-1">${tool}</h1><p class="text-lead">A dedicated ${tool.toLowerCase()} workspace within InfoBridgeIndia Finance & Accounting.</p></div><div class="service-icon-badge">${icon(section.icon)}</div></div></div></section>
+    <section class="section"><div class="container"><div class="finance-detail-shell"><span class="eyebrow">Workspace structure</span><h2 class="h-3">Built for the complete ${tool.toLowerCase()} process</h2><p class="text-lead">This route establishes the dedicated page in the finance architecture. Transaction processing and accounting-engine functionality will be connected here in a later implementation phase.</p><a class="btn btn-secondary" href="/index.html">Back to Finance & Accounting</a></div></div></section>`;
     return { route: toolHref(tool), title: tool, description: `${tool} in InfoBridgeIndia Finance & Accounting.`, active: "products", body };
   }));
 }

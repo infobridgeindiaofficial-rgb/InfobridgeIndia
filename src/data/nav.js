@@ -112,9 +112,6 @@ export const footerColumns = [
     title: "GST Workspace",
     links: [
       { title: "GST & Tax Compliance", href: "/app/gst/index.html" },
-      { title: "GSTR-1 Workspace", href: "/gst/gstr-1.html" },
-      { title: "GSTR-3B", href: "/gst/gstr-3b.html" },
-      { title: "Import & Export", href: "/products/import-export.html" },
     ],
   },
   {
