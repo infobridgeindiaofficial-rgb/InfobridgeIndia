@@ -282,8 +282,9 @@
   </section>
 
   <section class="section">
-    <div class="container" style="max-width:720px;">
-      <div class="card" id="sl4-card">
+    <div class="container sl4-tool-container">
+      <div class="card sl4-workspace" id="sl4-card">
+        <div class="sl4-controls">
 
         <div id="sl4-state-idle">
           <label class="sl4-dropzone" id="sl4-dropzone" for="sl4-file-input" tabindex="0">
@@ -345,6 +346,22 @@
           </div>
         </div>
 
+        </div>
+        <aside class="sl4-live-preview" id="sl4-live-preview" aria-labelledby="sl4-preview-title" hidden>
+          <div class="sl4-preview-header">
+            <div><span class="eyebrow">Live preview</span><h2 id="sl4-preview-title">A4 output</h2></div>
+            <span class="sl4-preview-count" id="sl4-preview-count"></span>
+          </div>
+          <div class="sl4-preview-stage">
+            <p class="sl4-preview-status" id="sl4-preview-status">Preparing preview&hellip;</p>
+            <iframe id="sl4-preview-frame" title="Preview of selected shipping labels arranged on an A4 page" hidden></iframe>
+          </div>
+          <div class="sl4-preview-pagination" id="sl4-preview-pagination" hidden>
+            <button type="button" class="btn btn-secondary btn-sm" id="sl4-preview-prev">Previous</button>
+            <span id="sl4-preview-page">Page 1 of 1</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="sl4-preview-next">Next</button>
+          </div>
+        </aside>
       </div>
 
       <div class="sl4-note">
