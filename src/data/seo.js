@@ -43,6 +43,11 @@ export const SEO_PAGES = Object.freeze({
     "Calculate inclusive or exclusive GST online and view taxable value, GST amount, CGST, SGST and IGST instantly.",
     "webapp"
   ),
+  "/hsn-sac-code-finder.html": page(
+    "HSN Code Finder by Product Name | InfoBridgeIndia",
+    "Search more than 22,600 Indian HSN and SAC classifications by product name, service description or code, then compare the closest detailed matches.",
+    "webapp"
+  ),
   "/gst-interest-calculator.html": page(
     "GST Interest Calculator India | InfoBridgeIndia",
     "Calculate interest on delayed GST tax payments using the tax amount, applicable rate and period of delay.",

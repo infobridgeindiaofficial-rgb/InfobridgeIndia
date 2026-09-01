@@ -26,6 +26,18 @@ export function resourcesPage() {
     </div>
   </section>
 
+  <section class="section" style="background:var(--surface-0); border-top:1px solid var(--border);" id="free-tools">
+    <div class="container">
+      ${sectionHead({ eyebrow: "Free business tools", title: "Find the right GST classification faster" })}
+      <div class="card" style="max-width:720px;">
+        <span class="eyebrow">22,615 classifications</span>
+        <h3 class="h-3" style="margin-top:8px;">HSN &amp; SAC Code Finder</h3>
+        <p class="text-small" style="margin-top:8px;">Search by product name, service description or code and compare the closest detailed matches from the HSN/SAC directory.</p>
+        <a href="/hsn-sac-code-finder.html" class="btn btn-accent btn-sm" style="margin-top:16px; display:inline-flex;">Search HSN/SAC codes ${icon("arrowRight", "").replace("<svg", '<svg width="14" height="14"')}</a>
+      </div>
+    </div>
+  </section>
+
   <section class="section" style="background:var(--surface-0); border-top:1px solid var(--border); border-bottom:1px solid var(--border);" id="calendar">
     <div class="container">
       ${sectionHead({ eyebrow: "Compliance calendar", title: "What's due soon" })}

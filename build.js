@@ -35,6 +35,7 @@ import { wordToPdfPageHtml } from "./src/pages/marketing/word-to-pdf.js";
 import { jpgToPdfPageHtml } from "./src/pages/marketing/jpg-to-pdf.js";
 import { mergePdfPageHtml } from "./src/pages/marketing/merge-pdf.js";
 import { splitPdfPageHtml } from "./src/pages/marketing/split-pdf.js";
+import { hsnSacFinderPageHtml } from "./src/pages/marketing/hsn-sac-finder.js";
 
 import {
   financePage,
@@ -145,6 +146,8 @@ writeRoute("/merge-pdf.html", mergePdfPageHtml());
 count++;
 writeRoute("/split-pdf.html", splitPdfPageHtml());
 count++;
+writeRoute("/hsn-sac-code-finder.html", hsnSacFinderPageHtml());
+count++;
 
 // ---- Authenticated app pages (already full HTML documents) ----
 const appPages = [
@@ -225,6 +228,7 @@ cpSync(join(__dirname, "node_modules/jspdf/dist/jspdf.umd.min.js"), join(DIST, "
 cpSync(join(__dirname, "src/merge-pdf"), join(DIST, "merge-pdf"), { recursive: true });
 cpSync(join(__dirname, "node_modules/pdf-lib/dist/pdf-lib.min.js"), join(DIST, "vendor/pdf-lib.min.js"));
 cpSync(join(__dirname, "src/split-pdf"), join(DIST, "split-pdf"), { recursive: true });
+cpSync(join(__dirname, "src/hsn-sac-finder"), join(DIST, "hsn-sac-finder"), { recursive: true });
 if (existsSync(join(__dirname, "public"))) {
   cpSync(join(__dirname, "public"), DIST, { recursive: true });
 }

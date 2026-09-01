@@ -37,6 +37,7 @@ test("sitemap includes real product pages and excludes private workspaces", () =
   const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
   assert.match(sitemap, /products\/finance-accounting\.html/);
   assert.match(sitemap, /products\/inventory-warehouse\.html/);
+  assert.match(sitemap, /hsn-sac-code-finder\.html/);
   assert.doesNotMatch(sitemap, /\/app\//);
   assert.doesNotMatch(sitemap, /finance-accounting\/chart-of-accounts/);
 });
