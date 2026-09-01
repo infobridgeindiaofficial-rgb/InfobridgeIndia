@@ -53,6 +53,7 @@ export const mainNav = [
         {
           title: "GST & Calculators",
           items: [
+            { icon: "search", title: "HSN & SAC Code Finder", desc: "Find codes and GST rates by product or service name", href: "/hsn-sac-code-finder.html" },
             { icon: "gst", title: "GST Calculator", desc: "Quick GST inclusive and exclusive amount workings", href: "/gst-calculator.html" },
             { icon: "clock", title: "GST Interest Calculator", desc: "Interest on delayed GST payments", href: "/gst-interest-calculator.html" },
             { icon: "alertCircle", title: "GST Late Fee Calculator", desc: "Late fees for delayed GST returns", href: "/gst-late-fee-calculator.html" },

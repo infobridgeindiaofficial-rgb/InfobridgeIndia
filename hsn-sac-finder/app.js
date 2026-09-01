@@ -15,6 +15,20 @@ const IRREGULAR_WORDS = Object.freeze({
   services: "service", goods: "good", bags: "bag", bottles: "bottle",
 });
 
+const SEARCH_CONCEPTS = Object.freeze({
+  food: ["food", "kitchen", "table", "household"],
+  container: ["container", "receptacle", "ware", "jar", "bottle", "box", "case", "vessel"],
+  storage: ["storage", "container", "receptacle", "box", "case"],
+  lunch: ["lunch", "food", "kitchen", "table"],
+  utensil: ["utensil", "kitchenware", "tableware", "household"],
+  cup: ["cup", "mug", "drinking", "glassware"],
+  plate: ["plate", "dish", "tableware"],
+  bag: ["bag", "sack", "pouch", "shopping"],
+  bottle: ["bottle", "flask", "container", "carboy"],
+  cleaning: ["cleaning", "washing", "scouring", "sanitary"],
+  website: ["website", "web", "software", "information technology"],
+});
+
 function normalizeWord(word) {
   if (IRREGULAR_WORDS[word]) return IRREGULAR_WORDS[word];
   if (word.length > 4 && word.endsWith("ies")) return `${word.slice(0, -3)}y`;
@@ -57,9 +71,11 @@ function scoreEntry(entry, normalizedQuery, tokens) {
 
   let matched = 0;
   for (const token of tokens) {
-    if (description.includes(token) || code.includes(token)) {
+    const concepts = SEARCH_CONCEPTS[token] || [token];
+    const matchedConcept = concepts.find((concept) => description.includes(concept));
+    if (matchedConcept || code.includes(token)) {
       matched += 1;
-      score += description.split(" ").includes(token) ? 30 : 15;
+      score += description.split(" ").includes(token) ? 30 : matchedConcept === token ? 20 : 12;
     }
   }
 

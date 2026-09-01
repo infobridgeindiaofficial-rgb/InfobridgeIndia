@@ -2,6 +2,36 @@
 (function () {
   "use strict";
 
+  // Add the HSN/SAC finder to older pre-rendered headers too. Future builds
+  // already receive it from nav.js; the href guard prevents duplicates.
+  if (!document.querySelector('.mega-link[href="/hsn-sac-code-finder.html"]')) {
+    var toolsNav = Array.from(document.querySelectorAll("[data-nav-item]")).find(function (item) {
+      var navLink = item.querySelector('.nav-link[href="/gst-calculator.html"]');
+      return Boolean(navLink);
+    });
+    var toolsColumn = toolsNav && toolsNav.querySelector(".mega-grid > div");
+    var firstTool = toolsColumn && toolsColumn.querySelector(".mega-link");
+    if (toolsColumn && firstTool) {
+      var finderLink = firstTool.cloneNode(true);
+      finderLink.href = "/hsn-sac-code-finder.html";
+      finderLink.querySelector(".mega-link-title").textContent = "HSN & SAC Code Finder";
+      finderLink.querySelector(".mega-link-desc").textContent = "Find codes and GST rates by product or service name";
+      firstTool.parentNode.insertBefore(finderLink, firstTool);
+    }
+  }
+
+  if (!document.querySelector('.mobile-nav a[href="/hsn-sac-code-finder.html"]')) {
+    Array.from(document.querySelectorAll(".mobile-group")).some(function (group) {
+      var title = group.querySelector(".mobile-group-title");
+      if (!title || title.textContent.trim() !== "Business Tools") return false;
+      var link = document.createElement("a");
+      link.href = "/hsn-sac-code-finder.html";
+      link.textContent = "HSN & SAC Code Finder";
+      title.insertAdjacentElement("afterend", link);
+      return true;
+    });
+  }
+
   // ---- Header mega menus ----
   var navItems = document.querySelectorAll("[data-nav-item].has-mega");
   navItems.forEach(function (item) {

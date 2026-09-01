@@ -11,6 +11,9 @@ test("HSN/SAC directory contains the uploaded official classifications", () => {
   assert.ok(data.filter((row) => row[0] === "HSN").length > 21900);
   assert.ok(data.filter((row) => row[0] === "SAC").length > 650);
   assert.ok(data.every((row) => row.length === 3 && row[1] && row[2]));
+  const glassContainer = data.find((row) => row[1] === "70134900");
+  assert.match(glassContainer[2], /GLASSWARE OF A KIND USED FOR TABLE, KITCHEN/);
+  assert.match(glassContainer[2], /OTHER GOODS UNDER THIS HEADING/);
 });
 
 test("HSN/SAC finder renders searchable controls and rate warning", () => {
