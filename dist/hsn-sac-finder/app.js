@@ -199,13 +199,6 @@ queryInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") searchDirectory();
 });
 
-document.querySelectorAll("[data-example]").forEach((button) => {
-  button.addEventListener("click", () => {
-    queryInput.value = button.dataset.example;
-    searchDirectory();
-  });
-});
-
 resultsElement.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-copy-code]");
   if (!button) return;

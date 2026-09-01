@@ -8,9 +8,6 @@
 .finder-controls { display: grid; grid-template-columns: minmax(0, 1fr) 210px auto; gap: var(--sp-4); align-items: end; }
 .finder-button { min-height: 46px; }
 .search-help { margin-top: var(--sp-2); color: var(--ink-500); font-size: var(--fs-13); }
-.popular-searches { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: var(--sp-4); color: var(--ink-600); font-size: var(--fs-13); }
-.popular-searches button { border: 1px solid var(--border); border-radius: 999px; background: #fff; color: var(--brand-700); padding: 6px 10px; font: inherit; cursor: pointer; }
-.popular-searches button:hover { border-color: var(--brand-400); background: var(--brand-50); }
 .finder-status { min-height: 28px; margin: var(--sp-5) 2px var(--sp-3); color: var(--ink-600); }
 .results-list { display: grid; gap: var(--sp-4); }
 .result-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: var(--shadow-sm); }

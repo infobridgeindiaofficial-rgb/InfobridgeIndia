@@ -19,7 +19,7 @@ export function hsnSacFinderPageHtml() {
         <div class="hsn-search-heading">
           <div>
             <h2 class="h-3" id="finder-title">Find the closest classification</h2>
-            <p>Try a specific description such as “stainless steel water bottle”, “wooden comb” or “website development”.</p>
+            <p>Enter the product or service name with its material and intended use for a more accurate classification.</p>
           </div>
           <span class="directory-count" id="directoryCount">Loading directory…</span>
         </div>
@@ -27,7 +27,7 @@ export function hsnSacFinderPageHtml() {
         <div class="finder-controls">
           <label class="field finder-query">
             <span>Product, service or code</span>
-            <input class="input" id="hsnQuery" type="search" autocomplete="off" placeholder="Example: glass water bottle" aria-describedby="searchHelp" />
+            <input class="input" id="hsnQuery" type="search" autocomplete="off" placeholder="Enter product, material, service or code" aria-describedby="searchHelp" />
           </label>
           <label class="field finder-type">
             <span>Classification</span>
@@ -40,13 +40,6 @@ export function hsnSacFinderPageHtml() {
           <button type="button" class="btn btn-accent finder-button" id="searchBtn">Search code</button>
         </div>
         <p class="search-help" id="searchHelp">Enter at least 2 characters. More product details give a more accurate match.</p>
-        <div class="popular-searches" aria-label="Popular searches">
-          <span>Try:</span>
-          <button type="button" data-example="water bottle">Water bottle</button>
-          <button type="button" data-example="wooden comb">Wooden comb</button>
-          <button type="button" data-example="shopping bag">Shopping bag</button>
-          <button type="button" data-example="construction service">Construction service</button>
-        </div>
       </section>
 
       <div class="finder-status" id="finderStatus" aria-live="polite"></div>
