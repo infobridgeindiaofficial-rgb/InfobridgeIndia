@@ -18,17 +18,17 @@ export const mainNav = [
         {
           title: "Run the business",
           items: [
-            { icon: "ledger", title: "Finance & Accounting", desc: "Ledgers, GST-ready books, financial statements", href: "/app/finance.html" },
-            { icon: "sales", title: "Sales & CRM", desc: "Leads to invoices to collections, one pipeline", href: "/app/sales.html" },
-            { icon: "purchase", title: "Purchases & Procurement", desc: "RFQs, approvals, purchase orders, bills", href: "/app/purchases.html" },
-            { icon: "inventory", title: "Inventory & Warehouse", desc: "Multi-warehouse stock, batches, valuation", href: "/inventory/index.html" },
+            { icon: "ledger", title: "Finance & Accounting", desc: "Ledgers, GST-ready books, financial statements", href: "/products/finance-accounting.html" },
+            { icon: "sales", title: "Sales & CRM", desc: "Leads to invoices to collections, one pipeline", href: "/products/sales-crm.html" },
+            { icon: "purchase", title: "Purchases & Procurement", desc: "RFQs, approvals, purchase orders, bills", href: "/products/purchases-procurement.html" },
+            { icon: "inventory", title: "Inventory & Warehouse", desc: "Multi-warehouse stock, batches, valuation", href: "/products/inventory-warehouse.html" },
           ],
         },
         {
           title: "People & operations",
           items: [
             { icon: "hr", title: "HR & Payroll", desc: "Attendance, statutory payroll, self-service", href: "/hr-payroll/index.html" },
-            { icon: "projects", title: "Projects & Operations", desc: "Timesheets, budgets, internal requests", href: "/app/projects.html" },
+            { icon: "projects", title: "Projects & Operations", desc: "Timesheets, budgets, internal requests", href: "/products/projects-operations.html" },
             { icon: "documents", title: "Documents", desc: "Contracts, records and expiry reminders", href: "/app/documents.html" },
             { icon: "approvals", title: "Internal Requests", desc: "Employee material, IT and service requests", href: "/app/approvals.html" },
           ],
@@ -37,7 +37,7 @@ export const mainNav = [
           title: "Money & insight",
           items: [
             { icon: "bank", title: "Banking", desc: "Cash, statement import and reconciliation", href: "/app/banking.html" },
-              { icon: "reports", title: "Reports & Analytics", desc: "Management, statutory and audit reports", href: "/app/reports.html" },
+              { icon: "reports", title: "Reports & Analytics", desc: "Management, statutory and audit reports", href: "/products/reports-analytics.html" },
             { icon: "admin", title: "Administration", desc: "Companies, branches, roles & permissions", href: "/app/admin.html" },
           ],
         },
@@ -93,10 +93,10 @@ export const footerColumns = [
   {
     title: "Products",
     links: [
-      { title: "Finance & Accounting", href: "/app/finance.html" },
-      { title: "Sales & CRM", href: "/app/sales.html" },
-      { title: "Purchases & Procurement", href: "/app/purchases.html" },
-      { title: "Inventory & Warehouse", href: "/inventory/index.html" },
+      { title: "Finance & Accounting", href: "/products/finance-accounting.html" },
+      { title: "Sales & CRM", href: "/products/sales-crm.html" },
+      { title: "Purchases & Procurement", href: "/products/purchases-procurement.html" },
+      { title: "Inventory & Warehouse", href: "/products/inventory-warehouse.html" },
       { title: "HR & Payroll", href: "/hr-payroll/index.html" },
       { title: "Banking", href: "/app/banking.html" },
     ],
@@ -104,7 +104,7 @@ export const footerColumns = [
   {
     title: "Business Tools",
     links: [
-      { title: "Reports & Analytics", href: "/app/reports.html" },
+      { title: "Reports & Analytics", href: "/products/reports-analytics.html" },
       { title: "Internal Requests", href: "/app/approvals.html" },
     ],
   },

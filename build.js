@@ -13,8 +13,9 @@ import {
   purchasesPage,
   projectsOpsPage,
   reportsPage,
+  inventoryPage,
 } from "./src/pages/marketing/products.js";
-import { financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
+import { financeAccountingPage, financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
 import { pricingPage } from "./src/pages/marketing/pricing.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
@@ -75,12 +76,14 @@ function writeRoute(route, html) {
 }
 
 function withWorkspaceChrome(html) {
-  return html.replace("</head>", '<link rel="stylesheet" href="/styles/workspace-sidebar.css"><script type="module" src="/scripts/workspace-sidebar.js"></script></head>');
+  return html.replace("</head>", '<meta name="robots" content="noindex, nofollow"><link rel="stylesheet" href="/styles/workspace-sidebar.css"><script type="module" src="/scripts/workspace-sidebar.js"></script></head>');
 }
 
 // ---- Marketing pages (need layout wrapper) ----
 const marketingPages = [
   homePage(),
+  financeAccountingPage(),
+  inventoryPage(),
   ...financeAccountingDetailPages(),
   salesCrmPage(),
   purchasesPage(),

@@ -3,6 +3,7 @@ Allow: /
 Disallow: /app/
 Disallow: /inventory/
 Disallow: /hr-payroll/
+Disallow: /products/finance-accounting/
 Disallow: /login.html
 Disallow: /signup.html
 Disallow: /reset-password.html
@@ -11,4 +12,3 @@ Disallow: /company-profile.html
 Disallow: /company-security.html
 
 Sitemap: https://infobridgeindia.online/sitemap.xml
-

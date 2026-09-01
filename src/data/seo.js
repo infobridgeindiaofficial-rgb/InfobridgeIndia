@@ -13,6 +13,16 @@ export const SEO_PAGES = Object.freeze({
     "Manage business projects, milestones, tasks, timesheets, expenses and operational requests in one connected project workspace.",
     "software"
   ),
+  "/products/finance-accounting.html": page(
+    "Accounting Software India | GST & Finance | InfoBridgeIndia",
+    "Accounting software for Indian businesses with GST-ready ledgers, receivables, payables, banking, expenses, fixed assets and financial reports.",
+    "software"
+  ),
+  "/products/inventory-warehouse.html": page(
+    "Inventory Management Software India | InfoBridgeIndia",
+    "Inventory management software for Indian businesses with multi-warehouse stock, HSN and GST rates, batches, serials, reorder alerts and valuation.",
+    "software"
+  ),
   "/products/sales-crm.html": page(
     "CRM & Sales Management Software India | InfoBridgeIndia",
     "CRM and sales management software for Indian businesses to manage leads, follow-ups, quotations, orders, invoices and collections.",
@@ -127,6 +137,7 @@ function structuredData(route, seo) {
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", "@id": `${DOMAIN}/#organization`, name: "InfoBridgeIndia", url: `${DOMAIN}/`, logo: `${DOMAIN}/logo/infobridgeindia-brand-logo.png` },
+      { "@type": "WebSite", "@id": `${DOMAIN}/#website`, name: "InfoBridgeIndia", url: `${DOMAIN}/`, publisher: { "@id": `${DOMAIN}/#organization` } },
       { ...application, "@id": `${DOMAIN}/#software`, publisher: { "@id": `${DOMAIN}/#organization` } },
     ],
   };
@@ -149,7 +160,11 @@ export function renderSeoTags(seo) {
   <meta property="og:description" content="${seo.description}" />
   <meta property="og:url" content="${seo.canonical}" />
   <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="InfoBridgeIndia" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:image" content="${DOMAIN}/logo/infobridgeindia-brand-logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${seo.title}" />
-  <meta name="twitter:description" content="${seo.description}" />${jsonLd}`;
+  <meta name="twitter:description" content="${seo.description}" />
+  <meta name="twitter:image" content="${DOMAIN}/logo/infobridgeindia-brand-logo.png" />${jsonLd}`;
 }

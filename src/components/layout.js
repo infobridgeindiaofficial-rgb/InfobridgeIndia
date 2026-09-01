@@ -9,6 +9,7 @@ const ANALYTICS_EXCLUDED_ROUTES = new Set([
   "/company-profile.html",
   "/company-security.html",
 ]);
+const NOINDEX_ROUTES = new Set(["/company-setup.html", "/company-profile.html", "/company-security.html"]);
 
 function renderGoogleAnalyticsTag(route) {
   if (!route || ANALYTICS_EXCLUDED_ROUTES.has(route)) return "";
@@ -41,9 +42,10 @@ export function renderHead({ title, description, exactTitle = false, route = "" 
   const descriptionMeta = effectiveDescription === null
     ? ""
     : `\n  <meta name="description" content="${effectiveDescription || BRAND.tagline}" />`;
+  const robotsMeta = NOINDEX_ROUTES.has(route) ? '\n  <meta name="robots" content="noindex, nofollow" />' : "";
   return `<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}
+  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${robotsMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />

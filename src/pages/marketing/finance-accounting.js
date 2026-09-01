@@ -32,10 +32,16 @@ function renderSection(section) {
   </section>`;
 }
 
+export function financeAccountingPage() {
+  const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Products / Finance & Accounting</span><h1 class="h-1">Accounting Software for Indian Businesses</h1><p class="text-lead">Run GST-ready books, customer and supplier accounts, cash and bank records, expenses, fixed assets and financial reporting from one connected finance system.</p></div><div class="service-icon-badge">${icon("ledger")}</div></div></div></section>
+  <section class="section"><div class="container"><div class="finance-hub">${financeSections.map(renderSection).join("")}</div></div></section>`;
+  return { route: "/products/finance-accounting.html", title: "Finance & Accounting", description: "Connected accounting, GST-ready books, receivables, payables, banking, expenses, assets and financial reporting for Indian businesses.", active: "products", body };
+}
+
 export function financeAccountingDetailPages() {
   return financeSections.flatMap((section) => section.tools.map((tool) => {
     const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "/index.html" }, { label: tool, href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Finance & Accounting / ${section.title}</span><h1 class="h-1">${tool}</h1><p class="text-lead">A dedicated ${tool.toLowerCase()} workspace within InfoBridgeIndia Finance & Accounting.</p></div><div class="service-icon-badge">${icon(section.icon)}</div></div></div></section>
     <section class="section"><div class="container"><div class="finance-detail-shell"><span class="eyebrow">Workspace structure</span><h2 class="h-3">Built for the complete ${tool.toLowerCase()} process</h2><p class="text-lead">This route establishes the dedicated page in the finance architecture. Transaction processing and accounting-engine functionality will be connected here in a later implementation phase.</p><a class="btn btn-secondary" href="/index.html">Back to Finance & Accounting</a></div></div></section>`;
-    return { route: toolHref(tool), title: tool, description: `${tool} in InfoBridgeIndia Finance & Accounting.`, active: "products", body };
+    return { route: toolHref(tool), title: tool, description: `${tool} in InfoBridgeIndia Finance & Accounting.`, active: "products", body, extraHead: '<meta name="robots" content="noindex, follow" />' };
   }));
 }
