@@ -24,6 +24,8 @@
 .code-block strong { display: block; margin-top: 3px; color: var(--ink-900); font-size: clamp(22px, 3vw, 30px); letter-spacing: .03em; }
 .result-main p { color: var(--ink-700); line-height: 1.6; }
 .result-footer { border-top: 1px solid var(--border); padding-top: var(--sp-3); color: var(--ink-600); font-size: var(--fs-13); }
+.result-footer > span { font-size: var(--fs-16); line-height: 1.5; }
+.result-footer > span strong { color: var(--ink-800); font-weight: 750; }
 .copy-code { border: 0; background: transparent; color: var(--brand-700); font: inherit; font-weight: 700; cursor: pointer; padding: 5px; }
 .finder-note { margin-top: var(--sp-8); background: var(--surface-50); }
 .finder-note p { margin-top: var(--sp-2); color: var(--ink-600); line-height: 1.65; }
