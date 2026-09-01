@@ -17,7 +17,14 @@ test("HSN/SAC finder renders searchable controls and rate warning", () => {
   const html = hsnSacFinderPageHtml();
   assert.match(html, /id="hsnQuery"/);
   assert.match(html, /22,600\+ Indian HSN and SAC entries/);
-  assert.match(html, /does not include GST rates/);
+  assert.match(html, /CBIC's published GST rate schedules/);
+});
+
+test("CBIC rate schedule contains knife heading and 18 percent IGST", () => {
+  const rates = JSON.parse(gunzipSync(readFileSync(new URL("../src/hsn-sac-finder/rates.json.gz", import.meta.url))).toString("utf8"));
+  const knife = rates.find((row) => row[0] === "HSN" && row[1] === "8211");
+  assert.ok(knife);
+  assert.equal(knife[5], "18%");
 });
 
 test("HSN/SAC finder has indexable SEO metadata", () => {
