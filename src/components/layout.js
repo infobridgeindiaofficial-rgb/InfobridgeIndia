@@ -51,6 +51,7 @@ export function renderHead({ title, description, exactTitle = false, route = "" 
   const robotsMeta = NOINDEX_ROUTES.has(route) ? '\n  <meta name="robots" content="noindex, nofollow" />' : "";
   return `<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-7245499530351078" />
   <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${robotsMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}${renderAdSenseTag(route)}
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
