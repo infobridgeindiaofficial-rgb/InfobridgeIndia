@@ -24,6 +24,12 @@ function renderGoogleAnalyticsTag(route) {
   </script>`;
 }
 
+function renderAdSenseTag(route) {
+  if (!route || ANALYTICS_EXCLUDED_ROUTES.has(route)) return "";
+  return `
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7245499530351078" crossorigin="anonymous"></script>`;
+}
+
 function renderBrandIconTags(route) {
   if (!route || ANALYTICS_EXCLUDED_ROUTES.has(route)) {
     return '<link rel="icon" type="image/png" href="/infobridgeindia-logo.png" />';
@@ -45,7 +51,7 @@ export function renderHead({ title, description, exactTitle = false, route = "" 
   const robotsMeta = NOINDEX_ROUTES.has(route) ? '\n  <meta name="robots" content="noindex, nofollow" />' : "";
   return `<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${robotsMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}
+  <title>${seo || exactTitle ? effectiveTitle : effectiveTitle ? `${effectiveTitle} — ${BRAND.name}` : BRAND.name}</title>${descriptionMeta}${robotsMeta}${renderSeoTags(seo)}${renderGoogleAnalyticsTag(route)}${renderAdSenseTag(route)}
   <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="/styles/base.css" />
   <link rel="stylesheet" href="/styles/components.css" />
