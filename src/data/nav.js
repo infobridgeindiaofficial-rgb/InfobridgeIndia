@@ -18,10 +18,10 @@ export const mainNav = [
         {
           title: "Run the business",
           items: [
-            { icon: "ledger", title: "Finance & Accounting", desc: "Ledgers, GST-ready books, financial statements", href: "/products/finance-accounting.html" },
-            { icon: "sales", title: "Sales & CRM", desc: "Leads to invoices to collections, one pipeline", href: "/products/sales-crm.html" },
-            { icon: "purchase", title: "Purchases & Procurement", desc: "RFQs, approvals, purchase orders, bills", href: "/products/purchases-procurement.html" },
-            { icon: "inventory", title: "Inventory & Warehouse", desc: "Multi-warehouse stock, batches, valuation", href: "/products/inventory-warehouse.html" },
+            { icon: "ledger", title: "Finance & Accounting", desc: "Ledgers, GST-ready books, financial statements", href: "/app/finance.html" },
+            { icon: "sales", title: "Sales & CRM", desc: "Leads to invoices to collections, one pipeline", href: "/app/sales.html" },
+            { icon: "purchase", title: "Purchases & Procurement", desc: "RFQs, approvals, purchase orders, bills", href: "/app/purchases.html" },
+            { icon: "inventory", title: "Inventory & Warehouse", desc: "Multi-warehouse stock, batches, valuation", href: "/inventory/index.html" },
           ],
         },
         {
@@ -53,7 +53,6 @@ export const mainNav = [
         {
           title: "GST & Calculators",
           items: [
-            { icon: "search", title: "HSN & SAC Code Finder", desc: "Find codes and GST rates by product or service name", href: "/hsn-sac-code-finder.html" },
             { icon: "gst", title: "GST Calculator", desc: "Quick GST inclusive and exclusive amount workings", href: "/gst-calculator.html" },
             { icon: "clock", title: "GST Interest Calculator", desc: "Interest on delayed GST payments", href: "/gst-interest-calculator.html" },
             { icon: "alertCircle", title: "GST Late Fee Calculator", desc: "Late fees for delayed GST returns", href: "/gst-late-fee-calculator.html" },
@@ -94,10 +93,10 @@ export const footerColumns = [
   {
     title: "Products",
     links: [
-      { title: "Finance & Accounting", href: "/products/finance-accounting.html" },
-      { title: "Sales & CRM", href: "/products/sales-crm.html" },
-      { title: "Purchases & Procurement", href: "/products/purchases-procurement.html" },
-      { title: "Inventory & Warehouse", href: "/products/inventory-warehouse.html" },
+      { title: "Finance & Accounting", href: "/app/finance.html" },
+      { title: "Sales & CRM", href: "/app/sales.html" },
+      { title: "Purchases & Procurement", href: "/app/purchases.html" },
+      { title: "Inventory & Warehouse", href: "/inventory/index.html" },
       { title: "HR & Payroll", href: "/hr-payroll/index.html" },
       { title: "Banking", href: "/app/banking.html" },
     ],

@@ -7,3 +7,6 @@ dist/
 .env
 .env.*
 *.log
+__pycache__/
+*.py[cod]
+/merge_shipping.py

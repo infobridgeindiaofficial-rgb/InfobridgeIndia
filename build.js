@@ -1,7 +1,7 @@
 // InfoBridgeIndia static site builder â€” zero external dependencies.
 // Reads component/page modules (plain JS render functions) and writes
 // finished static HTML + copies styles/scripts/public assets into dist/.
-import { mkdirSync, writeFileSync, cpSync, existsSync, rmSync } from "fs";
+import { mkdirSync, writeFileSync, cpSync, existsSync, rmSync, readdirSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -9,13 +9,10 @@ import { marketingPage } from "./src/components/layout.js";
 
 import { homePage } from "./src/pages/marketing/home.js";
 import {
-  salesCrmPage,
-  purchasesPage,
   projectsOpsPage,
   reportsPage,
-  inventoryPage,
 } from "./src/pages/marketing/products.js";
-import { financeAccountingPage, financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
+import { financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
 import { pricingPage } from "./src/pages/marketing/pricing.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
@@ -35,7 +32,6 @@ import { wordToPdfPageHtml } from "./src/pages/marketing/word-to-pdf.js";
 import { jpgToPdfPageHtml } from "./src/pages/marketing/jpg-to-pdf.js";
 import { mergePdfPageHtml } from "./src/pages/marketing/merge-pdf.js";
 import { splitPdfPageHtml } from "./src/pages/marketing/split-pdf.js";
-import { hsnSacFinderPageHtml } from "./src/pages/marketing/hsn-sac-finder.js";
 
 import {
   financePage,
@@ -67,7 +63,10 @@ import { financeWorkspacePage } from "./src/pages/app/finance-workspace.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = join(__dirname, "dist");
 
-if (existsSync(DIST)) rmSync(DIST, { recursive: true });
+// Clean every output while retaining the directory, which Windows previews can hold open.
+if (existsSync(DIST)) {
+  for (const entry of readdirSync(DIST)) rmSync(join(DIST, entry), { recursive: true, force: true });
+}
 mkdirSync(DIST, { recursive: true });
 
 function writeRoute(route, html) {
@@ -83,11 +82,7 @@ function withWorkspaceChrome(html) {
 // ---- Marketing pages (need layout wrapper) ----
 const marketingPages = [
   homePage(),
-  financeAccountingPage(),
-  inventoryPage(),
   ...financeAccountingDetailPages(),
-  salesCrmPage(),
-  purchasesPage(),
   projectsOpsPage(),
   reportsPage(),
   pricingPage(),
@@ -145,8 +140,6 @@ count++;
 writeRoute("/merge-pdf.html", mergePdfPageHtml());
 count++;
 writeRoute("/split-pdf.html", splitPdfPageHtml());
-count++;
-writeRoute("/hsn-sac-code-finder.html", hsnSacFinderPageHtml());
 count++;
 
 // ---- Authenticated app pages (already full HTML documents) ----
@@ -228,7 +221,6 @@ cpSync(join(__dirname, "node_modules/jspdf/dist/jspdf.umd.min.js"), join(DIST, "
 cpSync(join(__dirname, "src/merge-pdf"), join(DIST, "merge-pdf"), { recursive: true });
 cpSync(join(__dirname, "node_modules/pdf-lib/dist/pdf-lib.min.js"), join(DIST, "vendor/pdf-lib.min.js"));
 cpSync(join(__dirname, "src/split-pdf"), join(DIST, "split-pdf"), { recursive: true });
-cpSync(join(__dirname, "src/hsn-sac-finder"), join(DIST, "hsn-sac-finder"), { recursive: true });
 if (existsSync(join(__dirname, "public"))) {
   cpSync(join(__dirname, "public"), DIST, { recursive: true });
 }

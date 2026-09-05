@@ -23,6 +23,11 @@ const TYPES = {
 
 const server = createServer(async (req, res) => {
   try {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      res.writeHead(405, { "Content-Type": "text/plain; charset=utf-8", Allow: "GET, HEAD" });
+      res.end("Method not allowed");
+      return;
+    }
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
     if (urlPath === "/") urlPath = "/index.html";
     let filePath = resolve(join(ROOT, urlPath));

@@ -13,26 +13,6 @@ export const SEO_PAGES = Object.freeze({
     "Manage business projects, milestones, tasks, timesheets, expenses and operational requests in one connected project workspace.",
     "software"
   ),
-  "/products/finance-accounting.html": page(
-    "Accounting Software India | GST & Finance | InfoBridgeIndia",
-    "Accounting software for Indian businesses with GST-ready ledgers, receivables, payables, banking, expenses, fixed assets and financial reports.",
-    "software"
-  ),
-  "/products/inventory-warehouse.html": page(
-    "Inventory Management Software India | InfoBridgeIndia",
-    "Inventory management software for Indian businesses with multi-warehouse stock, HSN and GST rates, batches, serials, reorder alerts and valuation.",
-    "software"
-  ),
-  "/products/sales-crm.html": page(
-    "CRM & Sales Management Software India | InfoBridgeIndia",
-    "CRM and sales management software for Indian businesses to manage leads, follow-ups, quotations, orders, invoices and collections.",
-    "software"
-  ),
-  "/products/purchases-procurement.html": page(
-    "Purchase & Procurement Software India | InfoBridgeIndia",
-    "Manage purchase requests, approvals, vendor quotations, purchase orders, goods receipts, bills and supplier payments in one workflow.",
-    "software"
-  ),
   "/products/reports-analytics.html": page(
     "Business Reports & Analytics Software | InfoBridgeIndia",
     "Connected business reporting and analytics for finance, GST, inventory, sales, HR, branches and management decision-making.",
@@ -41,11 +21,6 @@ export const SEO_PAGES = Object.freeze({
   "/gst-calculator.html": page(
     "GST Calculator India | Calculate GST Online | InfoBridgeIndia",
     "Calculate inclusive or exclusive GST online and view taxable value, GST amount, CGST, SGST and IGST instantly.",
-    "webapp"
-  ),
-  "/hsn-sac-code-finder.html": page(
-    "HSN Code Finder by Product Name | InfoBridgeIndia",
-    "Search more than 22,600 Indian HSN and SAC classifications by product name, service description or code, then compare the closest detailed matches.",
     "webapp"
   ),
   "/gst-interest-calculator.html": page(

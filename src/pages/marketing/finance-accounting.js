@@ -25,19 +25,6 @@ function toolHref(tool) {
   return `/products/finance-accounting/${slug(tool)}.html`;
 }
 
-function renderSection(section) {
-  return `<section id="${section.id}" class="finance-hub-section${section.featured ? " featured" : ""}${section.advanced ? " advanced" : ""}">
-    <div class="finance-section-head"><span class="finance-section-icon">${icon(section.icon)}</span><div><h2 class="h-3">${section.title}</h2><p>${section.desc}</p></div></div>
-    <div class="finance-tool-grid">${section.tools.map((tool) => `<a class="finance-tool-link" href="${toolHref(tool)}"><span>${tool}</span>${icon("arrowRight")}</a>`).join("")}</div>
-  </section>`;
-}
-
-export function financeAccountingPage() {
-  const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Products / Finance & Accounting</span><h1 class="h-1">Accounting Software for Indian Businesses</h1><p class="text-lead">Run GST-ready books, customer and supplier accounts, cash and bank records, expenses, fixed assets and financial reporting from one connected finance system.</p></div><div class="service-icon-badge">${icon("ledger")}</div></div></div></section>
-  <section class="section"><div class="container"><div class="finance-hub">${financeSections.map(renderSection).join("")}</div></div></section>`;
-  return { route: "/products/finance-accounting.html", title: "Finance & Accounting", description: "Connected accounting, GST-ready books, receivables, payables, banking, expenses, assets and financial reporting for Indian businesses.", active: "products", body };
-}
-
 export function financeAccountingDetailPages() {
   return financeSections.flatMap((section) => section.tools.map((tool) => {
     const body = `<section class="service-hero"><div class="container">${breadcrumbs([...crumbBase, { label: "Finance & Accounting", href: "/index.html" }, { label: tool, href: "#" }])}<div class="service-hero-top" style="margin-top:18px;"><div><span class="eyebrow">Finance & Accounting / ${section.title}</span><h1 class="h-1">${tool}</h1><p class="text-lead">A dedicated ${tool.toLowerCase()} workspace within InfoBridgeIndia Finance & Accounting.</p></div><div class="service-icon-badge">${icon(section.icon)}</div></div></div></section>

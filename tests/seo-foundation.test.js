@@ -8,10 +8,6 @@ import { seoForRoute } from "../src/data/seo.js";
 test("primary product landing pages have complete SEO metadata", () => {
   for (const route of [
     "/index.html",
-    "/products/finance-accounting.html",
-    "/products/inventory-warehouse.html",
-    "/products/sales-crm.html",
-    "/products/purchases-procurement.html",
     "/products/projects-operations.html",
     "/products/reports-analytics.html",
   ]) {
@@ -35,9 +31,13 @@ test("private company routes emit noindex directives", () => {
 
 test("sitemap includes real product pages and excludes private workspaces", () => {
   const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
-  assert.match(sitemap, /products\/finance-accounting\.html/);
-  assert.match(sitemap, /products\/inventory-warehouse\.html/);
-  assert.match(sitemap, /hsn-sac-code-finder\.html/);
+  assert.match(sitemap, /products\/projects-operations\.html/);
+  assert.match(sitemap, /products\/reports-analytics\.html/);
   assert.doesNotMatch(sitemap, /\/app\//);
+  assert.doesNotMatch(sitemap, /\/inventory\//);
   assert.doesNotMatch(sitemap, /finance-accounting\/chart-of-accounts/);
+  assert.doesNotMatch(sitemap, /products\/finance-accounting\.html/);
+  assert.doesNotMatch(sitemap, /products\/sales-crm\.html/);
+  assert.doesNotMatch(sitemap, /products\/purchases-procurement\.html/);
+  assert.doesNotMatch(sitemap, /products\/inventory-warehouse\.html/);
 });
