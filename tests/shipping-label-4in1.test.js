@@ -24,6 +24,94 @@ function loadReferenceBytes() {
   return new Uint8Array(readFileSync(REFERENCE_PATH));
 }
 
+test("exact Amazon invoice preserves ICC profile and both indirect font-width arrays in a mixed sheet", async () => {
+  const bytes = readFileSync(join(__dirname, "..", "reference-files", "amazon-invoice-regression.pdf"));
+  const source = await parsePdfDocument(bytes);
+  assert.equal(source.pages.length, 1);
+  const result = await buildFourInOnePdf([
+    { name: "normal.pdf", bytes: loadReferenceBytes() },
+    { name: "amazon.pdf", bytes },
+  ]);
+  assert.equal(result.slipCount, 2);
+  assert.equal(result.pageCount, 1);
+  const output = await parsePdfDocument(result.bytes);
+  const form = output.objects.get(output.pages[0].dict["/Resources"]["/XObject"]["/S1"].ref);
+  const resources = form.dict["/Resources"];
+  const sourceResources = source.objects.get(source.pages[0].dict["/Resources"].ref).dict;
+  const originalColor = source.objects.get(sourceResources["/ColorSpace"]["/Cs1"].ref).dict;
+  const copiedColor = output.objects.get(resources["/ColorSpace"]["/Cs1"].ref).dict;
+  assert.ok(Array.isArray(copiedColor));
+  assert.equal(copiedColor.length, originalColor.length);
+  assert.equal(copiedColor[0], "/ICCBased");
+  const originalProfile = source.objects.get(originalColor[1].ref);
+  const copiedProfile = output.objects.get(copiedColor[1].ref);
+  assert.deepEqual(copiedProfile.dict, originalProfile.dict);
+  assert.deepEqual(
+    output.bytes.slice(copiedProfile.stream.byteStart, copiedProfile.stream.byteEnd),
+    source.bytes.slice(originalProfile.stream.byteStart, originalProfile.stream.byteEnd)
+  );
+  for (const name of ["/G1", "/G2"]) {
+    const originalFont = source.objects.get(sourceResources["/Font"][name].ref).dict;
+    const copiedFont = output.objects.get(resources["/Font"][name].ref).dict;
+    const originalDescendant = source.objects.get(originalFont["/DescendantFonts"][0].ref).dict;
+    const copiedDescendant = output.objects.get(copiedFont["/DescendantFonts"][0].ref).dict;
+    assert.deepEqual(output.objects.get(copiedDescendant["/W"].ref).dict,
+      source.objects.get(originalDescendant["/W"].ref).dict);
+  }
+});
+
+async function copyResourceFixture(resources, objects) {
+  const bytes = Buffer.from(`%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 300 400] /Resources ${resources} /Contents 4 0 R >> endobj
+4 0 obj << /Length 3 >>
+stream
+q Q
+endstream
+endobj
+${objects}
+trailer << /Root 1 0 R >>
+%%EOF`, "latin1");
+  const result = await buildFourInOnePdf([{ name: "resource-fixture.pdf", bytes }]);
+  const doc = await parsePdfDocument(result.bytes);
+  const form = doc.objects.get(doc.pages[0].dict["/Resources"]["/XObject"]["/S0"].ref);
+  return { doc, resources: form.dict["/Resources"] };
+}
+
+test("indirect ICC color-space arrays retain their values and copied profile reference", async () => {
+  const { doc, resources } = await copyResourceFixture(
+    "<< /ColorSpace << /Cs1 10 0 R >> >>",
+    `10 0 obj [/ICCBased 11 0 R] endobj
+11 0 obj << /N 1 /Alternate /DeviceGray /Length 7 >>
+stream
+profile
+endstream
+endobj`
+  );
+  const colorSpace = doc.objects.get(resources["/ColorSpace"]["/Cs1"].ref).dict;
+  assert.ok(Array.isArray(colorSpace));
+  assert.equal(colorSpace.length, 2);
+  assert.equal(colorSpace[0], "/ICCBased");
+  const profile = doc.objects.get(colorSpace[1].ref);
+  assert.equal(profile.dict["/N"], 1);
+  assert.equal(profile.dict["/Alternate"], "/DeviceGray");
+  assert.equal(Buffer.from(doc.bytes.slice(profile.stream.byteStart, profile.stream.byteEnd)).toString(), "profile");
+});
+
+test("indirect font-width arrays and scalar defaults survive copying unchanged", async () => {
+  const widths = [577, [484, 298], 580, [364, 398, 335, 417], 653, 653, 203];
+  const { doc, resources } = await copyResourceFixture(
+    "<< /Font << /F1 10 0 R >> >>",
+    `10 0 obj << /Type /Font /Subtype /CIDFontType2 /W 11 0 R /DW 12 0 R >> endobj
+11 0 obj [577 [484 298] 580 [364 398 335 417] 653 653 203] endobj
+12 0 obj 1000 endobj`
+  );
+  const font = doc.objects.get(resources["/Font"]["/F1"].ref).dict;
+  assert.deepEqual(doc.objects.get(font["/W"].ref).dict, widths);
+  assert.equal(doc.objects.get(font["/DW"].ref).dict, 1000);
+});
+
 // Builds a minimal, valid multi-page PDF for layout/ordering tests, in the
 // same spirit as the fixtures in pdf-to-word.test.js - classic xref-less
 // (but trailer-terminated) structure our hand-rolled scanner accepts.

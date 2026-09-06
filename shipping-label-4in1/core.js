@@ -403,8 +403,11 @@ function createBuilder() {
       return nextNum++;
     },
     setObject(num, dict, streamBytes) {
-      const finalDict = dict && typeof dict === "object" && !Array.isArray(dict) ? dict : {};
-      if (streamBytes != null) finalDict["/Length"] = streamBytes.length;
+      let finalDict = dict;
+      if (streamBytes != null) {
+        finalDict = dict && typeof dict === "object" && !Array.isArray(dict) ? { ...dict } : {};
+        finalDict["/Length"] = streamBytes.length;
+      }
       objects.set(num, { dict: finalDict, streamBytes: streamBytes || null });
     },
     addObject(dict, streamBytes) {
