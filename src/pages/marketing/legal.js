@@ -1,7 +1,6 @@
 import { icon } from "../../components/icons.js";
 import { breadcrumbs } from "../../components/layout.js";
 
-const CONTACT_LINK = '<a href="/pricing.html#contact" class="btn btn-secondary btn-sm" style="margin-top:10px; display:inline-flex;">Contact us</a>';
 
 function legalList(items) {
   return `<ul style="display:flex; flex-direction:column; gap:8px;">${items
@@ -73,11 +72,11 @@ export function privacyPage() {
     legalCard("checkCircle", 5, "User choices", [
       "Users may update their account and company profile information.",
       "Users may export locally supported business data where the product provides that feature.",
-      "Account or data deletion requests can be made through the available contact method.",
+      "A verified contact method for account or data deletion requests is not currently published.",
     ]),
     legalCard("clock", 6, "Data retention", "Information is retained only as needed to provide the service, meet legal requirements and resolve operational issues."),
     legalCard("alertCircle", 7, "Changes to this policy", "This policy may be updated when the platform or legal requirements change."),
-    legalCard("info", 8, "Contact", `InfoBridgeIndia does not currently publish a verified privacy email address. Please use the available contact channel for privacy, account or data requests.${CONTACT_LINK}`),
+    legalCard("info", 8, "Contact", `InfoBridgeIndia does not currently publish a verified contact channel for privacy, account or data requests.`),
   ];
   const body = `${legalIntro(
     "Privacy Policy",
@@ -106,10 +105,8 @@ export function termsPage() {
       "Features may be added, changed, improved or removed as the platform develops.",
       "InfoBridgeIndia does not promise uninterrupted or error-free availability.",
     ]),
-    legalCard("wallet", 5, "Pricing and future paid plans", [
+    legalCard("wallet", 5, "Free features", [
       "Currently available free features may be subject to limits.",
-      "Paid plans, user limits and pricing may be introduced in the future.",
-      "Users must be informed before charges are applied to their account.",
     ]),
     legalCard("link", 6, "Third-party services", "Authentication, hosting, storage or integrations may depend on third-party providers and their terms."),
     legalCard("shield", 7, "Intellectual property", [

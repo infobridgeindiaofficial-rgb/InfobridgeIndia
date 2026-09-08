@@ -72,11 +72,11 @@ export function securityPage() {
       ${secCard(
         "users",
         "3. Account security",
-        p("This is described accurately rather than aspirationally: sign-in is currently a visual prototype, not a working authentication system.") +
+        p("User authentication is handled using Supabase Auth.") +
           checkList([
             "Log in and Create Account use Supabase Auth. Google authentication is available when the Google provider and approved redirect URLs are configured in Supabase.",
-            "No password hashing, multi-factor authentication, session tokens, session expiry or account lockout are implemented, because there is no authentication backend yet.",
-            "As a result, anyone with the URL can currently open the app workspace pages directly &mdash; there is no login wall or role-based access control in this version.",
+            "Protected business and workspace areas require an authenticated session where applicable.",
+            "User and session access is separated by authenticated account.",
           ])
       )}
 
@@ -138,8 +138,7 @@ export function securityPage() {
         "alertCircle",
         "9. Report a security issue",
         p("If you believe you have found a security issue in InfoBridgeIndia, please report it responsibly so it can be investigated.") +
-          p("We do not yet have a dedicated security-disclosure inbox. Until one is set up, please use our contact channel below and mark your message as a security report.") +
-          `<a href="/pricing.html#contact" class="btn btn-secondary btn-sm" style="margin-top:10px; display:inline-flex;">Contact us</a>`
+          p("We do not currently publish a verified security-reporting contact channel.")
       )}
 
     </div>

@@ -13,7 +13,6 @@ import {
   reportsPage,
 } from "./src/pages/marketing/products.js";
 import { financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
-import { pricingPage } from "./src/pages/marketing/pricing.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
 import { securityPage } from "./src/pages/marketing/security.js";
 import { privacyPage, termsPage } from "./src/pages/marketing/legal.js";
@@ -85,7 +84,6 @@ const marketingPages = [
   ...financeAccountingDetailPages(),
   projectsOpsPage(),
   reportsPage(),
-  pricingPage(),
   resourcesPage(),
   securityPage(),
   privacyPage(),
@@ -104,6 +102,10 @@ for (const page of marketingPages) {
 
 // Retired standalone Products route: retain only a compatibility redirect.
 writeRoute("/products.html", '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0; url=/index.html"><link rel="canonical" href="/index.html"><title>Redirecting — InfoBridgeIndia</title><script>window.location.replace("/index.html");</script></head><body><p>Redirecting to <a href="/index.html">InfoBridgeIndia</a>…</p></body></html>');
+count++;
+
+// Retired Pricing route: preserve old bookmarks without publishing plan content.
+writeRoute("/pricing.html", "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"robots\" content=\"noindex, follow\"><meta http-equiv=\"refresh\" content=\"0; url=/index.html\"><link rel=\"canonical\" href=\"https://infobridgeindia.online/\"><title>Redirecting - InfoBridgeIndia</title></head><body><p>Continue to <a href=\"/index.html\">InfoBridgeIndia</a>.</p></body></html>");
 count++;
 
 // ---- Login (custom full-page layout) ----

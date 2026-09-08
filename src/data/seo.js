@@ -83,10 +83,6 @@ export const SEO_PAGES = Object.freeze({
     "Extract selected PDF pages or split a PDF into separate documents securely in your browser without uploading the file.",
     "webapp"
   ),
-  "/pricing.html": page(
-    "InfoBridgeIndia Pricing | Plans and Availability",
-    "Review current free InfoBridgeIndia tools and the planned Plus and Pro business software plans, features and availability.",
-  ),
   "/resources.html": page(
     "Business Resources & Compliance Guides | InfoBridgeIndia",
     "Explore InfoBridgeIndia setup guidance, GST and payroll resources, compliance dates, security information and support options.",
