@@ -87,6 +87,10 @@ export const SEO_PAGES = Object.freeze({
     "Business Resources & Compliance Guides | InfoBridgeIndia",
     "Explore InfoBridgeIndia setup guidance, GST and payroll resources, compliance dates, security information and support options.",
   ),
+  "/contact.html": page(
+    "Contact InfoBridgeIndia | Help and Support",
+    "Get help with InfoBridgeIndia and our business tools. Send a message through our contact form or contact us on WhatsApp.",
+  ),
   "/security.html": page(
     "Data Security & Privacy | InfoBridgeIndia",
     "Learn how InfoBridgeIndia handles browser-based file processing, account security, business data protection and privacy considerations.",

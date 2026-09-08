@@ -86,6 +86,7 @@ export const mainNav = [
     label: "GST Workspace",
     href: "/app/gst/index.html",
   },
+  { key: "contact", label: "Contact", href: "/contact.html" },
 ];
 
 export const footerColumns = [
@@ -118,6 +119,7 @@ export const footerColumns = [
     links: [
       { title: "Resources", href: "/resources.html" },
       { title: "Security", href: "/security.html" },
+      { title: "Contact", href: "/contact.html" },
     ],
   },
 ];

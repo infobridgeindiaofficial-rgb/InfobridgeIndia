@@ -11,7 +11,7 @@ export function projectsOpsPage() {
     icon: "projects",
     eyebrow: "Products / Projects & Office Operations",
     title: "Project Management Software for Indian Businesses",
-    lead: "Projects, milestones and timesheets sit alongside internal requests, office assets and employee claims â€” so operational work is tracked with the same rigour as revenue.",
+    lead: "Projects, milestones and timesheets sit alongside internal requests, office assets and employee claims — so operational work is tracked with the same rigour as revenue.",
     crumb: [...crumbBase, { label: "Projects & Operations", href: "#" }],
     subservices: [
       { icon: "projects", title: "Projects & Milestones", desc: "Tasks, teams and deadlines with budget tracking.", href: "/app/projects.html" },
@@ -30,7 +30,7 @@ export function reportsPage() {
     icon: "reports",
     eyebrow: "Products / Reports & Analytics",
     title: "Business Reports & Analytics Software",
-    lead: "Financial, GST, inventory, sales, HR and branch-level reports with real filters and export â€” plus a management view that surfaces what needs attention without burying it in charts.",
+    lead: "Financial, GST, inventory, sales, HR and branch-level reports with real filters and export — plus a management view that surfaces what needs attention without burying it in charts.",
     crumb: [...crumbBase, { label: "Reports & Analytics", href: "#" }],
     subservices: [
       { icon: "ledger", title: "Financial Reports", desc: "P&L, balance sheet, cash flow, trial balance, ledgers.", href: "/products/reports-analytics.html#financial" },
@@ -87,7 +87,7 @@ export function productsOverviewPage() {
       <div style="margin-top:18px; max-width:680px;">
         <span class="eyebrow">The full platform</span>
         <h1 class="h-1">Every module your business runs on</h1>
-        <p class="text-lead">Grouped the way finance, operations and leadership actually think about the business â€” not an alphabetical feature list.</p>
+        <p class="text-lead">Grouped the way finance, operations and leadership actually think about the business — not an alphabetical feature list.</p>
       </div>
     </div>
   </section>

@@ -1,6 +1,6 @@
 import { icon } from "../../components/icons.js";
 import { breadcrumbs } from "../../components/layout.js";
-import { sectionHead, featureCard, banner, timeline } from "../../components/ui.js";
+import { sectionHead, featureCard, banner } from "../../components/ui.js";
 
 export function resourcesPage() {
   const body = `
@@ -9,7 +9,7 @@ export function resourcesPage() {
       ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Resources", href: "#" }])}
       <div style="margin-top:18px; max-width:640px;">
         <span class="eyebrow">Resources</span>
-        <h1 class="h-1">Guides, compliance dates and help â€” in one place</h1>
+        <h1 class="h-1">Guides, compliance dates and help — in one place</h1>
         <p class="text-lead">Everything you need to set up and run InfoBridgeIndia, plus how we keep your business data secure.</p>
       </div>
     </div>
@@ -28,16 +28,8 @@ export function resourcesPage() {
 
   <section class="section" style="background:var(--surface-0); border-top:1px solid var(--border); border-bottom:1px solid var(--border);" id="calendar">
     <div class="container">
-      ${sectionHead({ eyebrow: "Compliance calendar", title: "What's due soon" })}
-      ${banner({ tone: "warning", title: "GSTR-1 (Aug 2026)", body: " due 11 Sep 2026." })}
-      <div style="margin-top:20px;">
-        ${timeline([
-          { title: "GSTR-3B (Jul 2026)", meta: "Filed on 19 Aug 2026" },
-          { title: "TDS return â€” Q1 FY26-27", meta: "Filed on 31 Jul 2026" },
-          { title: "GSTR-1 (Aug 2026)", meta: "Due 11 Sep 2026" },
-          { title: "GSTR-3B (Aug 2026)", meta: "Due 20 Sep 2026" },
-        ])}
-      </div>
+      ${sectionHead({ eyebrow: "Compliance calendar", title: "Check your filing requirements" })}
+      ${banner({ tone: "info", title: "Confirm applicable deadlines", body: " Filing dates and requirements depend on your registration and reporting period. Check the relevant official portal before submitting a return. This page does not show your filing status." })}
     </div>
   </section>
 
@@ -45,7 +37,7 @@ export function resourcesPage() {
     <div class="container">
       ${sectionHead({ eyebrow: "Security", title: "How InfoBridgeIndia handles your data" })}
       <div class="card" style="max-width:640px;">
-        <p class="text-small">Many of our document, label and GST-report tools process files directly in your browser instead of uploading them to a server. The Security page explains exactly what runs locally, what's stored, and what account-security features are (and aren't) built yet &mdash; described plainly, without generic promises.</p>
+        <p class="text-small">Many of our document, label and GST-report tools process files directly in your browser instead of uploading them to a server. The Security page describes account access, business data, file processing and steps you can take to help protect your information.</p>
         <a href="/security.html" class="btn btn-secondary btn-sm" style="margin-top:14px; display:inline-flex;">Read the full Security page ${icon("arrowRight", "").replace("<svg", '<svg width="14" height="14"')}</a>
       </div>
     </div>

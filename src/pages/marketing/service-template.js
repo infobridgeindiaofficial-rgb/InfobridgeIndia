@@ -47,9 +47,9 @@ export function servicePage({
     subservices.length
       ? `<section class="section">
       <div class="container">
-        ${sectionHead({ eyebrow: "Inside this service", title: "What you get", desc: "Each area below opens into its own dedicated workspace." })}
+        ${sectionHead({ eyebrow: "Inside this service", title: "What you get", desc: "Explore the areas below and open available workspaces." })}
         <div class="grid g-3">
-          ${subservices.map((s) => subserviceCard(s)).join("")}
+          ${subservices.map((s) => subserviceCard({ ...s, id: s.href?.startsWith(`${route}#`) ? s.href.split("#")[1] : undefined })).join("")}
         </div>
       </div>
     </section>`
@@ -74,7 +74,7 @@ export function servicePage({
       ${ctaBand(
         cta || {
           title: "Ready to see it inside the app?",
-          desc: "Open the workspace and explore with sample data — no setup required.",
+          desc: "Open an available workspace to get started. Sign-in and business setup may be required.",
           secondary: { href: "/index.html", label: "Back to main page" },
         }
       )}

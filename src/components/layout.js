@@ -109,7 +109,7 @@ export function renderHeader(active = "") {
       const caret = item.mega ? `<span class="nav-caret">${icon("chevronDown")}</span>` : "";
       return `<div class="nav-item${item.mega ? " has-mega" : ""}" data-nav-item>
         <a class="nav-link" href="${item.href}">${item.label}${caret}</a>
-        ${renderMega(item)}
+${renderMega(item)}
       </div>`;
     })
     .join("");
@@ -121,7 +121,7 @@ export function renderHeader(active = "") {
         : "";
       return `<div class="mobile-group">
         <a class="mobile-group-title" href="${item.href}" style="display:block;">${item.label}</a>
-        ${sub}
+${sub}
       </div>`;
     })
     .join("");
@@ -262,7 +262,7 @@ export function renderAppTopbar({ title }) {
   return `<div class="app-topbar">
     <div class="row-gap-3">
       <button class="mobile-nav-toggle" data-sidebar-toggle style="color: var(--ink-700);" aria-label="Menu">${icon("menu")}</button>
-      <div class="app-search">${icon("search")}<span>Search customers, invoices, employeesâ€¦</span></div>
+      <div class="app-search">${icon("search")}<span>Search customers, invoices, employees…</span></div>
     </div>
     <div class="topbar-actions">
       <span class="badge badge-brand">Sandbox data</span>

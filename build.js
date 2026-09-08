@@ -14,6 +14,7 @@ import {
 } from "./src/pages/marketing/products.js";
 import { financeAccountingDetailPages } from "./src/pages/marketing/finance-accounting.js";
 import { resourcesPage } from "./src/pages/marketing/resources.js";
+import { contactPage } from "./src/pages/marketing/contact.js";
 import { securityPage } from "./src/pages/marketing/security.js";
 import { privacyPage, termsPage } from "./src/pages/marketing/legal.js";
 import { companySetupPage, companyProfilePage, companySecurityPage } from "./src/pages/marketing/company.js";
@@ -86,6 +87,7 @@ const marketingPages = [
   reportsPage(),
   resourcesPage(),
   securityPage(),
+  contactPage(),
   privacyPage(),
   termsPage(),
   companySetupPage(),
@@ -227,4 +229,9 @@ if (existsSync(join(__dirname, "public"))) {
   cpSync(join(__dirname, "public"), DIST, { recursive: true });
 }
 
-console.log(`Built ${count} pages into ./dist`);
+// Current GitHub Pages deployment serves the repository root.
+// Synchronize the generated artifact after a successful build; preserve root-only files.
+for (const entry of readdirSync(DIST)) {
+  cpSync(join(DIST, entry), join(__dirname, entry), { recursive: true });
+}
+console.log(`Built ${count} pages into ./dist and synchronized the root deployment snapshot`);

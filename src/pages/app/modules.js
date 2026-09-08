@@ -156,7 +156,7 @@ export function inventoryPage() {
     primaryAction: { label: "Stock adjustment", href: "#" },
     attention: { tone: "warning", title: "3 products are below reorder level.", body: " Packing Boxes (Medium), Zipper Rolls, Cotton Fabric (Surat WH)." },
     stats: [
-      { label: "Stock value", value: "â‚¹22,80,600" },
+      { label: "Stock value", value: "₹22,80,600" },
       { label: "SKUs tracked", value: "184" },
       { label: "Warehouses", value: "2" },
       { label: "Below reorder level", value: "3" },
@@ -168,12 +168,12 @@ export function inventoryPage() {
         { key: "status", label: "Status", render: (r) => `<span class="badge badge-${r.tone}">${r.status}</span>` },
       ],
       rows: [
-        { item: "Cotton Fabric â€” Roll", wh: "Mumbai Warehouse", qty: "1,240 mtr", status: "Healthy", tone: "success" },
-        { item: "Cotton Fabric â€” Roll", wh: "Surat Warehouse", qty: "340 mtr", status: "Low", tone: "warning" },
-        { item: "Packing Boxes â€” Medium", wh: "Mumbai Warehouse", qty: "120 pcs", status: "Reorder", tone: "danger" },
+        { item: "Cotton Fabric — Roll", wh: "Mumbai Warehouse", qty: "1,240 mtr", status: "Healthy", tone: "success" },
+        { item: "Cotton Fabric — Roll", wh: "Surat Warehouse", qty: "340 mtr", status: "Low", tone: "warning" },
+        { item: "Packing Boxes — Medium", wh: "Mumbai Warehouse", qty: "120 pcs", status: "Reorder", tone: "danger" },
       ],
     },
-    activity: [{ title: "Stock transfer SW-Mumbai â†’ Surat completed", meta: "220 mtr Cotton Fabric" }],
+    activity: [{ title: "Stock transfer SW-Mumbai → Surat completed", meta: "220 mtr Cotton Fabric" }],
     reportLinks: [{ label: "Stock Valuation", href: "/app/reports.html" }, { label: "Product Profitability", href: "/app/reports.html" }],
   });
 }
@@ -196,7 +196,7 @@ export function importExportPage() {
       desc: "Create an export invoice or import purchase to start tracking shipments and landed cost.",
       action: { label: "New export invoice", href: "#" },
     },
-    activity: [{ title: "Export invoice EXP-014 raised", meta: "Vantage Exports LLC Â· $8,200" }],
+    activity: [{ title: "Export invoice EXP-014 raised", meta: "Vantage Exports LLC · $8,200" }],
     reportLinks: [{ label: "Export Register", href: "/app/reports.html" }],
   });
 }

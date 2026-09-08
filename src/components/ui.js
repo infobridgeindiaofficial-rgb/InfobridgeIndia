@@ -28,8 +28,8 @@ export function featureCard({ icon: ic, title, desc, href }) {
   </div>`;
 }
 
-export function subserviceCard({ icon: ic, title, desc, href, status }) {
-  return `<a class="subservice-card" href="${href}">
+export function subserviceCard({ icon: ic, title, desc, href, status, id }) {
+  return `<a class="subservice-card"${id ? ` id="${id}" style="scroll-margin-top:120px;"` : ""} href="${href}">
     <div class="subservice-top">
       <span class="card-icon" style="margin-bottom:0; width:36px; height:36px;">${icon(ic).replace("<svg", '<svg width="18" height="18"')}</span>
       ${status ? `<span class="badge badge-${status.tone}">${status.label}</span>` : ""}
