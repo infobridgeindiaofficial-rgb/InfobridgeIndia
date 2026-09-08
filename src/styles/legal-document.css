@@ -1,0 +1,12 @@
+﻿/* Scoped to the three public legal/information documents. */
+.legal-document { background: #fff; color: var(--ink-800); padding: clamp(36px, 6vw, 72px) 24px 80px; }
+.legal-document-content { width: 100%; max-width: 900px; margin: 0 auto; overflow-wrap: anywhere; }
+.legal-document h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; letter-spacing: -0.025em; font-weight: 700; margin: 0 0 20px; color: var(--ink-900); }
+.legal-document p { font-size: 16px; line-height: 1.8; margin: 0 0 16px; }
+.legal-document .legal-introduction { font-size: 18px; line-height: 1.7; }
+.legal-document .legal-updated { font-size: 14px; color: var(--ink-500); margin: 0 0 40px; }
+.legal-document section { margin: 0 0 32px; }
+.legal-document h2 { font-size: clamp(21px, 3vw, 25px); line-height: 1.4; font-weight: 650; margin: 0 0 12px; color: var(--ink-900); }
+.legal-document a { color: var(--brand-600); text-decoration: underline; text-underline-offset: 3px; }
+.legal-document a:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 3px; }
+@media (max-width: 480px) { .legal-document { padding: 32px 20px 48px; } }

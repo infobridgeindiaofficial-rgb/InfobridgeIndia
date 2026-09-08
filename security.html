@@ -38,7 +38,7 @@
   <script src="/vendor/supabase.js"></script>
   <script src="/supabase-config.js"></script>
   <script type="module" src="/scripts/auth-gate.js"></script>
-
+<link rel="stylesheet" href="/styles/legal-document.css">
 </head>
 <body class="">
 <header class="site-header">
@@ -49,7 +49,7 @@
       <nav class="main-nav" aria-label="Main">
         <div class="nav-item has-mega" data-nav-item>
         <a class="nav-link" href="/index.html">Products<span class="nav-caret"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></a>
-        <div class="mega">
+<div class="mega">
     <div class="mega-grid" style="grid-template-columns: repeat(3, 1fr) ;">
       <div>
     <div class="mega-col-title">Run the business</div>
@@ -138,7 +138,7 @@
   </div>
       </div><div class="nav-item has-mega" data-nav-item>
         <a class="nav-link" href="/gst-calculator.html">Business Tools<span class="nav-caret"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></a>
-        <div class="mega">
+<div class="mega">
     <div class="mega-grid" style="grid-template-columns: repeat(3, 1fr) ;">
       <div>
     <div class="mega-col-title">GST & Calculators</div>
@@ -239,7 +239,10 @@
   </div>
       </div><div class="nav-item" data-nav-item>
         <a class="nav-link" href="/app/gst/index.html">GST Workspace</a>
-        
+
+      </div><div class="nav-item" data-nav-item>
+        <a class="nav-link" href="/contact.html">Contact</a>
+
       </div>
       </nav>
       <div class="header-actions">
@@ -259,13 +262,16 @@
       <div class="container">
         <div class="mobile-group">
         <a class="mobile-group-title" href="/index.html" style="display:block;">Products</a>
-        <a href="/app/finance.html">Finance & Accounting</a><a href="/app/sales.html">Sales & CRM</a><a href="/app/purchases.html">Purchases & Procurement</a><a href="/inventory/index.html">Inventory & Warehouse</a><a href="/hr-payroll/index.html">HR & Payroll</a><a href="/products/projects-operations.html">Projects & Operations</a><a href="/app/documents.html">Documents</a><a href="/app/approvals.html">Internal Requests</a><a href="/app/banking.html">Banking</a><a href="/products/reports-analytics.html">Reports & Analytics</a><a href="/app/admin.html">Administration</a>
+<a href="/app/finance.html">Finance & Accounting</a><a href="/app/sales.html">Sales & CRM</a><a href="/app/purchases.html">Purchases & Procurement</a><a href="/inventory/index.html">Inventory & Warehouse</a><a href="/hr-payroll/index.html">HR & Payroll</a><a href="/products/projects-operations.html">Projects & Operations</a><a href="/app/documents.html">Documents</a><a href="/app/approvals.html">Internal Requests</a><a href="/app/banking.html">Banking</a><a href="/products/reports-analytics.html">Reports & Analytics</a><a href="/app/admin.html">Administration</a>
       </div><div class="mobile-group">
         <a class="mobile-group-title" href="/gst-calculator.html" style="display:block;">Business Tools</a>
-        <a href="/gst-calculator.html">GST Calculator</a><a href="/gst-interest-calculator.html">GST Interest Calculator</a><a href="/gst-late-fee-calculator.html">GST Late Fee Calculator</a><a href="/marketplace-profit-calculator.html">Marketplace Profit Calculator</a><a href="/pdf-to-word.html">PDF to Word</a><a href="/shipping-label-4in1.html">Shipping Label 4-in-1 PDF</a><a href="/word-to-pdf.html">Word to PDF</a><a href="/jpg-to-pdf.html">JPG to PDF</a><a href="/merge-pdf.html">Merge PDF</a><a href="/split-pdf.html">Split PDF</a><a href="/gst-invoice-generator.html">GST Invoice Generator</a><a href="/quotation-generator.html">Quotation Generator</a><a href="/company-letterhead-generator.html">Company Letterhead Generator</a>
+<a href="/gst-calculator.html">GST Calculator</a><a href="/gst-interest-calculator.html">GST Interest Calculator</a><a href="/gst-late-fee-calculator.html">GST Late Fee Calculator</a><a href="/marketplace-profit-calculator.html">Marketplace Profit Calculator</a><a href="/pdf-to-word.html">PDF to Word</a><a href="/shipping-label-4in1.html">Shipping Label 4-in-1 PDF</a><a href="/word-to-pdf.html">Word to PDF</a><a href="/jpg-to-pdf.html">JPG to PDF</a><a href="/merge-pdf.html">Merge PDF</a><a href="/split-pdf.html">Split PDF</a><a href="/gst-invoice-generator.html">GST Invoice Generator</a><a href="/quotation-generator.html">Quotation Generator</a><a href="/company-letterhead-generator.html">Company Letterhead Generator</a>
       </div><div class="mobile-group">
         <a class="mobile-group-title" href="/app/gst/index.html" style="display:block;">GST Workspace</a>
-        
+
+      </div><div class="mobile-group">
+        <a class="mobile-group-title" href="/contact.html" style="display:block;">Contact</a>
+
       </div>
         <div class="mobile-group" style="border-bottom:none;" data-auth-logged-out>
           <a href="/login.html" style="color:#fff; font-weight:600;">Log in</a>
@@ -276,98 +282,41 @@
       </div>
     </div>
   </header>
-
-  <section class="section" style="padding-bottom:0;">
-    <div class="container" style="max-width:760px;">
-      <div class="breadcrumbs">
-    <a href="/index.html">Home</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><a href="/resources.html">Resources</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><span class="current">Security</span>
-  </div>
-      <div style="margin-top:16px; max-width:620px;">
-        <span class="eyebrow">Security</span>
-        <h1 class="h-3" style="margin-top:8px;">Protecting your business data</h1>
-        <p class="text-small" style="margin-top:10px;">InfoBridgeIndia handles business, GST and document workflows. This page describes, specifically, how the product currently handles data &mdash; what runs locally in your browser, what is stored, and what has not been built yet &mdash; rather than making general promises.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="padding-top:var(--sp-6);">
-    <div class="container" style="max-width:760px;">
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5a1 1 0 011-1h5l2 2.3h8a1 1 0 011 1V18a1 1 0 01-1 1h-15a1 1 0 01-1-1V6.5z"/></svg></span>
-      <h2 class="h-6" style="margin:0;">1. Data protection</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">How data is handled depends on the specific module or tool.</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Business setup details and workspace records are stored in the configured Supabase project and protected by authenticated-user and company ownership policies.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Uploaded marketplace GST reports (Meesho / Flipkart Excel files) are read and calculated directly in your browser; the file itself is not uploaded anywhere.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Browser-local storage is not encrypted at rest. It is only as private as the device, browser profile and operating-system account it lives in.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/></svg></span>
-      <h2 class="h-6" style="margin:0;">2. File privacy</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">Verified by inspecting the source code: none of the tools below make any network request when converting or generating a file.</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>PDF to Word, Word to PDF, and Shipping Label 4-in-1 PDF read the selected file and produce the output entirely in your browser &mdash; the file is not uploaded to a server or a third-party conversion API.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>GST marketplace report processing (Meesho, Flipkart, Combined GSTR-1) parses the uploaded Excel file locally and produces the Excel/JSON output locally.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Quotation Generator's optional logo image is read locally in your browser (never uploaded) and only becomes part of the PDF you generate via your browser's own print function.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>JPG to PDF, Merge PDF and Split PDF process files locally in the browser; documents are not sent to an external conversion service.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3 3 0 010 5.9M20.5 19c0-2.6-1.8-4.7-4.3-5.6"/></svg></span>
-      <h2 class="h-6" style="margin:0;">3. Account security</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">User authentication is handled using Supabase Auth.</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Log in and Create Account use Supabase Auth. Google authentication is available when the Google provider and approved redirect URLs are configured in Supabase.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Protected business and workspace areas require an authenticated session where applicable.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>User and session access is separated by authenticated account.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 5-3.2 7.8-7.5 9-4.3-1.2-7.5-4-7.5-9V6L12 3z"/><path d="M9 12.2l2 2 4-4.2"/></svg></span>
-      <h2 class="h-6" style="margin:0;">4. GST &amp; business data</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">GSTIN, invoices, quotations, marketplace reports and GSTR data can include sensitive business and customer details.</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>GST Workspace setup and transaction records are scoped to the authenticated owner and company through Supabase Row Level Security.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>GST Invoice Generator and Quotation Generator hold what you type only in memory for the current page session &mdash; nothing is saved automatically, and it is cleared on refresh.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Generated GST JSON and Excel workbooks are produced from data you supplied and are saved to your device via your browser's normal download &mdash; InfoBridgeIndia does not keep a separate copy.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5l5-5"/><path d="M12.5 6.5l1.4-1.4a3.5 3.5 0 015 5L17.5 11.5M11.5 17.5l-1.4 1.4a3.5 3.5 0 01-5-5L6.5 12.5"/></svg></span>
-      <h2 class="h-6" style="margin:0;">5. Third-party services</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">Checked directly in the source and the built site: no CDN scripts, external fonts, analytics or tracking services, or third-party document-processing APIs are loaded anywhere.</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Typography uses your system's built-in fonts &mdash; no font files are fetched from an external service.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>A small number of workflows (e.g. contacting a customer or supplier) include a click-to-open WhatsApp link; this only activates if you click it and does not run automatically in the background.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Because the document and GST-report tools above process files locally, they do not depend on any third-party service to function.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/></svg></span>
-      <h2 class="h-6" style="margin:0;">6. Data retention</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">Retention differs by where the data lives:</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>In-memory only:</strong> the document/PDF tools, Shipping Label 4-in-1, GST Invoice Generator, Quotation Generator and marketplace report uploads &mdash; cleared when you refresh or leave the page.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Authenticated workspace storage:</strong> company and workspace records are stored in the configured Supabase project and retained until you delete them through the product or remove the account data.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span><strong>Downloads you generate</strong> (PDF, Excel, GST&nbsp;JSON) are saved to your device through your browser; what happens to that file afterward is under your control.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.6 2.6L16.5 9"/></svg></span>
-      <h2 class="h-6" style="margin:0;">7. Security practices</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">Practices genuinely followed in this codebase, not a generic list:</p><ul style="display:flex; flex-direction:column; gap:9px;"><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Local processing for the document, label and GST-report tools listed above, instead of routing files through a server.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>The Supabase browser client is bundled with the product rather than loaded from a third-party CDN.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Only the browser-safe Supabase project URL and publishable key are used in the built output; privileged service-role keys and provider secrets must remain in Supabase.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>User-entered text (customer names, notes, addresses, etc.) is escaped before being placed on the page in the areas we reviewed, to guard against common script-injection issues.</span></li><li style="display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-14); color:var(--ink-600); line-height:var(--lh-normal);"><svg width="14" height="14" style="flex:none; margin-top:3px; color:var(--brand-600);" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span>File-type and file-size checks on document, logo and marketplace-report uploads.</span></li></ul></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 6l-5.5 11h11L12 6z"/><path d="M4 21h16"/><circle cx="6.5" cy="14" r="0" /><path d="M12 6L6.5 17M12 6l5.5 11"/></svg></span>
-      <h2 class="h-6" style="margin:0;">8. Privacy &amp; Indian data protection</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">InfoBridgeIndia is being built with India's data-protection framework in mind, including the Digital Personal Data Protection Act, 2023 and its associated Rules, alongside the Information Technology Act, 2000 and applicable CERT-In cyber-security directions.</p><p class="text-small">As a product still under active development, we have not completed formal compliance processes such as a Data Protection Officer appointment, a Consent Manager integration, a breach-notification procedure, or a data-protection impact assessment. We do not claim DPDP compliance, ISO/SOC certification, or any government/CERT-In endorsement, and businesses using InfoBridgeIndia remain responsible for their own obligations as data fiduciaries under applicable law.</p><p class="text-micro" style="margin-top:8px;">This section is provided for transparency and is not legal advice. For authoritative guidance, consult the Ministry of Electronics &amp; Information Technology (MeitY) and your own legal counsel.</p></div>
-  </div>
-
-      <div class="card" style="margin-top:var(--sp-5);">
-    <div class="row-gap-3" style="align-items:center;">
-      <span class="card-icon" style="margin:0; width:34px; height:34px; flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5"/><circle cx="12" cy="16" r="0.4" fill="currentColor"/></svg></span>
-      <h2 class="h-6" style="margin:0;">9. Report a security issue</h2>
-    </div>
-    <div style="margin-top:12px;"><p class="text-small">If you believe you have found a security issue in InfoBridgeIndia, please report it responsibly so it can be investigated.</p><p class="text-small">We do not currently publish a verified security-reporting contact channel.</p></div>
-  </div>
-
-    </div>
-  </section>
-  
+<main class="legal-document">
+    <article class="legal-document-content" aria-labelledby="legal-title">
+      <h1 id="legal-title">Security</h1>
+      <p class="legal-introduction">This page explains how InfoBridgeIndia helps protect information and the steps users can take when using our website, tools and business platform.</p>
+      <p class="legal-updated">Last updated: <time datetime="2026-09-08">September 8, 2026</time></p>
+      <section aria-labelledby="legal-section-1">
+        <h2 id="legal-section-1">1. Protecting Your Information</h2>
+        <p>InfoBridgeIndia uses reasonable technical and organisational measures to help protect user and business information. No internet-based service can guarantee absolute security.</p>
+      </section>
+      <section aria-labelledby="legal-section-2">
+        <h2 id="legal-section-2">2. Account Security</h2>
+        <p>Account access requires sign-in where applicable. Business workspace access is separated between user accounts where applicable. Users are responsible for keeping their account information and login credentials secure.</p>
+      </section>
+      <section aria-labelledby="legal-section-3">
+        <h2 id="legal-section-3">3. Business Data</h2>
+        <p>Information entered into business workspaces is handled to provide the requested platform functionality. Only submit information needed for your work, and take care when sharing business records with others.</p>
+      </section>
+      <section aria-labelledby="legal-section-4">
+        <h2 id="legal-section-4">4. File Processing</h2>
+        <p>File handling depends on the tool you use. JPG to PDF processes selected images in your browser and provides the generated PDF for download to your device. This does not mean that every InfoBridgeIndia feature processes information only on your device.</p>
+      </section>
+      <section aria-labelledby="legal-section-5">
+        <h2 id="legal-section-5">5. Third-Party Services</h2>
+        <p>InfoBridgeIndia may use trusted external services for hosting, authentication, analytics, advertising, contact forms, storage and other platform functions. Our <a href="/privacy.html">Privacy Policy</a> explains how information may be used by these services.</p>
+      </section>
+      <section aria-labelledby="legal-section-6">
+        <h2 id="legal-section-6">6. Security Responsibilities</h2>
+        <p>Keep login credentials and devices secure, use an updated browser and sign out after using shared devices. Review important business, tax and accounting information before submission. Contact us if you believe your account or data may have been compromised.</p>
+      </section>
+      <section aria-labelledby="legal-section-7">
+        <h2 id="legal-section-7">7. Reporting a Security Issue</h2>
+        <p>If you believe you have found a security or privacy issue, please use our <a href="/contact.html">Contact page</a> so we can review it. Describe the issue without including passwords or unnecessary sensitive information.</p>
+      </section>
+    </article>
+  </main>
 <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
@@ -388,7 +337,7 @@
       <a href="/app/gst/index.html">GST & Tax Compliance</a>
     </div><div class="footer-col">
       <div class="footer-col-title">Company</div>
-      <a href="/resources.html">Resources</a><a href="/security.html">Security</a>
+      <a href="/resources.html">Resources</a><a href="/security.html">Security</a><a href="/contact.html">Contact</a>
     </div>
       </div>
       <div class="footer-bottom">
