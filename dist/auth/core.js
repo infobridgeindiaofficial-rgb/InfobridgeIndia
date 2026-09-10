@@ -13,7 +13,6 @@ export const PROTECTED_ROUTES = [
 ];
 
 export const PUBLIC_TOOL_ROUTES = [
-  "/app/gst/index.html", "/app/gst/gstr-1.html",
   "/gst-calculator.html", "/gst-interest-calculator.html", "/gst-late-fee-calculator.html", "/marketplace-profit-calculator.html",
   "/gst-invoice-generator.html", "/quotation-generator.html", "/pdf-to-word.html", "/word-to-pdf.html", "/shipping-label-4in1.html",
 ];

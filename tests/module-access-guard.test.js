@@ -44,7 +44,6 @@ test("HR & Payroll, Finance, Sales, Purchases, Inventory and Administration rout
 test("routes with no defined Administration module are left ungated rather than inventing a new permission key", () => {
   assert.equal(requiredModuleForRoute("/app/settings.html"), null);
   assert.equal(requiredModuleForRoute("/app/import-export.html"), null);
-  assert.equal(requiredModuleForRoute("/app/gst/index.html"), null);
   assert.doesNotMatch(Object.values(MODULE_ACCESS_ROUTES).join("|"), /Settings|Import|GST/);
 });
 

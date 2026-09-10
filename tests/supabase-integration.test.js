@@ -52,7 +52,4 @@ test("major business workspaces use Supabase-backed persistence", async () => {
   for (const path of paths) {
     assert.match(await read(path), /supabase\/workspace\.js/, `${path} must use the shared Supabase workspace store`);
   }
-  const gst=await read("src/gst/app.js");
-  assert.match(gst,/\.\/public-store\.js/,"public GST must not require an authenticated company workspace");
-  assert.doesNotMatch(gst,/supabase\/workspace\.js/);
 });

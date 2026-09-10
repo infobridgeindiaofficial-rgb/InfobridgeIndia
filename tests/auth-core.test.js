@@ -6,14 +6,13 @@ import { companyToProfile } from "../src/supabase/client.js";
 
 class MemoryStorage { constructor() { this.values = new Map(); } getItem(key) { return this.values.get(key) ?? null; } setItem(key, value) { this.values.set(key, String(value)); } removeItem(key) { this.values.delete(key); } }
 
-test("protected routes include every private business workspace but exclude public GST", () => {
+test("protected routes include every private business workspace", () => {
   for (const route of ["/app/finance.html", "/app/sales.html", "/app/purchases.html", "/inventory/index.html", "/hr-payroll/index.html", "/app/projects.html", "/app/documents.html", "/app/approvals.html", "/app/banking.html", "/app/reports.html", "/app/admin.html"]) assert.equal(isProtectedRoute(route), true, route);
-  for (const route of ["/app/gst/index.html", "/app/gst/gstr-1.html"]) assert.equal(isProtectedRoute(route), false, route);
 });
 test("company setup always returns to the main page", () => { const storage = new MemoryStorage(); saveIntendedDestination("/app/reports.html?range=fy#profit", storage); setLastWorkspace("/app/banking.html", storage); assert.equal(destinationAfterSetup(storage), "/index.html"); assert.equal(storage.getItem(INTENDED_KEY), null); });
 test("external and protocol-relative destinations are rejected", () => { assert.equal(normalizePath("https://evil.example/app/finance.html"), ""); assert.equal(normalizePath("//evil.example/app/finance.html"), ""); });
 test("last workspace is company-session temporary navigation state", () => { const storage = new MemoryStorage(); setLastWorkspace("/app/banking.html", storage); assert.equal(getLastWorkspace(storage), "/app/banking.html"); });
-test("public tools and GST Workspace remain public", () => { for (const route of ["/gst-calculator.html", "/app/gst/index.html", "/app/gst/gstr-1.html"]) assert.equal(isPublicToolRoute(route), true, route); });
+test("public tools remain public", () => { for (const route of ["/gst-calculator.html"]) assert.equal(isPublicToolRoute(route), true, route); });
 test("company defaults remain India focused", () => { const profile = validateCompanyProfile({ name: "A", businessType: "Partnership", state: "Kerala", gstRegistered: false }); assert.deepEqual([profile.currency, profile.dateFormat, profile.financialYear, profile.invoicePrefix, profile.quotationPrefix], ["INR", "DD/MM/YYYY", currentIndianFinancialYear(), "INV", "QUO"]); });
 test("registered companies require a valid GSTIN", () => assert.throws(() => validateCompanyProfile({ name: "A", businessType: "Other", state: "Delhi", gstRegistered: true, gstin: "BAD" }), /valid GSTIN/));
 test("new India companies use explicit GST and INR defaults", () => {

@@ -6,7 +6,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("shared workspace chrome covers every protected product family", async () => {
   const source = await read("src/scripts/workspace-sidebar.js");
-  for (const name of ["Finance & Accounting", "Sales & CRM", "Purchases & Procurement", "Inventory & Warehouse", "HR & Payroll", "Projects & Operations", "Documents", "Internal Requests", "Banking", "Reports & Analytics", "Administration", "GST Workspace"]) assert.match(source, new RegExp(name.replace(/[&]/g, "\\&")));
+  for (const name of ["Finance & Accounting", "Sales & CRM", "Purchases & Procurement", "Inventory & Warehouse", "HR & Payroll", "Projects & Operations", "Documents", "Internal Requests", "Banking", "Reports & Analytics", "Administration"]) assert.match(source, new RegExp(name.replace(/[&]/g, "\\&")));
   assert.match(source, /brand\.replaceWith\(replacement\)/);
   assert.match(source, /Back to main page/);
   assert.match(source, /href="\/index\.html"/);

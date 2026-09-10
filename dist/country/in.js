@@ -18,7 +18,7 @@ export const indiaCountryConfig = freezeCountryConfig({
     identifierField: "gstin",
     rateLabel: "Default GST rate",
     settingsLabel: "GST & Tax Settings",
-    workspaceLabel: "GST Workspace",
+    workspaceLabel: "GST Settings",
     validateIdentifier: gstinValid,
     labels: { total: "GST", central: "CGST", state: "SGST", integrated: "IGST" },
     capabilities: {

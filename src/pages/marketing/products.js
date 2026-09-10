@@ -58,7 +58,6 @@ export function productsOverviewPage() {
     {
       title: "Compliance & trade",
       items: [
-        { icon: "gst", title: "GST & Tax Compliance", desc: "Returns, reconciliation, e-invoicing.", href: "/app/gst/index.html" },
         { icon: "approvals", title: "Approvals & Workflows", desc: "Configurable multi-level sign-off.", href: "/app/approvals.html" },
       ],
     },

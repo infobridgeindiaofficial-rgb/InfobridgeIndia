@@ -16,7 +16,7 @@ async function cloudAdapter(moduleKey, label, collections, route) {
   catch (error) { return unavailable(label, error.message || `${label} data is unavailable.`, route); }
 }
 export const inventoryAnalyticsAdapter = () => cloudAdapter("inventory", "Inventory", ["products", "warehouses", "movements", "counts"], "/inventory/index.html");
-export const gstAnalyticsAdapter = () => cloudAdapter("gst", "GST", ["setup", "rows", "uploads", "mappings", "settings"], "/app/gst/index.html");
+export const gstAnalyticsAdapter = () => cloudAdapter("gst", "GST", ["setup", "rows", "uploads", "mappings", "settings"], "/app/finance.html");
 export const hrAnalyticsAdapter = () => cloudAdapter("hr-payroll", "HR & Payroll", ["employees", "payrollRuns", "attendance", "leaveTransactions", "settings"], "/hr-payroll/index.html");
 export function financeAnalyticsAdapter() { const x = read("infobridgeindia.finance.v1"); return x ? available("Finance", { journals: x.journals || [], accounts: x.accounts || [], audit: x.audit || [] }, "/app/finance.html") : unavailable("Finance", "Finance has no saved workspace data.", "/app/finance.html"); }
 export function vatAnalyticsAdapter({ sales, purchases }, company = globalThis.InfoBridgeCompany) {

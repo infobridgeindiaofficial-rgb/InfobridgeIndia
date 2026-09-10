@@ -81,11 +81,6 @@ export const mainNav = [
       ],
     },
   },
-  {
-    key: "gst",
-    label: "GST Workspace",
-    href: "/app/gst/index.html",
-  },
   { key: "contact", label: "Contact", href: "/contact.html" },
 ];
 
@@ -106,12 +101,6 @@ export const footerColumns = [
     links: [
       { title: "Reports & Analytics", href: "/products/reports-analytics.html" },
       { title: "Internal Requests", href: "/app/approvals.html" },
-    ],
-  },
-  {
-    title: "GST Workspace",
-    links: [
-      { title: "GST & Tax Compliance", href: "/app/gst/index.html" },
     ],
   },
   {
@@ -143,12 +132,6 @@ export const appNav = [
       { icon: "purchase", title: "Purchases & Procurement", href: "/app/purchases.html" },
       { icon: "inventory", title: "Inventory & Warehouse", href: "/inventory/index.html" },
       { icon: "importexport", title: "Import & Export", href: "/app/import-export.html" },
-    ],
-  },
-  {
-    group: "Compliance",
-    items: [
-      { icon: "gst", title: "GST & Tax", href: "/app/gst/index.html", badge: "2 due" },
     ],
   },
   {

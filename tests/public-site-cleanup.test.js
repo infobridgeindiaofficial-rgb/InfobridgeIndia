@@ -8,8 +8,8 @@ import { privacyPage, termsPage } from '../src/pages/marketing/legal.js';
 
 const headings = html => [...html.matchAll(/<h2\b[^>]*>(.*?)<\/h2>/g)].map(m => m[1]);
 
-test('Desktop and mobile public navigation put Contact after GST and before login', () => {
-  assert.deepEqual(mainNav.map(item => item.label), ['Products', 'Business Tools', 'GST Workspace', 'Contact']);
+test('Desktop and mobile public navigation put Contact after Business Tools and before login', () => {
+  assert.deepEqual(mainNav.map(item => item.label), ['Products', 'Business Tools', 'Contact']);
   assert.equal(mainNav.at(-1).href, '/contact.html');
   const header = renderHeader();
   assert.equal((header.match(/href="\/contact.html"/g) || []).length, 2);

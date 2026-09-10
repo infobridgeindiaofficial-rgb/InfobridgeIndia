@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { XLSX } from "../src/gst/xlsx-shim.js";
+import { XLSX } from "../src/shared/xlsx-shim.js";
 import { analyticsReportCsv, analyticsReportModel, buildAnalyticsWorkbook, renderAnalyticsPrintDocument } from "../src/analytics/export.js";
 
 const company = { companyId: "CO-1", name: "Example Trading LLC", country: "AE", currency: "AED", trn: "100000000000001", address: "Dubai", city: "Abu Dhabi", logo: "data:image/png;base64,AAAA" };

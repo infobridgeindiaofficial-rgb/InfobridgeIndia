@@ -46,12 +46,10 @@ import {
   adminPage,
   settingsPage,
 } from "./src/pages/app/modules.js";
-import { gstIndexPage, gstr1WorkspacePage } from "./src/pages/app/gst.js";
 import { hrIndexPage, payrollWorkspacePage } from "./src/pages/app/hr.js";
 import { inventoryWorkspacePage } from "./src/pages/app/inventory-workspace.js";
 import { hrPayrollWorkspacePage } from "./src/pages/app/hr-payroll-workspace.js";
 import { documentsWorkspacePage } from "./src/pages/app/documents-workspace.js";
-import { gstWorkspacePage } from "./src/pages/app/gst-workspace.js";
 import { approvalsWorkspacePage } from "./src/pages/app/approvals-workspace.js";
 import { salesWorkspacePage } from "./src/pages/app/sales-workspace.js";
 import { purchasesWorkspacePage } from "./src/pages/app/purchases-workspace.js";
@@ -161,8 +159,6 @@ const appPages = [
   ["/app/reports.html", reportsWorkspacePage()],
   ["/app/admin.html", administrationWorkspacePage()],
   ["/app/settings.html", settingsPage()],
-  ["/app/gst/index.html", gstWorkspacePage()],
-  ["/app/gst/gstr-1.html", gstWorkspacePage()],
   ["/app/hr/index.html", hrIndexPage()],
   ["/app/hr/payroll.html", payrollWorkspacePage()],
 ];
@@ -181,6 +177,8 @@ writeRoute("/hr-payroll/index.html", withWorkspaceChrome(hrPayrollWorkspacePage(
 count++;
 
 // ---- Static assets ----
+cpSync(join(__dirname, "src/shared"), join(DIST, "shared"), { recursive: true });
+
 cpSync(join(__dirname, "src/styles"), join(DIST, "styles"), { recursive: true });
 cpSync(join(__dirname, "src/scripts"), join(DIST, "scripts"), { recursive: true });
 cpSync(join(__dirname, "src/auth"), join(DIST, "auth"), { recursive: true });
@@ -202,7 +200,6 @@ cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.min.mjs"), join(DIST, 
 cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"), join(DIST, "vendor/pdf.worker.min.mjs"));
 cpSync(join(__dirname, "src/inventory"), join(DIST, "inventory"), { recursive: true });
 cpSync(join(__dirname, "src/hr-payroll"), join(DIST, "hr-payroll"), { recursive: true });
-cpSync(join(__dirname, "src/gst"), join(DIST, "gst-workspace"), { recursive: true });
 cpSync(join(__dirname, "src/approvals"), join(DIST, "approvals-workspace"), { recursive: true });
 cpSync(join(__dirname, "src/sales"), join(DIST, "sales-workspace"), { recursive: true });
 cpSync(join(__dirname, "src/purchases"), join(DIST, "purchases-workspace"), { recursive: true });

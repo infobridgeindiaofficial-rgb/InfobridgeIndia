@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { BRANDED_DOCUMENT_BASE_CSS, documentCompanyBranding, renderCompanyIdentity, renderInfoBridgeFooter } from "../src/export/document.js";
 import { INFOBRIDGE_FOOTER, brandedWorkbook } from "../src/export/workbook.js";
-import { XLSX } from "../gst-workspace/xlsx-shim.js";
+import { XLSX } from "../src/shared/xlsx-shim.js";
 import { renderQuotationDocument } from "../src/sales/quotation-document.js";
 import { renderInvoiceDocument } from "../src/sales/invoice-document.js";
 import { renderSalesOrderDocument } from "../src/sales/sales-order-document.js";

@@ -2,7 +2,7 @@ const MODULES = [
   [/finance/, "Finance & Accounting"], [/sales/, "Sales & CRM"], [/purchases/, "Purchases & Procurement"],
   [/inventory/, "Inventory & Warehouse"], [/hr-payroll|\/app\/hr\//, "HR & Payroll"], [/projects/, "Projects & Operations"],
   [/documents/, "Documents"], [/approvals/, "Internal Requests"], [/banking/, "Banking"],
-  [/reports/, "Reports & Analytics"], [/admin/, "Administration"], [/gst/, "GST Workspace"],
+  [/reports/, "Reports & Analytics"], [/admin/, "Administration"],
   [/import-export/, "Import & Export"], [/settings/, "Settings"],
 ];
 

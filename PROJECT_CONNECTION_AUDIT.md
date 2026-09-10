@@ -42,10 +42,10 @@ No non-empty file or folder met the requested strong standard for VERIFIED UNUSE
 | Root `*.html` | LIVE deployment snapshot | YES | Tracked static routes; commit history contains deployment synchronization/publishing commits | NO |
 | Root `infobridgeindia-*.png` | LIVE deployment assets | YES | Referenced branding/hero assets and present in `public/`/`dist/` | NO |
 | Root `supabase-config.js` | LIVE deployment config | YES | Browser Supabase endpoint/client configuration in root snapshot | NO |
-| `app/`, `gst/`, `hr/`, `products/` | LIVE route snapshot | YES | Root static route trees corresponding to generated marketing/app routes | NO |
+| `app/`, `hr/`, `products/` | LIVE route snapshot | YES | Root static route trees corresponding to generated marketing/app routes | NO |
 | `app-showcase/` | LIVE deployment assets | YES | Image set duplicated from `public/app-showcase/` for root deployment; all ten files match `dist` | NO |
 | `auth/`, `company/`, `country/`, `export/`, `security/` | LIVE runtime snapshot | YES | Browser authentication, company, localization, workbook export, and security modules | NO |
-| `administration-workspace/`, `approvals-workspace/`, `banking-workspace/`, `finance-workspace/`, `gst-workspace/`, `purchases-workspace/`, `reports-workspace/`, `sales-workspace/` | LIVE runtime snapshot | YES | Browser module code copied from canonical `src/*` families into corresponding build destinations | NO |
+| `administration-workspace/`, `approvals-workspace/`, `banking-workspace/`, `finance-workspace/`, `purchases-workspace/`, `reports-workspace/`, `sales-workspace/` | LIVE runtime snapshot | YES | Browser module code copied from canonical `src/*` families into corresponding build destinations | NO |
 | `inventory/`, `hr-payroll/` | LIVE runtime + route snapshot | YES | Active standalone workspaces; generated routes `/inventory/index.html` and `/hr-payroll/index.html` | NO |
 | `gst-calculator/`, `gst-interest-calculator/`, `gst-invoice-generator/`, `gst-late-fee-calculator/`, `marketplace-profit-calculator/` | LIVE free-tool snapshot | YES | Explicit route generation and recursive asset copies in `build.js` | NO |
 | `pdf-to-word/`, `word-to-pdf/`, `jpg-to-pdf/`, `merge-pdf/`, `split-pdf/` | LIVE free-tool snapshot | YES | Explicit route generation, runtime assets, tests, and vendor PDF dependencies | NO |
