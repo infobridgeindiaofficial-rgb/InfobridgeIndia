@@ -41,6 +41,12 @@ export const mainNav = [
             { icon: "admin", title: "Administration", desc: "Companies, branches, roles & permissions", href: "/app/admin.html" },
           ],
         },
+        {
+          title: "Desktop software",
+          items: [
+            { icon: "ecommerce", title: "SellQuanta", desc: "Open-source Windows app for e-commerce orders & inventory", href: "/sellquanta.html" },
+          ],
+        },
       ],
     },
   },
@@ -99,6 +105,7 @@ export const footerColumns = [
       { title: "Inventory & Warehouse", href: "/inventory/index.html" },
       { title: "HR & Payroll", href: "/hr-payroll/index.html" },
       { title: "Banking", href: "/app/banking.html" },
+      { title: "SellQuanta (Windows)", href: "/sellquanta.html" },
     ],
   },
   {

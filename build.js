@@ -32,6 +32,7 @@ import { wordToPdfPageHtml } from "./src/pages/marketing/word-to-pdf.js";
 import { jpgToPdfPageHtml } from "./src/pages/marketing/jpg-to-pdf.js";
 import { mergePdfPageHtml } from "./src/pages/marketing/merge-pdf.js";
 import { splitPdfPageHtml } from "./src/pages/marketing/split-pdf.js";
+import { sellquantaPages } from "./src/pages/marketing/sellquanta.js";
 
 import {
   financePage,
@@ -93,6 +94,7 @@ const marketingPages = [
   companySetupPage(),
   companyProfilePage(),
   companySecurityPage(),
+  ...sellquantaPages(),
 ];
 
 let count = 0;

@@ -23,6 +23,8 @@ test('generated routes, assets, imports and fragment destinations resolve', () =
       const url=new URL(m[1].replaceAll('&amp;','&'),'https://infobridgeindia.online/'+file);
       if(url.hostname!=='infobridgeindia.online')continue;
       let target=decodeURIComponent(url.pathname).slice(1);if(!target||target.endsWith('/'))target+='index.html';
+      // GitHub Pages serves /name from name.html (clean URLs used by canonical links).
+      if(!available.has(target)&&available.has(target+'.html'))target+='.html';
       if(!available.has(target)){errors.push(`${file}: missing ${target}`);continue;}
       const id=decodeURIComponent(url.hash.slice(1));if(!id)continue;
       if(target==='hr-payroll/index.html'&&dynamicHrViews.has(id))continue;

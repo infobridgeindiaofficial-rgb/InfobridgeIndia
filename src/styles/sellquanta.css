@@ -1,0 +1,40 @@
+/* SellQuanta product pages - builds on the shared InfoBridgeIndia tokens and components. */
+.sq-subnav { background: var(--surface-0); border-bottom: 1px solid var(--border); }
+.sq-subnav-inner { display: flex; align-items: center; gap: var(--sp-5); min-height: 48px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.sq-subnav-inner::-webkit-scrollbar { display: none; }
+.sq-subnav-brand { font-weight: 700; color: var(--ink-900); margin-right: var(--sp-2); }
+.sq-subnav a { color: var(--ink-500); font-size: var(--fs-14); font-weight: 560; padding: 13px 0; border-bottom: 2px solid transparent; display: inline-flex; align-items: center; gap: 4px; }
+.sq-subnav a:hover { color: var(--ink-900); }
+.sq-subnav a[aria-current="page"] { color: var(--ink-900); border-bottom-color: var(--brand-600); }
+.sq-subnav .sq-subnav-gh { margin-left: auto; }
+.sq-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--sp-5); }
+.sq-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-6); }
+.sq-actions .btn, .sq-download-btn { display: inline-flex; align-items: center; gap: 8px; }
+.sq-section-alt { background: var(--surface-50); }
+.sq-intro .section-head { max-width: 780px; }
+.sq-split { align-items: start; gap: var(--sp-12); }
+.sq-split .h-2 { margin: var(--sp-3) 0 var(--sp-4); }
+.sq-point p, .sq-point strong { margin: 0; }
+.sq-point p { color: var(--ink-500); margin-top: 6px; line-height: 1.6; }
+.sq-point a, .sq-muted a, .sq-facts a, .sq-download-card a:not(.btn) { color: var(--brand-600); text-decoration: underline; text-underline-offset: 3px; }
+.sq-download-card { display: flex; flex-direction: column; gap: var(--sp-5); }
+.sq-download-card .h-4 { margin: 0; }
+.sq-download-action { display: flex; flex-direction: column; gap: var(--sp-3); align-items: flex-start; }
+.sq-download-btn[aria-disabled="true"] { cursor: default; opacity: .8; }
+.sq-banner p { margin: 4px 0 0; }
+.sq-download-card .banner p { margin: 4px 0 0; }
+.sq-muted { color: var(--ink-500); font-size: var(--fs-14); line-height: 1.7; margin: 0; }
+.sq-muted + .sq-muted, .sq-steps + .sq-muted { margin-top: var(--sp-3); }
+.sq-hash { word-break: break-all; font-size: var(--fs-12); }
+.sq-steps { margin: 0; padding-left: 1.25rem; color: var(--ink-700); line-height: 1.7; display: grid; gap: var(--sp-2); }
+.sq-footnote { color: var(--ink-400); font-size: var(--fs-13); margin-top: var(--sp-6); line-height: 1.6; }
+.sq-legal-crumbs { padding-top: var(--sp-6); }
+.legal-document code, .sq-muted code { font-size: 0.92em; background: var(--surface-50); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+@media (max-width: 720px) {
+  .sq-hero .service-icon-badge { display: none; }
+  .sq-cta .cta-band .row-gap-3 { flex-wrap: wrap; width: 100%; }
+  .sq-cta .cta-band .btn { width: 100%; justify-content: center; }
+  .sq-split { gap: var(--sp-8); }
+  .sq-actions .btn { width: 100%; justify-content: center; }
+  .sq-download-btn { width: 100%; justify-content: center; }
+}

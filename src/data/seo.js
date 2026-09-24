@@ -1,6 +1,6 @@
 const DOMAIN = "https://infobridgeindia.online";
 
-const page = (title, description, schema = "") => ({ title, description, schema });
+const page = (title, description, schema = "", path = "") => ({ title, description, schema, path });
 
 export const SEO_PAGES = Object.freeze({
   "/index.html": page(
@@ -91,6 +91,30 @@ export const SEO_PAGES = Object.freeze({
     "Contact InfoBridgeIndia | Help and Support",
     "Get help with InfoBridgeIndia and our business tools. Send a message through our contact form or contact us on WhatsApp.",
   ),
+  "/sellquanta.html": page(
+    "SellQuanta – E-commerce Order & Inventory Management for Windows | InfoBridge India",
+    "SellQuanta is free, open-source Windows software for e-commerce sellers to manage orders, inventory, marketplace SKU mappings, refunds and agent wallets, with data stored locally.",
+    "desktop",
+    "/sellquanta"
+  ),
+  "/sellquanta/download.html": page(
+    "Download SellQuanta for Windows | InfoBridge India",
+    "Download SellQuanta 1.0.2, the free open-source e-commerce order and inventory manager for Windows 10 and 11 (64-bit). MIT licensed.",
+    "",
+    "/sellquanta/download"
+  ),
+  "/sellquanta/privacy.html": page(
+    "SellQuanta Privacy Policy | InfoBridge India",
+    "How the SellQuanta Windows desktop app handles your data: local-first storage on your computer, no cloud account, no telemetry and optional local Ollama AI.",
+    "",
+    "/sellquanta/privacy"
+  ),
+  "/sellquanta/code-signing.html": page(
+    "SellQuanta Code Signing Policy | InfoBridge India",
+    "SellQuanta's code signing policy: current unsigned status, which official builds will be signed, release roles and privacy commitments.",
+    "",
+    "/sellquanta/code-signing"
+  ),
   "/security.html": page(
     "Data Security & Privacy | InfoBridgeIndia",
     "Learn how InfoBridgeIndia handles browser-based file processing, account security, business data protection and privacy considerations.",
@@ -98,6 +122,8 @@ export const SEO_PAGES = Object.freeze({
 });
 
 function canonicalUrl(route) {
+  const clean = SEO_PAGES[route]?.path;
+  if (clean) return `${DOMAIN}${clean}`;
   return route === "/index.html" ? `${DOMAIN}/` : `${DOMAIN}${route}`;
 }
 
@@ -106,12 +132,15 @@ function structuredData(route, seo) {
   const url = canonicalUrl(route);
   const application = {
     "@type": seo.schema === "webapp" ? "WebApplication" : "SoftwareApplication",
-    name: seo.title.split(" |")[0],
+    name: seo.schema === "desktop" ? seo.title.split(" –")[0] : seo.title.split(" |")[0],
     url,
     description: seo.description,
     applicationCategory: "BusinessApplication",
-    operatingSystem: "Web browser",
+    operatingSystem: seo.schema === "desktop" ? "Windows 10, Windows 11" : "Web browser",
   };
+  if (seo.schema === "desktop") {
+    Object.assign(application, { softwareVersion: "1.0.2", license: "https://opensource.org/licenses/MIT", offers: { "@type": "Offer", price: "0", priceCurrency: "INR" } });
+  }
   if (seo.schema !== "homepage") return { "@context": "https://schema.org", ...application };
   return {
     "@context": "https://schema.org",
