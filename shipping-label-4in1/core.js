@@ -509,6 +509,410 @@ export function sourcePageGeometry(objects, pageDict) {
 }
 
 // ---------------------------------------------------------------------------
+// Flipkart: crop the shipping label away from the Tax Invoice below it
+// ---------------------------------------------------------------------------
+// A Flipkart label PDF is one A4 page: the bordered shipping label at the top,
+// then a dashed cut line and the Tax Invoice. Only for a confidently detected
+// Flipkart page, the label's own drawn border is located and used as the
+// source region; content entirely outside it (the invoice) is dropped from the
+// copied content stream. Every other format keeps the complete MediaBox.
+
+const FLIPKART_RULE_THICKNESS = 2.5; // border rules are drawn as ~0.75pt filled bars
+const FLIPKART_PAD = 1; // keep the border's full stroke, nothing more
+const FLIPKART_SLOT_MARGIN = 4; // safe print margin inside the quadrant border
+
+const multiply = (m, n) => [
+  m[0] * n[0] + m[1] * n[2], m[0] * n[1] + m[1] * n[3],
+  m[2] * n[0] + m[3] * n[2], m[2] * n[1] + m[3] * n[3],
+  m[4] * n[0] + m[5] * n[2] + n[4], m[4] * n[1] + m[5] * n[3] + n[5],
+];
+const apply = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+
+function bytesToLatin1(bytes) {
+  let out = "";
+  for (let i = 0; i < bytes.length; i += 8192) out += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  return out;
+}
+
+function hexToUnicode(hex) {
+  let out = "";
+  for (let i = 0; i + 4 <= hex.length; i += 4) out += String.fromCharCode(parseInt(hex.slice(i, i + 4), 16));
+  return out;
+}
+
+// ToUnicode CMap: bfchar and bfrange entries -> code -> text.
+function parseToUnicode(text) {
+  const map = new Map();
+  let codeBytes = 1;
+  for (const block of text.matchAll(/beginbfchar([\s\S]*?)endbfchar/g)) {
+    for (const m of block[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]*)>/g)) {
+      codeBytes = Math.max(codeBytes, m[1].length / 2);
+      map.set(parseInt(m[1], 16), hexToUnicode(m[2]));
+    }
+  }
+  for (const block of text.matchAll(/beginbfrange([\s\S]*?)endbfrange/g)) {
+    for (const m of block[1].matchAll(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(<[0-9A-Fa-f]*>|\[[^\]]*\])/g)) {
+      codeBytes = Math.max(codeBytes, m[1].length / 2);
+      const lo = parseInt(m[1], 16), hi = parseInt(m[2], 16);
+      if (hi - lo > 65535) continue;
+      if (m[3][0] === "[") {
+        const items = [...m[3].matchAll(/<([0-9A-Fa-f]*)>/g)];
+        items.forEach((item, i) => map.set(lo + i, hexToUnicode(item[1])));
+      } else {
+        const base = m[3].slice(1, -1);
+        const first = hexToUnicode(base);
+        for (let code = lo; code <= hi; code++) {
+          map.set(code, first.slice(0, -1) + String.fromCharCode(first.charCodeAt(first.length - 1) + (code - lo)));
+        }
+      }
+    }
+  }
+  return { map, codeBytes };
+}
+
+// Embedded TrueType 'cmap' table, inverted to glyph id -> character. Used for
+// Identity-H fonts that carry no ToUnicode map (e.g. a label re-saved by iOS).
+function trueTypeGlyphToUnicode(font) {
+  const view = new DataView(font.buffer, font.byteOffset, font.byteLength);
+  const u16 = (o) => view.getUint16(o), u32 = (o) => view.getUint32(o);
+  const glyphs = new Map();
+  let cmap = -1;
+  for (let i = 0, n = u16(4); i < n; i++) {
+    const rec = 12 + i * 16;
+    if (String.fromCharCode(font[rec], font[rec + 1], font[rec + 2], font[rec + 3]) === "cmap") cmap = u32(rec + 8);
+  }
+  if (cmap < 0) return glyphs;
+  const subtables = [];
+  for (let i = 0, n = u16(cmap + 2); i < n; i++) {
+    const rec = cmap + 4 + i * 8;
+    subtables.push({ platform: u16(rec), encoding: u16(rec + 2), offset: cmap + u32(rec + 4) });
+  }
+  const rank = (t) => (t.platform === 3 && t.encoding === 10 ? 0 : t.platform === 3 && t.encoding === 1 ? 1 : t.platform === 0 ? 2 : 3);
+  for (const table of subtables.sort((a, b) => rank(a) - rank(b))) {
+    const o = table.offset, format = u16(o);
+    const set = (gid, code) => { if (gid && !glyphs.has(gid)) glyphs.set(gid, String.fromCodePoint(code)); };
+    if (format === 4) {
+      const segs = u16(o + 6) / 2, ends = o + 14, starts = ends + segs * 2 + 2, deltas = starts + segs * 2, ranges = deltas + segs * 2;
+      for (let s = 0; s < segs; s++) {
+        const end = u16(ends + s * 2), start = u16(starts + s * 2), delta = view.getInt16(deltas + s * 2), rangeOffset = u16(ranges + s * 2);
+        for (let code = start; code <= end && code !== 0xffff; code++) {
+          let gid;
+          if (!rangeOffset) gid = (code + delta) & 0xffff;
+          else {
+            const at = ranges + s * 2 + rangeOffset + (code - start) * 2;
+            gid = at + 1 < font.length ? u16(at) : 0;
+            if (gid) gid = (gid + delta) & 0xffff;
+          }
+          set(gid, code);
+        }
+      }
+    } else if (format === 12) {
+      for (let g = 0, n = u32(o + 12); g < n; g++) {
+        const rec = o + 16 + g * 12, start = u32(rec), end = u32(rec + 4), gid = u32(rec + 8);
+        for (let code = start; code <= end && code - start < 65536; code++) set(gid + code - start, code);
+      }
+    } else if (format === 0) {
+      for (let code = 0; code < 256; code++) set(font[o + 6 + code], code);
+    } else if (format === 6) {
+      const first = u16(o + 6);
+      for (let i = 0, n = u16(o + 8); i < n; i++) set(u16(o + 10 + i * 2), first + i);
+    }
+  }
+  return glyphs;
+}
+
+async function fontDecoder(sourceCtx, fontRef) {
+  const { objects, bytes } = sourceCtx;
+  const font = resolve(objects, fontRef) || {};
+  const type0 = font["/Subtype"] === "/Type0";
+  const decoder = { codeBytes: type0 ? 2 : 1, map: new Map(), widths: new Map(), defaultWidth: type0 ? 1000 : 500 };
+  const toUnicode = font["/ToUnicode"];
+  if (toUnicode && typeof toUnicode === "object" && "ref" in toUnicode) {
+    const parsed = parseToUnicode(bytesToLatin1(await decodeStream(bytes, objects.get(toUnicode.ref))));
+    decoder.map = parsed.map;
+    if (!type0) decoder.codeBytes = parsed.codeBytes;
+  }
+  if (type0) {
+    const descendants = resolve(objects, font["/DescendantFonts"]);
+    const cid = resolve(objects, Array.isArray(descendants) ? descendants[0] : null) || {};
+    decoder.defaultWidth = typeof cid["/DW"] === "number" ? cid["/DW"] : 1000;
+    const w = resolve(objects, cid["/W"]);
+    if (Array.isArray(w)) {
+      for (let i = 0; i < w.length;) {
+        const first = resolve(objects, w[i]), next = resolve(objects, w[i + 1]);
+        if (Array.isArray(next)) { next.forEach((v, k) => decoder.widths.set(first + k, resolve(objects, v))); i += 2; }
+        else { for (let c = first; c <= next; c++) decoder.widths.set(c, resolve(objects, w[i + 2])); i += 3; }
+      }
+    }
+    if (!decoder.map.size) {
+      const descriptor = resolve(objects, cid["/FontDescriptor"]) || {};
+      const file = descriptor["/FontFile2"];
+      const identity = !cid["/CIDToGIDMap"] || cid["/CIDToGIDMap"] === "/Identity";
+      if (identity && file && typeof file === "object" && "ref" in file) {
+        const fontBytes = await decodeStream(bytes, objects.get(file.ref));
+        if (fontBytes.length > 12) decoder.map = trueTypeGlyphToUnicode(fontBytes);
+      }
+    }
+  } else {
+    const first = resolve(objects, font["/FirstChar"]), widths = resolve(objects, font["/Widths"]);
+    if (typeof first === "number" && Array.isArray(widths)) widths.forEach((v, k) => decoder.widths.set(first + k, resolve(objects, v)));
+    if (!decoder.map.size) for (let c = 32; c < 256; c++) decoder.map.set(c, String.fromCharCode(c));
+  }
+  return decoder;
+}
+
+// Minimal content-stream tokenizer: yields operands and operators with their
+// source offsets so individual painting operators can be removed later.
+function* contentTokens(s) {
+  const number = /[+\-]?(?:\d+\.?\d*|\.\d+)/y, name = /\/[^\s()<>\[\]{}\/%]*/y, word = /[A-Za-z'"][A-Za-z0-9*'"]*/y;
+  let pos = 0;
+  const stack = [];
+  let operands = [], operandStart = -1;
+  while (pos < s.length) {
+    pos = skipWs(s, pos);
+    if (pos >= s.length) break;
+    const start = pos, ch = s[pos];
+    let value;
+    if (ch === "[") { stack.push({ operands, operandStart }); operands = []; operandStart = -1; pos++; if (stack.length === 1) stack[0].arrayStart = start; continue; }
+    if (ch === "]") {
+      const frame = stack.pop(); pos++;
+      if (!frame) continue;
+      const arr = operands; operands = frame.operands; operandStart = frame.operandStart;
+      if (operandStart < 0) operandStart = frame.arrayStart ?? start;
+      operands.push(arr);
+      continue;
+    }
+    if (ch === "<" && s[pos + 1] === "<") {
+      let depth = 0;
+      while (pos < s.length) {
+        if (s.startsWith("<<", pos)) { depth++; pos += 2; }
+        else if (s.startsWith(">>", pos)) { depth--; pos += 2; if (!depth) break; }
+        else if (s[pos] === "(") pos = parseLiteralString(s, pos)[1];
+        else pos++;
+      }
+      value = null;
+    } else if (ch === "<") [value, pos] = parseHexString(s, pos);
+    else if (ch === "(") [value, pos] = parseLiteralString(s, pos);
+    else if (ch === "/") { name.lastIndex = pos; const m = name.exec(s); value = m[0]; pos += m[0].length; }
+    else {
+      number.lastIndex = pos;
+      const n = number.exec(s);
+      if (n && n[0].length) { value = Number(n[0]); pos += n[0].length; }
+      else {
+        word.lastIndex = pos;
+        const w = word.exec(s);
+        if (!w) { pos++; continue; }
+        pos += w[0].length;
+        if (stack.length) continue; // stray operator inside an array: ignore
+        if (w[0] === "BI") { // inline image: skip its binary payload
+          const id = s.indexOf("ID", pos);
+          const ei = id < 0 ? -1 : s.slice(id + 2).search(/\sEI(?=[\s]|$)/);
+          pos = ei < 0 ? s.length : id + 2 + ei + 3;
+          yield { op: "BI", operands: [], start: operandStart < 0 ? start : operandStart, end: pos };
+        } else yield { op: w[0], operands, start: operandStart < 0 ? start : operandStart, opStart: start, end: pos };
+        operands = []; operandStart = -1;
+        continue;
+      }
+    }
+    if (operandStart < 0 && !stack.length) operandStart = start;
+    operands.push(value);
+  }
+}
+
+const PAINT_FILL = new Set(["f", "F", "f*", "B", "B*", "b", "b*"]);
+const PAINT_ANY = new Set([...PAINT_FILL, "S", "s"]);
+
+// Interprets one page: decoded text (with page-space glyph positions), filled
+// path parts and every painting operator's page-space bounds.
+async function interpretPage(sourceCtx, pageDict, content) {
+  const { objects } = sourceCtx;
+  const resources = inheritedResources(objects, pageDict);
+  const fonts = resolve(objects, resources["/Font"]) || {};
+  const xobjects = resolve(objects, resources["/XObject"]) || {};
+  const decoders = new Map();
+  const glyphs = []; // { ch, x, y, size }
+  const fills = []; // { x0, y0, x1, y1 } per filled subpath
+  const paints = []; // { start, end, opStart, op, box, name? }
+  let ctm = [1, 0, 0, 1, 0, 0];
+  let font = null, size = 0, leading = 0, charSpace = 0, wordSpace = 0, hScale = 1, rise = 0;
+  const stack = [];
+  let tm = [1, 0, 0, 1, 0, 0], tlm = tm;
+  let subpaths = [], current = null;
+  const point = (x, y) => { const [px, py] = apply(ctm, x, y); if (!current) { current = [px, py, px, py]; subpaths.push(current); } else { current[0] = Math.min(current[0], px); current[1] = Math.min(current[1], py); current[2] = Math.max(current[2], px); current[3] = Math.max(current[3], py); } };
+  const union = (boxes) => boxes.length ? [Math.min(...boxes.map((b) => b[0])), Math.min(...boxes.map((b) => b[1])), Math.max(...boxes.map((b) => b[2])), Math.max(...boxes.map((b) => b[3]))] : null;
+  const show = async (str, token, boxes) => {
+    if (!font) return;
+    if (!decoders.has(font)) decoders.set(font, await fontDecoder(sourceCtx, fonts[font]).catch(() => ({ codeBytes: 1, map: new Map(), widths: new Map(), defaultWidth: 500 })));
+    const dec = decoders.get(font), b = str.bytes || [];
+    for (let i = 0; i + dec.codeBytes <= b.length; i += dec.codeBytes) {
+      let code = 0;
+      for (let k = 0; k < dec.codeBytes; k++) code = code * 256 + b[i + k];
+      const m = multiply(tm, ctm);
+      const [x, y] = apply(m, 0, rise);
+      const scaleY = Math.hypot(m[2], m[3]) * size;
+      const width = (dec.widths.get(code) ?? dec.defaultWidth) / 1000;
+      const [x2, y2] = apply(m, width * size, rise + size);
+      glyphs.push({ ch: dec.map.get(code) ?? "", x, y, size: scaleY });
+      boxes.push([Math.min(x, x2), Math.min(y, y2), Math.max(x, x2), Math.max(y, y2)]);
+      const advance = (width * size + charSpace + (dec.codeBytes === 1 && code === 32 ? wordSpace : 0)) * hScale;
+      tm = multiply([1, 0, 0, 1, advance, 0], tm);
+    }
+  };
+  for (const t of contentTokens(content)) {
+    const a = t.operands;
+    switch (t.op) {
+      case "q": stack.push({ ctm, font, size, leading, charSpace, wordSpace, hScale, rise }); break;
+      case "Q": if (stack.length) ({ ctm, font, size, leading, charSpace, wordSpace, hScale, rise } = stack.pop()); break;
+      case "cm": if (a.length === 6) ctm = multiply(a, ctm); break;
+      case "m": current = null; point(a[0], a[1]); break;
+      case "l": point(a[0], a[1]); break;
+      case "c": point(a[0], a[1]); point(a[2], a[3]); point(a[4], a[5]); break;
+      case "v": case "y": point(a[0], a[1]); point(a[2], a[3]); break;
+      case "re": current = null; point(a[0], a[1]); point(a[0] + a[2], a[1] + a[3]); current = null; break;
+      case "h": break;
+      case "n": subpaths = []; current = null; break;
+      case "BT": tm = tlm = [1, 0, 0, 1, 0, 0]; break;
+      case "Tf": font = a[0]; size = a[1]; break;
+      case "TL": leading = a[0]; break;
+      case "Tc": charSpace = a[0]; break;
+      case "Tw": wordSpace = a[0]; break;
+      case "Tz": hScale = a[0] / 100; break;
+      case "Ts": rise = a[0]; break;
+      case "Td": tm = tlm = multiply([1, 0, 0, 1, a[0], a[1]], tlm); break;
+      case "TD": leading = -a[1]; tm = tlm = multiply([1, 0, 0, 1, a[0], a[1]], tlm); break;
+      case "Tm": if (a.length === 6) tm = tlm = [...a]; break;
+      case "T*": tm = tlm = multiply([1, 0, 0, 1, 0, -leading], tlm); break;
+      case "Tj": case "'": case "\"": case "TJ": {
+        if (t.op === "'" || t.op === "\"") tm = tlm = multiply([1, 0, 0, 1, 0, -leading], tlm);
+        if (t.op === "\"") { wordSpace = a[0]; charSpace = a[1]; }
+        const boxes = [];
+        const items = t.op === "TJ" ? a[0] || [] : [a[a.length - 1]];
+        for (const item of items) {
+          if (typeof item === "number") tm = multiply([1, 0, 0, 1, -item / 1000 * size * hScale, 0], tm);
+          else if (item && item.isString) await show(item, t, boxes);
+        }
+        paints.push({ ...t, box: union(boxes) });
+        break;
+      }
+      case "Do": {
+        const xobj = resolve(objects, xobjects[a[0]]) || {};
+        let corners = [[0, 0], [1, 0], [0, 1], [1, 1]], m = ctm;
+        if (xobj["/Subtype"] === "/Form" && Array.isArray(xobj["/BBox"])) {
+          const [x0, y0, x1, y1] = xobj["/BBox"].map((v) => resolve(objects, v));
+          corners = [[x0, y0], [x1, y0], [x0, y1], [x1, y1]];
+          if (Array.isArray(xobj["/Matrix"])) m = multiply(xobj["/Matrix"], ctm);
+        }
+        const pts = corners.map(([x, y]) => apply(m, x, y));
+        paints.push({ ...t, name: a[0], box: union(pts.map(([x, y]) => [x, y, x, y])) });
+        break;
+      }
+      case "BI": paints.push({ ...t, box: union([[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y]) => apply(ctm, x, y)).map(([x, y]) => [x, y, x, y])) }); break;
+      default:
+        if (PAINT_ANY.has(t.op)) {
+          if (PAINT_FILL.has(t.op)) for (const sp of subpaths) fills.push({ x0: sp[0], y0: sp[1], x1: sp[2], y1: sp[3] });
+          paints.push({ ...t, box: union(subpaths) });
+          subpaths = []; current = null;
+        }
+    }
+  }
+  return { glyphs, fills, paints };
+}
+
+// Finds `needle` (spaces ignored) in the page text; returns the glyph where it starts.
+function findText(glyphs, needle) {
+  const target = needle.replace(/\s+/g, "");
+  const chars = [], owners = [];
+  glyphs.forEach((g) => { for (const ch of g.ch.replace(/\s+/g, "")) { chars.push(ch); owners.push(g); } });
+  const index = chars.join("").indexOf(target);
+  return index < 0 ? null : owners[index];
+}
+
+/**
+ * Returns the Flipkart shipping-label rectangle (page coordinates) and the
+ * decoded content needed to crop it, or null when the page is not a
+ * confidently detected Flipkart label - in which case nothing changes.
+ */
+export async function detectFlipkartLabel(sourceCtx, pageDict) {
+  try {
+    const { pageBox, rotate } = sourcePageGeometry(sourceCtx.objects, pageDict);
+    if (rotate !== 0) return null;
+    const contentsVal = pageDict["/Contents"];
+    const refs = Array.isArray(contentsVal) ? contentsVal : [contentsVal];
+    const parts = [];
+    for (const ref of refs) {
+      const obj = ref && typeof ref === "object" && "ref" in ref ? sourceCtx.objects.get(ref.ref) : null;
+      if (obj?.stream) parts.push(bytesToLatin1(await decodeStream(sourceCtx.bytes, obj)));
+    }
+    const content = parts.join("\n");
+    // Cheap gate: a Flipkart page's text is drawn with Tj (no text, no crop).
+    if (!content || !/T[jJ]/.test(content)) return null;
+    const page = await interpretPage(sourceCtx, pageDict, content);
+    const ekart = findText(page.glyphs, "E-Kart Logistics");
+    const notForResale = findText(page.glyphs, "Not for resale.");
+    const printedAt = findText(page.glyphs, "Printed at");
+    const routing = findText(page.glyphs, "AWB No") || findText(page.glyphs, "HBD:") || findText(page.glyphs, "CPD:");
+    if (!ekart || !notForResale || !printedAt || !routing) return null;
+    const taxInvoice = findText(page.glyphs, "Tax Invoice");
+
+    // The label's outer border: thin filled rules just above the header and
+    // just below the "Not for resale. / Printed at" footer.
+    const t = FLIPKART_RULE_THICKNESS;
+    const horizontal = page.fills.filter((r) => r.y1 - r.y0 <= t && r.x1 - r.x0 >= 40);
+    const vertical = page.fills.filter((r) => r.x1 - r.x0 <= t && r.y1 - r.y0 >= 40);
+    const under = (r, g) => r.x0 - 1 <= g.x && g.x <= r.x1 + 1;
+    const footerY = Math.min(notForResale.y, printedAt.y);
+    const bottom = horizontal.filter((r) => under(r, notForResale) && r.y1 <= footerY && r.y1 >= footerY - 40).sort((p, q) => q.y1 - p.y1)[0];
+    const top = horizontal.filter((r) => under(r, ekart) && r.y0 >= ekart.y && r.y0 <= ekart.y + 60).sort((p, q) => p.y0 - q.y0)[0];
+    if (!bottom || !top) return null;
+    let x0 = Math.min(bottom.x0, top.x0), x1 = Math.max(bottom.x1, top.x1);
+    for (const v of vertical) {
+      const spans = v.y0 <= bottom.y1 + t && v.y1 >= top.y0 - t;
+      if (spans && Math.abs(v.x0 - x0) <= 2 * t) x0 = Math.min(x0, v.x0);
+      if (spans && Math.abs(v.x1 - x1) <= 2 * t) x1 = Math.max(x1, v.x1);
+    }
+    const region = [x0 - FLIPKART_PAD, bottom.y0 - FLIPKART_PAD, x1 + FLIPKART_PAD, top.y1 + FLIPKART_PAD];
+    // Sanity: the label must contain its header and footer, sit inside the
+    // page, be a plausible label size, and exclude the Tax Invoice.
+    const inside = (g) => g.x >= region[0] && g.x <= region[2] && g.y >= region[1] && g.y <= region[3];
+    if (![ekart, notForResale, printedAt, routing].every(inside)) return null;
+    if (taxInvoice && taxInvoice.y + taxInvoice.size >= region[1]) return null;
+    const w = region[2] - region[0], h = region[3] - region[1];
+    if (w < 100 || h < 150 || region[0] < pageBox[0] - 1 || region[1] < pageBox[1] - 1 || region[2] > pageBox[2] + 1 || region[3] > pageBox[3] + 1) return null;
+    return { region, content, paints: page.paints };
+  } catch {
+    return null;
+  }
+}
+
+async function deflate(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+// Physically crops the decoded content: painting operators whose bounds lie
+// entirely outside the label are removed (text/image) or turned into `n`
+// (paths, so path syntax stays valid). Returns the new content and the
+// XObject names the label still draws.
+function cropContent({ region, content, paints }) {
+  const outside = (b) => !b || b[2] < region[0] || b[0] > region[2] || b[3] < region[1] || b[1] > region[3];
+  const edits = [], used = new Set();
+  for (const p of paints) {
+    if (!outside(p.box)) { if (p.name) used.add(p.name); continue; }
+    if (p.op === "Tj" || p.op === "TJ" || p.op === "Do" || p.op === "BI") edits.push([p.start, p.end, " "]);
+    else if (PAINT_ANY.has(p.op)) edits.push([p.opStart, p.end, "n"]);
+    else if (p.name) used.add(p.name);
+  }
+  let out = "", last = 0;
+  for (const [start, end, text] of edits.sort((a, b) => a[0] - b[0])) {
+    if (start < last) continue;
+    out += content.slice(last, start) + text;
+    last = end;
+  }
+  out += content.slice(last);
+  return { text: out, used };
+}
+
+// ---------------------------------------------------------------------------
 // A4 4-up layout
 // ---------------------------------------------------------------------------
 
@@ -664,6 +1068,29 @@ function writePdf(builder, rootNum) {
 // Embedding one source page as a Form XObject
 // ---------------------------------------------------------------------------
 
+// Flipkart only: the form is the label rectangle, built from physically
+// cropped content and only the XObjects the label still draws.
+async function embedFlipkartLabelAsForm(builder, sourceCtx, pageDict, label) {
+  const resources = { ...inheritedResources(sourceCtx.objects, pageDict) };
+  const { text, used } = cropContent(label);
+  const xobjects = resolve(sourceCtx.objects, resources["/XObject"]);
+  if (xobjects && typeof xobjects === "object") {
+    resources["/XObject"] = Object.fromEntries(Object.entries(xobjects).filter(([name]) => used.has(name)));
+  }
+  const [x0, y0, x1, y1] = label.region;
+  const formDict = {
+    "/Type": "/XObject",
+    "/Subtype": "/Form",
+    "/FormType": 1,
+    "/BBox": label.region,
+    "/Matrix": [1, 0, 0, 1, -x0, -y0],
+    "/Resources": transformValue(sourceCtx, builder, resources),
+    "/Filter": "/FlateDecode",
+  };
+  const formNum = builder.addObject(formDict, await deflate(Uint8Array.from(text, (ch) => ch.charCodeAt(0) & 0xff)));
+  return { formNum, effW: x1 - x0, effH: y1 - y0 };
+}
+
 async function embedSlipAsForm(builder, sourceCtx, pageDict) {
   const { pageBox, rotate, effW, effH } = sourcePageGeometry(sourceCtx.objects, pageDict);
   const resources = inheritedResources(sourceCtx.objects, pageDict);
@@ -767,9 +1194,15 @@ export async function buildFourInOnePdf(files, { onProgress } = {}) {
     const contentLines = [];
     for (let slot = 0; slot < group.length; slot++) {
       const slip = group[slot];
-      const { formNum, effW, effH } = await embedSlipAsForm(builder, slip.sourceCtx, slip.pageDict);
+      const flipkart = await detectFlipkartLabel(slip.sourceCtx, slip.pageDict);
+      const { formNum, effW, effH } = flipkart
+        ? await embedFlipkartLabelAsForm(builder, slip.sourceCtx, slip.pageDict, flipkart)
+        : await embedSlipAsForm(builder, slip.sourceCtx, slip.pageDict);
       const box = slotBox(slot);
-      const { scale, offX, offY } = referencePlacement(effW, effH, box);
+      // A cropped Flipkart label is scaled up to fill its slot, centred, inside a small print margin.
+      const { scale, offX, offY } = flipkart
+        ? computePlacement(effW, effH, { x: box.x + FLIPKART_SLOT_MARGIN, y: box.y + FLIPKART_SLOT_MARGIN, w: box.w - 2 * FLIPKART_SLOT_MARGIN, h: box.h - 2 * FLIPKART_SLOT_MARGIN })
+        : referencePlacement(effW, effH, box);
       const name = `S${slot}`;
       xobjectDict["/" + name] = { ref: formNum, gen: 0 };
       // Contain scaling guarantees the complete source MediaBox fits inside

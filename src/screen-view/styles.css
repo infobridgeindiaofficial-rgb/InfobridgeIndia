@@ -1,0 +1,61 @@
+body{margin:0;background:var(--surface-50);color:var(--ink-800);font-family:var(--font-sans)}
+[hidden]{display:none!important}*{box-sizing:border-box}.sv-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px max(20px,env(safe-area-inset-right)) 18px max(20px,env(safe-area-inset-left));background:white;border-bottom:1px solid var(--border)}
+.sv-brand{display:flex;align-items:center;gap:10px;font-weight:750;text-decoration:none;color:var(--ink-900)}a{color:var(--brand-700)}
+.sv-main{max-width:1280px;margin:auto;padding:28px max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sv-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}h1{font-size:clamp(28px,5vw,40px);margin:4px 0}h2{font-size:24px;margin:0 0 12px}.sv-eyebrow{font-size:13px;color:var(--brand-700);margin:0}.sv-panel{background:white;border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:0 4px 18px #0a0f1a05}.sv-join{max-width:510px;margin:48px auto}.sv-badge{border-radius:30px;padding:7px 12px;background:var(--brand-100);color:var(--brand-800);font-size:12px;font-weight:700;white-space:nowrap}label{display:block;font-weight:600;margin:16px 0 8px}input{font:16px var(--font-sans);width:100%;min-width:0;border:1px solid var(--border-strong);border-radius:8px;padding:12px;color:var(--ink-800);background:white}button{min-height:44px;border:1px solid transparent;border-radius:8px;background:var(--brand-700);color:white;padding:10px 16px;font:600 14px var(--font-sans);cursor:pointer}button:hover{filter:brightness(.94)}button:disabled{opacity:.5;cursor:default}button.secondary,.sv-keyboard button,#control-bar nav button,#tabs button{background:var(--surface-100);color:var(--ink-700);border-color:var(--border)}button.danger{background:var(--danger-100);color:var(--danger-700);margin-left:auto}input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--brand-400);outline-offset:2px}#join button{width:100%;margin-top:16px}#code{font-family:var(--font-mono);letter-spacing:2px}.sv-note,.sv-footnote{font-size:13px;line-height:1.65;color:var(--ink-400)}.sv-footnote{text-align:center;margin:24px 0}.sv-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.sv-address{display:flex;gap:8px;margin:12px 0}.sv-session-line{margin-bottom:16px}.sv-message{color:var(--danger-700);white-space:pre-wrap;overflow-wrap:anywhere}.sv-message:empty{display:none}.sv-viewport{position:relative;border:1px solid var(--border);border-radius:10px;background:var(--surface-100);overflow:hidden;margin-top:12px;min-height:260px;touch-action:none;user-select:none;-webkit-user-select:none}.sv-viewport img{display:block;width:100%;height:auto;pointer-events:none}.sv-viewport img:not([src]){display:none}.sv-viewport p{padding:32px;text-align:center}.sv-keyboard{max-width:720px}.sv-keyboard input{font-size:16px}#tabs{margin:8px 0}#tabs button[aria-pressed=true]{border-color:var(--brand-500)}.sv-card{border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px;overflow-wrap:anywhere}.sv-card strong{font-family:var(--font-mono);font-size:19px}.sv-card p{margin:8px 0}.sv-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}body[data-mode=admin] .sv-viewport{touch-action:auto}
+@media(max-width:600px){.sv-main{padding-top:20px}.sv-header{font-size:13px}.sv-panel{padding:14px}.sv-join{margin:20px auto}.sv-heading{align-items:flex-start}.sv-eyebrow{max-width:220px}.sv-session-line{font-size:12px}.sv-badge{padding:6px 9px}.sv-viewport{min-height:200px}button{padding:10px 13px}}
+
+/* Connected session: an immersive browser. The viewer tracks the visual viewport (keyboard, rotation, zoom). */
+body.sv-connected{overflow:hidden;overscroll-behavior:none;background:#fff}
+.sv-connected>.sv-header,.sv-connected .sv-heading,.sv-connected .sv-footnote,.sv-connected #viewer>.sv-note{display:none}
+.sv-connected .sv-main{max-width:none;margin:0;padding:0}
+.sv-connected #viewer{position:fixed;top:var(--sv-top,0px);left:var(--sv-left,0px);width:var(--sv-width,100vw);height:100vh;height:var(--sv-height,100dvh);display:flex;flex-direction:column;min-height:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:#fff;
+  padding-bottom:env(safe-area-inset-bottom)}
+.sv-connected #control-bar,.sv-connected .sv-session-line{display:flex;flex-wrap:nowrap;align-items:center;gap:2px;flex:none;min-height:44px;margin:0;
+  padding:calc(env(safe-area-inset-top) + 3px) max(4px,env(safe-area-inset-right)) 3px max(4px,env(safe-area-inset-left));background:#f7f9fb;border-bottom:1px solid #dce3ec}
+.sv-connected #control-bar nav{flex-wrap:nowrap;gap:0}
+.sv-connected #control-bar button{display:inline-grid;place-items:center;flex:none;width:36px;min-width:0;height:36px;min-height:0;padding:0;border:0;border-radius:8px;background:transparent;color:#1c344a}
+.sv-connected #control-bar button:hover:not(:disabled){background:#e6ecf2;filter:none}
+.sv-connected #control-bar .sv-end{color:var(--danger-700);margin-left:2px}
+.sv-connected .sv-address{position:relative;display:flex;align-items:center;flex:1;min-width:0;margin:0 2px;gap:0;height:36px;background:#e9eef3;border-radius:18px;padding-left:24px}
+.sv-connected #address{height:36px;min-width:0;border:0;border-radius:0;background:transparent;padding:0 4px;font-size:16px;color:#14263a}
+.sv-connected #address:focus{outline:0}.sv-connected .sv-address:focus-within{box-shadow:0 0 0 2px var(--brand-400);background:#fff}
+.sv-connected #control-bar .sv-go{width:auto;height:28px;margin-right:4px;padding:0 10px;border-radius:14px;background:var(--brand-700);color:#fff;font-size:12px}
+.sv-connected #control-bar .sv-address:not(:focus-within) .sv-go{display:none}
+.sv-dot{width:9px;height:9px;flex:none;border-radius:50%;background:#e0a100}
+.sv-address .sv-dot{position:absolute;left:10px;top:13px}
+.sv-dot[data-state=connected]{background:#14a86b}.sv-dot[data-state=disconnected],.sv-dot[data-state=ended]{background:#d6453d}
+/* Admin: one compact, view-only bar. */
+.sv-connected .sv-session-line{gap:8px;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right));font-size:12px}
+.sv-connected .sv-session-line #session-label{font-family:var(--font-mono);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sv-connected .sv-session-line .sv-badge{padding:4px 8px;font-size:11px}
+.sv-connected #presence{color:#4d5d72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sv-connected .sv-session-line button{min-height:34px;height:34px;padding:0 10px;font-size:12px;flex:none}
+.sv-connected .sv-session-line .sv-fullscreen{display:inline-grid;place-items:center;width:34px;padding:0;margin-left:auto}
+.sv-connected .sv-session-line button.danger{margin-left:0}
+.sv-connected[data-mode=participant] .sv-session-line{display:none}
+/* Tabs appear only when the remote browser has more than one. */
+.sv-connected #tabs{flex:none;flex-wrap:nowrap;overflow-x:auto;gap:4px;margin:0;padding:3px 6px;background:#f7f9fb;border-bottom:1px solid #dce3ec}
+.sv-connected #tabs button{flex:none;min-height:28px;padding:2px 10px;font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The remote page fills every remaining pixel; JS sizes the image to the exact remote viewport. */
+.sv-connected .sv-viewport{flex:1;min-height:0;width:100%;margin:0;border:0;border-radius:0;background:#fff;overflow:hidden;outline:0;
+  margin-left:env(safe-area-inset-left);width:auto;margin-right:env(safe-area-inset-right)}
+.sv-connected[data-mode=admin] .sv-viewport{background:#e5eaf0}
+.sv-connected[data-mode=participant] .sv-viewport:focus-visible{box-shadow:inset 0 0 0 2px var(--brand-400)}
+.sv-connected .sv-viewport img{position:absolute;max-width:none;width:100%;height:auto}
+.sv-connected #waiting{position:absolute;inset:0;display:grid;place-content:center;margin:0;padding:24px;color:#4d5d72}
+/* Software keyboard helper sits above the device keyboard as part of the layout, never over the page. */
+.sv-connected .sv-keyboard{flex:none;max-width:none;background:#f7f9fb;padding:6px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left));border-top:1px solid #c6d1dd}
+.sv-connected .sv-keyboard .sv-actions{flex-wrap:nowrap;gap:4px;overflow-x:auto}
+.sv-connected .sv-keyboard label{margin:0;font-size:12px;flex:1}
+.sv-connected .sv-keyboard input{padding:7px 10px;margin:4px 0;font-size:16px}
+.sv-connected .sv-keyboard .sv-note{display:none}
+.sv-connected .sv-keyboard button{flex:none;min-height:32px;padding:4px 10px;font-size:12px}
+.sv-connected #message:not(:empty){position:fixed;z-index:8;top:calc(var(--sv-top,0px) + env(safe-area-inset-top) + 50px);left:12px;right:12px;max-width:720px;margin:0 auto;padding:10px 14px;border:1px solid #e9c4bf;border-radius:8px;background:#fff5f3;box-shadow:0 3px 16px #15223818;font-size:13px}
+/* Immersive fallback where the Fullscreen API is unavailable (iPhone Safari): hide the toolbar. */
+.sv-immersive #control-bar,.sv-immersive .sv-session-line,.sv-immersive #tabs{display:none!important}
+.sv-immersive-exit{position:fixed;z-index:9;top:calc(var(--sv-top,0px) + env(safe-area-inset-top) + 6px);right:calc(env(safe-area-inset-right) + 6px);display:grid;place-items:center;width:36px;height:36px;min-height:0;padding:0;border-radius:50%;background:#14263acc;color:#fff;opacity:.7}
+.sv-immersive-exit:hover{opacity:1}
+@media(max-width:360px){.sv-connected #control-bar button{width:31px}.sv-connected .sv-address{padding-left:20px}.sv-address .sv-dot{left:8px}}
+@media(max-width:600px){.sv-connected[data-mode=admin] #presence{display:none}.sv-connected[data-mode=admin] #session-label{font-size:11px}}
+/* Short landscape phones: trim the bar so the page keeps the height. */
+@media(max-height:500px) and (orientation:landscape){.sv-connected #control-bar,.sv-connected .sv-session-line{min-height:40px;padding-top:calc(env(safe-area-inset-top) + 2px);padding-bottom:2px}.sv-connected #control-bar button{height:34px}}
