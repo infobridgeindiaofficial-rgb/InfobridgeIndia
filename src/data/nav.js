@@ -63,6 +63,7 @@ export const mainNav = [
             { icon: "clock", title: "GST Interest Calculator", desc: "Interest on delayed GST payments", href: "/gst-interest-calculator.html" },
             { icon: "alertCircle", title: "GST Late Fee Calculator", desc: "Late fees for delayed GST returns", href: "/gst-late-fee-calculator.html" },
             { icon: "ecommerce", title: "Marketplace Profit Calculator", desc: "True profit after marketplace fees and costs", href: "/marketplace-profit-calculator.html" },
+            { icon: "workflow", title: "Screen View", desc: "Join and control a secure shared browser session", href: "/screen-view/" },
           ],
         },
         {
