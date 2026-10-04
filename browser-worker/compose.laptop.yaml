@@ -1,0 +1,62 @@
+# Linux containers on Windows. No host ports; public ingress is tunnel-only.
+name: infobridge-screen-view-laptop
+services:
+  worker:
+    image: infobridge-screen-view-worker:laptop
+    extends:
+      file: compose.yaml
+      service: worker
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8090/api/sessions',{headers:{Origin:process.env.ALLOWED_ORIGINS,'X-Forwarded-Proto':'https'}}).then(r=>process.exit(r.status===401&&r.headers.get('access-control-allow-origin')===process.env.ALLOWED_ORIGINS?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+  egress:
+    image: infobridge-screen-view-worker:laptop
+    extends:
+      file: compose.yaml
+      service: egress
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      BROWSER_DOMAIN: ${BROWSER_DOMAIN:-browser.infobridgeindia.online}
+    volumes:
+      - ./Caddyfile.laptop:/etc/caddy/Caddyfile:ro
+    networks: [private]
+    depends_on:
+      worker:
+        condition: service_healthy
+    read_only: true
+    tmpfs: [/data, /config]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+  tunnel:
+    image: cloudflare/cloudflared:2026.9.3
+    restart: unless-stopped
+    command: [tunnel, --no-autoupdate, run, --token-file, /run/secrets/tunnel_token]
+    secrets: [tunnel_token]
+    networks: [private, internet]
+    depends_on: [gateway]
+    read_only: true
+    cap_drop: [ALL]
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+networks:
+  private:
+    internal: true
+  internet: {}
+secrets:
+  tunnel_token:
+    file: ./.env.tunnel-token

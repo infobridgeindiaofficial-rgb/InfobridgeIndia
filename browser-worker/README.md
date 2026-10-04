@@ -2,6 +2,8 @@
 
 For the current production connection diagnosis, exact DNS/VPS steps, production environment template and API/WSS acceptance checks, see [PRODUCTION.md](PRODUCTION.md). Copy `.env.production.example` rather than the local-development template when deploying with Compose.
 
+For the zero-cost Windows laptop deployment with isolated Linux containers and outbound-only Cloudflare Tunnel, see [LAPTOP.md](LAPTOP.md) and `compose.laptop.yaml`. This option publishes no host ports and reuses the production worker security controls.
+
 ## Architecture and hosting audit
 
 The existing site is a custom Node-generated static HTML/CSS/JS application. `build.js` renders `src/pages` with `src/components` and `src/data/nav.js`, copies explicitly selected runtime assets, and normally synchronizes `dist` into the tracked repository-root GitHub Pages snapshot. `serve.js` is only a development static server. `CNAME` points to `infobridgeindia.online`; the build and existing connection audit explicitly identify GitHub Pages. No persistent application server, WebSocket host, or Chromium deployment existed. The nested `Infobridgeindia website` directory and deployment worktree are separate copies and were not modified.

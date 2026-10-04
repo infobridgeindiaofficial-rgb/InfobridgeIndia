@@ -1,0 +1,19 @@
+# Cloudflare terminates public HTTPS/WSS; this hop stays inside the private network.
+{
+	auto_https off
+	admin off
+}
+http://{$BROWSER_DOMAIN} {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), clipboard-read=(), clipboard-write=()"
+	}
+	reverse_proxy worker:8090 {
+		# This gateway has no published ports and is reached only by the tunnel.
+		# Set HTTPS unconditionally after requiring HTTPS at the Cloudflare edge.
+		header_up X-Forwarded-Proto https
+		header_up X-Real-IP {http.request.header.Cf-Connecting-Ip}
+	}
+}

@@ -697,12 +697,8 @@
 			],
 			"action": "SCMP_ACT_ALLOW",
 			"args": [],
-			"comment": "",
-			"includes": {
-				"caps": [
-					"CAP_SYS_CHROOT"
-				]
-			},
+			"comment": "Chromium chroots inside its own user namespace. Keep host capabilities dropped; the kernel still enforces namespace-local CAP_SYS_CHROOT.",
+			"includes": {},
 			"excludes": {}
 		},
 		{
