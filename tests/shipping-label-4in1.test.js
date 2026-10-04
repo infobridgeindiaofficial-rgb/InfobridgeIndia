@@ -393,3 +393,59 @@ test("the produced PDF preserves the original content stream bytes untouched for
   assert.equal(formBytes.length, srcContentBytes.length);
   assert.ok(Buffer.from(formBytes).equals(Buffer.from(srcContentBytes)), "original compressed content stream bytes must be copied verbatim");
 });
+
+// Synthetic Flipkart-style page (no customer data): a bordered shipping label
+// at the top, a dashed cut line, then a Tax Invoice with its own table.
+function buildFlipkartLikePdf({ withCarrier = true } = {}) {
+  const rule = (x, y, w, h) => `${x} ${y} ${w} ${h} re f`;
+  const text = (x, y, s) => `BT /F1 9 Tf ${x} ${y} Td (${s}) Tj ET`;
+  const content = [
+    "0 0 0 rg",
+    rule(190.5, 813, 214, 0.75), rule(190.5, 461, 214, 0.75), rule(190.5, 461, 0.75, 352.75), rule(403.5, 461, 0.75, 352.75),
+    text(195, 800, "STD"), text(230, 800, withCarrier ? "E-Kart Logistics" : "Courier Logistics"),
+    text(195, 700, "AWB No. FMPC0000000000"), text(195, 600, "HBD: 01 - 01"), text(195, 590, "CPD: 02 - 01"),
+    text(195, 466, "Not for resale."), text(300, 466, "Printed at 1200 hrs, 01/01/26"),
+    "[6 6] 0 d 34 456.5 m 560 456.5 l S [] 0 d",
+    text(40, 430, "Tax Invoice"), text(40, 410, "Invoice No: TEST0001"),
+    rule(40, 200, 515, 0.75), rule(40, 380, 515, 0.75),
+  ].join("\n") + "\n";
+  const objects = [
+    `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`,
+    `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`,
+    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj\n`,
+    `4 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`,
+    `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`,
+  ];
+  return new Uint8Array(Buffer.concat([Buffer.from("%PDF-1.4\n" + objects.join(""), "latin1"), Buffer.from("trailer\n<< /Root 1 0 R >>\n%%EOF", "latin1")]));
+}
+
+async function slotForm(bytes) {
+  const doc = await generatedPages(bytes);
+  const placement = readSlotPlacements(doc, doc.pages[0]).S0;
+  const form = doc.objects.get(doc.pages[0].dict["/Resources"]["/XObject"]["/S0"].ref);
+  let stream = doc.bytes.slice(form.stream.byteStart, form.stream.byteEnd);
+  if (form.dict["/Filter"] === "/FlateDecode") stream = new Uint8Array(await new Response(new Blob([stream]).stream().pipeThrough(new DecompressionStream("deflate"))).arrayBuffer());
+  return { placement, content: Buffer.from(stream).toString("latin1") };
+}
+
+test("Flipkart: only the bordered shipping label is embedded; the Tax Invoice is physically removed", async () => {
+  const result = await buildFourInOnePdf(Array.from({ length: 4 }, (_, i) => ({ name: `fk${i}.pdf`, bytes: buildFlipkartLikePdf() })));
+  assert.equal(result.slipCount, 4);
+  assert.equal(result.pageCount, 1);
+  const { placement, content } = await slotForm(result.bytes);
+  assert.deepEqual(placement.bbox, [189.5, 460, 405.5, 814.75]); // the drawn border + 1pt, not the A4 page
+  assert.match(content, /\(E-Kart Logistics\) Tj/);
+  assert.match(content, /\(Not for resale\.\) Tj/);
+  assert.doesNotMatch(content, /Tax Invoice|Invoice No/);
+  assert.ok(placement.scale > 0.9, `label is scaled up to fill its quadrant (scale ${placement.scale})`);
+  const box = slotBox(0);
+  assert.ok(placement.offX >= box.x && placement.offY >= box.y);
+  assert.ok(placement.offX + 216 * placement.scale <= box.x + box.w && placement.offY + 354.75 * placement.scale <= box.y + box.h);
+});
+
+test("Flipkart crop needs confident detection: the same layout without Flipkart markers keeps the full page", async () => {
+  const result = await buildFourInOnePdf([{ name: "other.pdf", bytes: buildFlipkartLikePdf({ withCarrier: false }) }]);
+  const { placement, content } = await slotForm(result.bytes);
+  assert.deepEqual(placement.bbox, [0, 0, 595, 842]);
+  assert.match(content, /Tax Invoice/);
+});

@@ -1,0 +1,51 @@
+const svg = path => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+const icons = {
+  back: svg('<path d="M15 18l-6-6 6-6"/>'), forward: svg('<path d="M9 18l6-6-6-6"/>'),
+  refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'),
+  home: svg('<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/>'),
+  keyboard: svg('<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+  fullscreen: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  close: svg('<path d="M6 6l12 12M18 6L6 18"/>')
+};
+
+export function screenViewPage(admin = false) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self' https: wss: http://localhost:8090 ws://localhost:8090; object-src 'none'; base-uri 'none'; form-action 'self'">
+<title>Screen View${admin ? ' Admin' : ''} — InfoBridgeIndia</title>
+<link rel="icon" href="/infobridgeindia-logo.png"><link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/base.css"><link rel="stylesheet" href="/screen-view/styles.css">
+<script src="/vendor/supabase.js" defer></script><script src="/supabase-config.js" defer></script>
+<script src="/screen-view-config.js" defer></script><script type="module" src="/screen-view/client.js"></script>
+</head><body data-mode="${admin ? 'admin' : 'participant'}">
+<header class="sv-header"><a class="sv-brand" href="/index.html"><img src="/logo/favicon-32x32.png" alt="" width="32" height="32">InfoBridgeIndia</a>
+<a href="${admin ? '/screen-view/' : '/screen-view/admin/'}">${admin ? 'Join a session' : 'Admin sessions'}</a></header>
+<main class="sv-main"><div class="sv-heading"><div><p class="sv-eyebrow">A shared browser, wherever you are</p><h1>Screen View</h1></div>
+<span id="status" class="sv-badge" role="status">Not connected</span></div>
+<p id="message" role="alert" class="sv-message"></p>
+<section id="lobby" class="sv-panel ${admin ? '' : 'sv-join'}">
+${admin ? `<h2>Admin sessions</h2><p>Create a temporary browser for one participant. Your access is view only.</p>
+<div class="sv-actions"><a id="login" href="/login.html">Sign in with your existing account</a><button id="create" type="button">Create Session</button><button id="reload" class="secondary" type="button">Refresh list</button></div>
+<div id="sessions" aria-live="polite"></div>` : `<h2>Join a session</h2><p>Enter the Session ID shared by your admin.</p>
+<form id="join"><label for="code">Session ID</label><input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXXX-XXXXXX-XXXXXX" maxlength="30" required>
+<p class="sv-note">You control a temporary remote browser. Your admin can see everything displayed inside it, including the websites you sign into. Your device screen, apps, camera and files stay private.</p>
+<button type="submit">Join Session</button></form>`}
+</section>
+<section id="viewer" class="sv-panel" hidden aria-label="Shared browser">
+<div id="session-tools" class="sv-actions sv-session-line"><strong id="session-label"></strong><span id="permission" class="sv-badge"></span><span id="presence"></span>${admin ? `<span class="sv-dot" data-conn aria-hidden="true"></span><button type="button" class="secondary sv-fullscreen" aria-label="Full screen" title="Full screen">${icons.fullscreen}</button><button id="end" class="danger" type="button">End Session</button>` : ''}</div>
+<div id="control-bar"><nav class="sv-actions" aria-label="Remote browser controls">
+<button type="button" data-command="back" aria-label="Back" title="Back">${icons.back}</button><button type="button" data-command="forward" aria-label="Forward" title="Forward">${icons.forward}</button>
+<button type="button" data-command="refresh" aria-label="Refresh" title="Refresh">${icons.refresh}</button><button type="button" data-command="home" aria-label="Home" title="Home">${icons.home}</button></nav>
+<form id="navigate" class="sv-address"><span class="sv-dot" data-conn aria-hidden="true"></span><label class="sv-sr" for="address">URL or search query</label><input id="address" type="text" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Search or enter URL"><button type="submit" class="sv-go">Go</button></form>
+<button id="keyboard-toggle" type="button" aria-label="Open keyboard" title="Keyboard" aria-expanded="false" aria-controls="keyboard-bar">${icons.keyboard}</button><button type="button" class="sv-fullscreen" aria-label="Full screen" title="Full screen">${icons.fullscreen}</button>${admin ? '' : `<button id="end" type="button" class="sv-end" aria-label="End Session" title="End Session">${icons.close}</button>`}</div>
+<div id="tabs" class="sv-actions" aria-label="Remote tabs" hidden></div>
+<button id="immersive-exit" type="button" class="sv-immersive-exit" aria-label="Show toolbar" hidden>${icons.fullscreen}</button>
+<div id="viewport" class="sv-viewport"${admin ? '' : ' tabindex="0"'} aria-label="Remote browser viewport"><img id="frame" alt="Live remote browser" draggable="false"><p id="waiting">Waiting for the participant to join…</p></div>
+<div id="keyboard-bar" class="sv-keyboard" hidden><div class="sv-actions"><label for="typing">Remote keyboard</label><button id="keyboard-close" type="button" class="secondary" aria-label="Close keyboard">Done</button></div>
+<input id="typing" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tap here to open your keyboard" aria-describedby="typing-help">
+<p id="typing-help" class="sv-note">Tap a field in the browser first, then type here. Text is sent as you type and cleared from this input.</p>
+<div class="sv-actions"><button type="button" data-key="Tab">Tab</button><button type="button" data-key="Enter">Enter</button><button type="button" data-key="Backspace">⌫</button><button type="button" data-key="Escape">Esc</button><button type="button" data-key="ControlOrMeta+A">Select all</button></div></div>
+<p class="sv-note">Downloads: Phase 2. File downloads and uploads are unavailable in this version. Sessions end after 10 minutes without participant activity or after 60 minutes.</p>
+</section><p class="sv-footnote">Only the remote browser is shared. End Session clears its temporary sign-ins and browser state.</p></main></body></html>`;
+}

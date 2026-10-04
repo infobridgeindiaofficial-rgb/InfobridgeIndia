@@ -1,0 +1,64 @@
+services:
+  worker:
+    build: .
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      EGRESS_ISOLATED: "true"
+      EGRESS_PROXY: http://egress:8091
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?Set HTTPS website origins}
+      SUPABASE_URL: ${SUPABASE_URL:?Set Supabase URL}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?Set Supabase publishable key}
+      SCREEN_VIEW_ADMIN_IDS: ${SCREEN_VIEW_ADMIN_IDS:?Set authorized Supabase user UUIDs}
+      MAX_SESSIONS: ${MAX_SESSIONS:-4}
+    networks: [private]
+    depends_on: [egress]
+    read_only: true
+    tmpfs:
+      - /tmp:size=2g,mode=1777
+      - /home/browser:size=32m,uid=10001,gid=10001
+    shm_size: 1gb
+    pids_limit: 512
+    mem_limit: 4g
+    cpus: 2
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - seccomp=./seccomp_profile.json
+    cap_drop: [ALL]
+  egress:
+    build: .
+    init: true
+    restart: unless-stopped
+    command: [node, proxy.js]
+    environment:
+      PROXY_HOST: 0.0.0.0
+      PROXY_PORT: 8091
+    networks: [private, internet]
+    read_only: true
+    cap_drop: [ALL]
+    mem_limit: 256m
+    pids_limit: 64
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      BROWSER_DOMAIN: ${BROWSER_DOMAIN:-browser.infobridgeindia.online}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [private, internet]
+    depends_on: [worker]
+networks:
+  private:
+    internal: true
+  internet: {}
+volumes:
+  caddy_data: {}
+  caddy_config: {}

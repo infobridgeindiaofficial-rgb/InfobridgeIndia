@@ -1,0 +1,12 @@
+{$BROWSER_DOMAIN} {
+  header {
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options nosniff
+    Referrer-Policy no-referrer
+    Permissions-Policy "camera=(), microphone=(), geolocation=(), clipboard-read=(), clipboard-write=()"
+  }
+  reverse_proxy worker:8090 {
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "infobridge-screen-view-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "proxy": "node proxy.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=24.0"
+  },
+  "dependencies": {
+    "ipaddr.js": "2.5.0",
+    "playwright": "1.63.0",
+    "undici": "8.11.2",
+    "ws": "8.22.0"
+  }
+}

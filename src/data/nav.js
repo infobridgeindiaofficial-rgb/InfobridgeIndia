@@ -27,6 +27,7 @@ export const mainNav = [
         {
           title: "People & operations",
           items: [
+            { icon: "globe", title: "Screen View", desc: "Join a temporary shared remote browser", href: "/screen-view/" },
             { icon: "hr", title: "HR & Payroll", desc: "Attendance, statutory payroll, self-service", href: "/hr-payroll/index.html" },
             { icon: "projects", title: "Projects & Operations", desc: "Timesheets, budgets, internal requests", href: "/products/projects-operations.html" },
             { icon: "documents", title: "Documents", desc: "Contracts, records and expiry reminders", href: "/app/documents.html" },
@@ -155,6 +156,7 @@ export const appNav = [
   {
     group: "System",
     items: [
+      { icon: "globe", title: "Screen View", href: "/screen-view/admin/" },
       { icon: "admin", title: "Administration", href: "/app/admin.html" },
       { icon: "settings", title: "Settings", href: "/app/settings.html" },
     ],

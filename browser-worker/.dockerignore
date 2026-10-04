@@ -1,0 +1,7 @@
+node_modules
+.env
+.env.*
+test
+*.log
+README.md
+seccomp_profile.json
