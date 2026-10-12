@@ -6,14 +6,14 @@ import { legalDocument, legalDocumentHead } from "../../components/legal-documen
 // SellQuanta - open-source Windows desktop app published by InfoBridgeIndia.
 // Source of truth: https://github.com/infobridgeindiaofficial-rgb/sellquanta
 export const SELLQUANTA = Object.freeze({
-  version: "1.0.2",
+  version: "1.1.1",
   repo: "https://github.com/infobridgeindiaofficial-rgb/sellquanta",
   // Public, no-login download of the installer built by the repository's GitHub Actions release workflow.
   // null = no public release published yet: the download page then shows the source link instead of a button.
-  installerUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/v1.0.2/SellQuanta-Setup-1.0.2.exe",
-  installerSize: "about 110 MB",
-  installerSha256: "56cc96e19cc5a7073f088dfd6b576a3982c7ceef50be87cbb5df0290c0b22870",
-  releaseUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/tag/v1.0.2",
+  installerUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/v1.1.1/SellQuanta-Setup-1.1.1.exe",
+  installerSize: "121.8 MiB (127,719,953 bytes), unsigned",
+  installerSha256: "584edff258ca0d108f47dc6f0991b45353b37e5118c9daa203cc932e6cacacb7",
+  releaseUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/tag/v1.1.1",
 });
 
 const EXTRA_HEAD = '<link rel="stylesheet" href="/styles/sellquanta.css" />';
@@ -50,7 +50,7 @@ function badges() {
 
 export function sellquantaHomePage() {
   const features = [
-    ["warehouse", "Warehouse & Inventory Management", "Products, warehouse product codes, cost price, opening stock, stock adjustments and low-stock levels."],
+    ["warehouse", "Warehouse & Purchase Management", "Read-only stock overview and validated purchases, suppliers and purchase history."],
     ["package", "Product Master", "One place to map every marketplace SKU to the right warehouse product, per company."],
     ["link", "Amazon / Flipkart / Meesho mapping", "Map marketplace SKUs from Amazon, Flipkart and Meesho listings to your own warehouse products."],
     ["file", "Shipping-label PDF scanning", "Read order ID, SKU, quantity and amount from supported shipping-label and invoice PDFs. Results are shown for review before saving."],
@@ -58,9 +58,9 @@ export function sellquantaHomePage() {
     ["inventory", "Automatic stock deduction", "Saving a sale deducts stock from the mapped warehouse product; refunds return it."],
     ["trendingDown", "Refund Management", "Refund a sale within the refund window, return stock and adjust the agent wallet in one step."],
     ["wallet", "Agent Wallets", "Track what each agent owes for the sales recorded on their marketplace accounts."],
-    ["creditCard", "Payments & Settlement History", "Record payments against agent wallets and keep a complete settlement history."],
+    ["creditCard", "Banking Reconciliation", "Record actual marketplace receipts separately from sales and compare reference differences."],
     ["clock", "Wallet Reset", "Start a new wallet period from a clear baseline without deleting past records."],
-    ["calendar", "Close Day / Month Close", "Export the day's sales to Excel and archive completed months as permanent snapshots."],
+    ["calendar", "Sales & Returns Reports", "Read-only period, marketplace, agent and product reports with branded Excel exports."],
     ["download", "Excel import / export", "Import products and mappings from Excel templates and export warehouse and Product Master backups."],
     ["bolt", "Local Ollama AI-assisted label scanning", "Optionally use a vision model running in Ollama on your own computer for labels the text parser cannot read."],
     ["shield", "Local-first data storage", "Your records are kept in a local database with automatic daily backups on your PC."],
@@ -157,62 +157,43 @@ export function sellquantaHomePage() {
 }
 
 export function sellquantaDownloadPage() {
-  const ready = Boolean(SELLQUANTA.installerUrl);
-  const button = ready
-    ? `<a class="btn btn-accent btn-lg sq-download-btn" href="${SELLQUANTA.installerUrl}" rel="noopener">${small("download")} Download for Windows</a>`
-    : `<span class="btn btn-secondary btn-lg sq-download-btn" aria-disabled="true">Installer publication in progress</span>
-       <p class="sq-muted">The first public installer is being published from the open-source repository. Until it is available you can build SellQuanta from the <a href="${SELLQUANTA.repo}" target="_blank" rel="noopener">source code on GitHub</a>.</p>`;
-  const body = `
+  const ready=Boolean(SELLQUANTA.installerUrl);
+  const button=ready ? '<a class="btn btn-accent btn-lg" href="'+SELLQUANTA.installerUrl+'">Download SellQuanta Standard</a>' : '<span class="btn btn-secondary btn-lg" aria-disabled="true">Release candidate — not yet available</span>';
+  const body=`
   ${subNav("/sellquanta/download.html")}
-  <section class="service-hero sq-hero">
-    <div class="container">
-      ${breadcrumbs([...crumbBase, { label: "Download", href: "#" }])}
-      <div style="margin-top:18px; max-width:720px;">
-        <span class="eyebrow">Download</span>
-        <h1 class="h-1">SellQuanta for Windows</h1>
-        <p class="text-lead">Version ${SELLQUANTA.version} &middot; Windows 10/11 64-bit</p>
-      </div>
+  <section class="service-hero sq-hero"><div class="container">
+    ${breadcrumbs([...crumbBase,{label:'Download',href:'#'}])}
+    <h1 class="h-1">Choose your SellQuanta setup</h1>
+    <p class="text-lead">SellQuanta ${SELLQUANTA.version}${ready?'':' candidate'} · Windows 10/11 64-bit</p>
+    <p class="sq-muted">${ready?'Official release download.':'Local release preview. This version has not been published or approved for production.'}</p>
+  </div></section>
+  <section class="section"><div class="container grid g-2 sq-split">
+    <div class="card sq-download-card"><span class="badge badge-brand">Recommended for normal users</span>
+      <h2 class="h-4">Option A — SellQuanta Standard</h2>
+      <p>Sales, purchases, warehouse, refunds, wallets, banking, reports and backups. Ollama is optional; no AI installation is required for core business features.</p>
+      <p>Version ${SELLQUANTA.version} · ${SELLQUANTA.installerSize} · Free / MIT License</p>
+      <div class="sq-download-action">${button}</div>
+      ${SELLQUANTA.installerSha256 ? '<p class="sq-muted">SHA-256: <code class="sq-hash">'+SELLQUANTA.installerSha256+'</code></p>' : ''}
+      <p class="sq-muted">${UNSIGNED_NOTE} Metadata authentication does not make a Windows installer code-signed.</p>
+      <p><a href="${SELLQUANTA.releaseUrl}" rel="noopener" target="_blank">Published releases and release notes</a></p>
     </div>
-  </section>
-  <section class="section">
-    <div class="container grid g-2 sq-split">
-      <div class="card sq-download-card">
-        <h2 class="h-4">SellQuanta ${SELLQUANTA.version}</h2>
-        ${kvList([
-          { k: "Version", v: SELLQUANTA.version },
-          { k: "Operating system", v: "Windows 10/11 64-bit" },
-          { k: "Download size", v: SELLQUANTA.installerSize },
-          { k: "License", v: "MIT License" },
-          { k: "Source code", v: `<a href="${SELLQUANTA.repo}" target="_blank" rel="noopener">View Source on GitHub</a>` },
-        ])}
-        <div class="sq-download-action">${button}</div>
-        ${SELLQUANTA.installerSha256 ? `<p class="sq-muted">SHA-256: <code class="sq-hash">${SELLQUANTA.installerSha256}</code></p>` : ""}
-        ${ready ? `<p class="sq-muted">File: SellQuanta-Setup-${SELLQUANTA.version}.exe &middot; <a href="${SELLQUANTA.releaseUrl}" target="_blank" rel="noopener">Release notes on GitHub</a></p>` : ""}
-        ${banner({ tone: "warning", title: "Unsigned installer", body: `<p>${UNSIGNED_NOTE}</p>` })}
-      </div>
-      <div class="stack-4">
-        <h2 class="h-4">Installing SellQuanta</h2>
-        <ol class="sq-steps">
-          <li>Download the installer and open it.</li>
-          <li>If Windows SmartScreen shows <em>Windows protected your PC</em>, check that the file came from this page, then choose <em>More info</em> &rarr; <em>Run anyway</em>.</li>
-          <li>Choose the installation folder and finish the setup. SellQuanta is installed for your Windows user account.</li>
-          <li>Start SellQuanta from the desktop or Start menu shortcut.</li>
-        </ol>
-        <p class="sq-muted">Your business data is stored in <code>%APPDATA%\\SellQuanta Data</code> and is kept when you update or uninstall the app. Keep your own backups.</p>
-        <p class="sq-muted">Optional: install <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> separately if you want local AI-assisted label scanning. It is not required.</p>
-        <p class="sq-muted">The installer is built from the public source code by the repository's GitHub Actions workflow. See the <a href="/sellquanta/code-signing.html">Code Signing Policy</a> and <a href="/sellquanta/privacy.html">Privacy Policy</a>.</p>
-      </div>
+    <div class="card sq-download-card"><h2 class="h-4">Option B — SellQuanta + Ollama Setup</h2>
+      <p>The same SellQuanta installer, with a guided two-step optional AI setup. No bundled Ollama installer and no extra SellQuanta edition.</p>
+      <ol class="sq-steps"><li>Install SellQuanta Standard using the official download above.</li>
+        <li>Open SellQuanta Settings. If Ollama is already installed, skip reinstalling it. Test Connection to check whether it is running.</li>
+        <li>If absent, choose whether to download and run the <a href="https://ollama.com/download/windows" rel="noopener" target="_blank">official Ollama Windows installer</a>. Its installer may start its own local service.</li>
+        <li>Only if you want AI scanning, manually run <code>ollama pull qwen2.5vl:3b</code>, then test the connection and a non-sensitive sample label.</li></ol>
+      <p>Additional resources: approximately 4 GB for Ollama, a separate 3.2 GB 3B vision-model download, cache and temporary space. Allow at least 12 GB free disk space. Installer download size changes with Ollama releases.</p>
+      <p>8 GB RAM is a cautious minimum for trying 3B; 16 GB is preferred. GPU support and available RAM affect speed. With 32 GB or more, the optional 7B vision model is a 6.0 GB download; test hardware first. Ollama 0.7.0 or later is required for this model family.</p>
+      <p>SellQuanta never silently installs Ollama, downloads a model or starts its service. Starting an installed service from Settings requires confirmation. Communication is restricted to this PC's loopback interface.</p>
     </div>
-  </section>`;
-  return {
-    route: "/sellquanta/download.html",
-    title: "Download SellQuanta for Windows | InfoBridge India",
-    exactTitle: true,
-    description: `Download SellQuanta ${SELLQUANTA.version}, the free open-source e-commerce order and inventory manager for Windows 10 and 11 (64-bit). MIT licensed.`,
-    active: "products",
-    extraHead: EXTRA_HEAD,
-    body,
-  };
+  </div></section>
+  <section class="section sq-section-alt"><div class="container">
+    <h2 class="h-4">Safe installation and updates</h2>
+    <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. SellQuanta 1.1.1 checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
+    <p>Update checks contact InfoBridgeIndia and GitHub over HTTPS. Business records and labels are not uploaded. The installer replaces app files, not business records.</p>
+  </div></section>`;
+  return {route:'/sellquanta/download.html',title:'SellQuanta Standard & Optional Ollama Setup | InfoBridge India',exactTitle:true,description:'Free Windows SellQuanta installer and optional guided local Ollama setup.',active:'products',extraHead:EXTRA_HEAD,body};
 }
 
 function legalPage({ route, current, crumbLabel, title, seoTitle, description, introduction, updated, sections }) {
@@ -229,8 +210,8 @@ export function sellquantaPrivacyPage() {
     ["Data SellQuanta stores", "SellQuanta stores the business information you enter or scan: companies, agents and marketplace accounts, warehouse products (including optional product images), Product Master mappings, sales, refunds, stock movements, payments and wallet history.", "In the installed app this data is kept in <code>%APPDATA%\\SellQuanta Data</code> on your computer. That folder also contains automatic daily backups, manual and Month Close backups, Excel exports, and a local scan-diagnostics log used to troubleshoot label scanning, which can include values read from your labels. The desktop app also writes technical log files to its local application folder on your computer."],
     ["Data SellQuanta does not collect", "The SellQuanta source code contains no telemetry, analytics, advertising, crash-reporting or tracking code. SellQuanta does not upload your business data, shipping labels or invoices to InfoBridgeIndia or to any other server, and InfoBridgeIndia cannot see your SellQuanta data."],
     ["Shipping labels and PDFs", "Shipping-label and invoice PDFs you select are read on your computer to extract order details. They are processed locally and are not uploaded by SellQuanta."],
-    ["Optional Ollama AI integration", "AI-assisted label scanning is optional. When you use it, SellQuanta sends the label image to the Ollama service configured on your computer (by default <code>http://127.0.0.1:11434</code>, which is your own machine). Ollama is separate software that you install and control; SellQuanta does not download AI models. If you point SellQuanta to an Ollama service on another computer, label images are sent to that service."],
-    ["Network activity", "SellQuanta itself only communicates with its own local service and, if you use it, your configured Ollama service. Links to websites you choose to open, such as the GitHub repository, open in your default web browser. SellQuanta does not include an automatic update check; you choose when to download a new version."],
+    ["Optional Ollama AI integration", "AI-assisted label scanning is optional. When you use it, SellQuanta sends the label image to the Ollama service configured on your computer (by default <code>http://127.0.0.1:11434</code>, which is your own machine). Ollama is separate software that you install and control; SellQuanta does not download AI models. SellQuanta accepts loopback-only Ollama addresses and requires confirmation before starting a service."],
+    ["Network activity", "The Windows desktop application checks authenticated update metadata at startup and every six hours over HTTPS with infobridgeindia.online and GitHub. Those providers receive normal connection information such as IP address; no business records or label images are sent. Download and installation require confirmation. Optional AI uses only this PC’s loopback service. External links open in your browser."],
     ["Files you save", "Excel exports, templates and backups you download are saved to your Windows Downloads folder or your data folder. What you do with those files, and who you share them with, is under your control."],
     ["Your responsibilities", "Because your data never leaves your computer, protecting it is up to you: keep your Windows account secure, keep regular copies of the data folder in a safe place, and delete exports you no longer need. Uninstalling SellQuanta does not delete your data folder; delete it yourself if you want to remove all data."],
     ["Children", "SellQuanta is business software intended for adults and is not directed at children."],
@@ -256,7 +237,7 @@ export function sellquantaCodeSigningPage() {
     ["Planned signing", "InfoBridgeIndia intends to apply for free code signing for open-source projects, for example through the SignPath Foundation. If and when signing is approved, this page will be updated and the rules below will apply."],
     ["What will be signed", "Only binaries built by the public GitHub Actions workflow from the source code in the official repository, <a href=\"https://github.com/infobridgeindiaofficial-rgb/sellquanta\" target=\"_blank\" rel=\"noopener\">infobridgeindiaofficial-rgb/sellquanta</a>, will be signed.", "Signing will happen only for releases built from the <code>main</code> branch or from release tags. No locally built or modified binaries will be signed. Signing credentials will never be stored in the repository."],
     ["Roles", "Committers and reviewers: maintainers of the official GitHub repository.", "Approvers of release signing requests: the repository owner, InfoBridgeIndia.", "All maintainers are expected to use multi-factor authentication on their GitHub accounts."],
-    ["Privacy", "SellQuanta does not transfer any information to networked systems unless specifically requested by the user or the person installing or operating it. It stores business data only on the local computer. The optional Ollama integration communicates only with the Ollama server URL configured by the user (by default the local machine, 127.0.0.1). See the <a href=\"/sellquanta/privacy.html\">SellQuanta Privacy Policy</a>."],
+    ["Privacy", "SellQuanta does not transfer any information to networked systems unless specifically requested by the user or the person installing or operating it. It stores business data only on the local computer. The optional Ollama integration communicates only with a validated loopback-only Ollama URL on the local machine. See the <a href=\"/sellquanta/privacy.html\">SellQuanta Privacy Policy</a>."],
     ["Source of this policy", "This page reflects the <a href=\"https://github.com/infobridgeindiaofficial-rgb/sellquanta/blob/main/CODE_SIGNING_POLICY.md\" target=\"_blank\" rel=\"noopener\">CODE_SIGNING_POLICY.md</a> file in the official repository, which remains the source of truth."],
   ];
   return legalPage({

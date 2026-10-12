@@ -178,6 +178,12 @@
           <span class="mega-link-title">Marketplace Profit Calculator</span>
           <div class="mega-link-desc">True profit after marketplace fees and costs</div>
         </span>
+      </a><a class="mega-link" href="/screen-view/">
+        <span class="mega-link-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2.3"/><circle cx="19" cy="6" r="2.3"/><circle cx="12" cy="18" r="2.3"/><path d="M5 8.3v3a3 3 0 003 3h2M19 8.3v3a3 3 0 01-3 3h-2"/></svg></span>
+        <span>
+          <span class="mega-link-title">Screen View</span>
+          <div class="mega-link-desc">Join and control a secure shared browser session</div>
+        </span>
       </a>
     </div>
   </div><div>
@@ -276,7 +282,7 @@
 <a href="/app/finance.html">Finance & Accounting</a><a href="/app/sales.html">Sales & CRM</a><a href="/app/purchases.html">Purchases & Procurement</a><a href="/inventory/index.html">Inventory & Warehouse</a><a href="/hr-payroll/index.html">HR & Payroll</a><a href="/products/projects-operations.html">Projects & Operations</a><a href="/app/documents.html">Documents</a><a href="/app/approvals.html">Internal Requests</a><a href="/app/banking.html">Banking</a><a href="/products/reports-analytics.html">Reports & Analytics</a><a href="/app/admin.html">Administration</a><a href="/sellquanta.html">SellQuanta</a>
       </div><div class="mobile-group">
         <a class="mobile-group-title" href="/gst-calculator.html" style="display:block;">Business Tools</a>
-<a href="/gst-calculator.html">GST Calculator</a><a href="/gst-interest-calculator.html">GST Interest Calculator</a><a href="/gst-late-fee-calculator.html">GST Late Fee Calculator</a><a href="/marketplace-profit-calculator.html">Marketplace Profit Calculator</a><a href="/pdf-to-word.html">PDF to Word</a><a href="/shipping-label-4in1.html">Shipping Label 4-in-1 PDF</a><a href="/word-to-pdf.html">Word to PDF</a><a href="/jpg-to-pdf.html">JPG to PDF</a><a href="/merge-pdf.html">Merge PDF</a><a href="/split-pdf.html">Split PDF</a><a href="/gst-invoice-generator.html">GST Invoice Generator</a><a href="/quotation-generator.html">Quotation Generator</a><a href="/company-letterhead-generator.html">Company Letterhead Generator</a>
+<a href="/gst-calculator.html">GST Calculator</a><a href="/gst-interest-calculator.html">GST Interest Calculator</a><a href="/gst-late-fee-calculator.html">GST Late Fee Calculator</a><a href="/marketplace-profit-calculator.html">Marketplace Profit Calculator</a><a href="/screen-view/">Screen View</a><a href="/pdf-to-word.html">PDF to Word</a><a href="/shipping-label-4in1.html">Shipping Label 4-in-1 PDF</a><a href="/word-to-pdf.html">Word to PDF</a><a href="/jpg-to-pdf.html">JPG to PDF</a><a href="/merge-pdf.html">Merge PDF</a><a href="/split-pdf.html">Split PDF</a><a href="/gst-invoice-generator.html">GST Invoice Generator</a><a href="/quotation-generator.html">Quotation Generator</a><a href="/company-letterhead-generator.html">Company Letterhead Generator</a>
       </div><div class="mobile-group">
         <a class="mobile-group-title" href="/app/gst/index.html" style="display:block;">GST Workspace</a>
 
@@ -331,11 +337,11 @@
       </section>
       <section aria-labelledby="legal-section-6">
         <h2 id="legal-section-6">6. Optional Ollama AI integration</h2>
-        <p>AI-assisted label scanning is optional. When you use it, SellQuanta sends the label image to the Ollama service configured on your computer (by default <code>http://127.0.0.1:11434</code>, which is your own machine). Ollama is separate software that you install and control; SellQuanta does not download AI models. If you point SellQuanta to an Ollama service on another computer, label images are sent to that service.</p>
+        <p>AI-assisted label scanning is optional. When you use it, SellQuanta sends the label image to the Ollama service configured on your computer (by default <code>http://127.0.0.1:11434</code>, which is your own machine). Ollama is separate software that you install and control; SellQuanta does not download AI models. SellQuanta accepts loopback-only Ollama addresses and requires confirmation before starting a service.</p>
       </section>
       <section aria-labelledby="legal-section-7">
         <h2 id="legal-section-7">7. Network activity</h2>
-        <p>SellQuanta itself only communicates with its own local service and, if you use it, your configured Ollama service. Links to websites you choose to open, such as the GitHub repository, open in your default web browser. SellQuanta does not include an automatic update check; you choose when to download a new version.</p>
+        <p>The Windows desktop application checks authenticated update metadata at startup and every six hours over HTTPS with infobridgeindia.online and GitHub. Those providers receive normal connection information such as IP address; no business records or label images are sent. Download and installation require confirmation. Optional AI uses only this PC’s loopback service. External links open in your browser.</p>
       </section>
       <section aria-labelledby="legal-section-8">
         <h2 id="legal-section-8">8. Files you save</h2>

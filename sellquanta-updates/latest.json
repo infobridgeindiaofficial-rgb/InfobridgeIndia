@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "version": "1.1.1",
+    "sourceCommit": "76b6b49487247e1d726050da61d6613e6e4ea591",
+    "url": "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/v1.1.1/SellQuanta-Setup-1.1.1.exe",
+    "size": 127719953,
+    "sha256": "584edff258ca0d108f47dc6f0991b45353b37e5118c9daa203cc932e6cacacb7",
+    "sha512": "jBPcqkWTdbRXbSqMO5EC/+Mh6WyAuEWcEuLT5iCad8h0xKCw17HyWUKJojJ0ZNK3nxw9pBJQUpMs/89WDs7kqw==",
+    "releaseNotes": "SellQuanta 1.1.1 for Windows 10/11 64-bit.\n\nIncludes Banking settlement reconciliation, Purchase Management, read-only Warehouse, Sales & Returns Reports, Agent Wallet date filters, and unified SellQuanta Excel branding.\n\nCore business features do not require Ollama. Optional local AI setup is available in Settings, with explicit consent before starting Ollama. No automatic Ollama installation or model download.\n\nExisting v1.0.2 users must upgrade manually: create a backup in SellQuanta, close SellQuanta, and run the new official installer over the existing installation. Do not uninstall or remove %APPDATA%\\SellQuanta Data. The application identity com.sellquanta.desktop and existing business-data/profile paths are retained.\n\nFuture updates use authenticated metadata and verified installer checksums, with download/install confirmation and a pre-update data backup.\n\nBuilt by GitHub Actions from commit 76b6b49487247e1d726050da61d6613e6e4ea591. This installer is unsigned. Metadata signing is not Windows Authenticode signing.\n\nValidation: 145 repository tests pass locally and in Windows GitHub Actions; production frontend and NSIS installer builds pass. Synthetic old-backend-to-new-backend compatibility and read-only export tests pass. Actual fresh installation, in-place installer upgrade, auto-update installation, SmartScreen behavior and uninstall/reinstall retention are not physically verified; a separate Windows test environment is required for those checks.\n\nThe v1.1.0 tag was an unsuccessful unpublished CI attempt (test dependency path); no v1.1.0 public installer was released.\r\n",
+    "releaseDate": "2026-10-12T19:13:03.424Z"
+  },
+  "signature": "MgRETKRikPv5cNTb8FXMvd2LpLBVng7CG6cfGsnmDUxOP3KBhJcrU5Com/1Ht2muqKb52RwJVtjxBZJcFOlgDQ=="
+}
