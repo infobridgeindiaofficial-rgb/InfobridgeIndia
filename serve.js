@@ -67,6 +67,6 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "127.0.0.1", () => {
   console.log(`InfoBridgeIndia preview running at http://localhost:${PORT}`);
 });
