@@ -6,14 +6,14 @@ import { legalDocument, legalDocumentHead } from "../../components/legal-documen
 // SellQuanta - open-source Windows desktop app published by InfoBridgeIndia.
 // Source of truth: https://github.com/infobridgeindiaofficial-rgb/sellquanta
 export const SELLQUANTA = Object.freeze({
-  version: "1.1.0",
+  version: "1.1.1",
   repo: "https://github.com/infobridgeindiaofficial-rgb/sellquanta",
   // Public, no-login download of the installer built by the repository's GitHub Actions release workflow.
   // null = no public release published yet: the download page then shows the source link instead of a button.
-  installerUrl: null,
-  installerSize: "121.8 MiB (127,719,987 bytes), unsigned candidate",
-  installerSha256: "98e9f098dbe74ca57b84e0a8d7359446fcc00f4347600e64bfc24d6690428ca8",
-  releaseUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases",
+  installerUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/v1.1.1/SellQuanta-Setup-1.1.1.exe",
+  installerSize: "121.8 MiB (127,719,953 bytes), unsigned",
+  installerSha256: "584edff258ca0d108f47dc6f0991b45353b37e5118c9daa203cc932e6cacacb7",
+  releaseUrl: "https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/tag/v1.1.1",
 });
 
 const EXTRA_HEAD = '<link rel="stylesheet" href="/styles/sellquanta.css" />';
@@ -179,7 +179,7 @@ export function sellquantaDownloadPage() {
     </div>
     <div class="card sq-download-card"><h2 class="h-4">Option B — SellQuanta + Ollama Setup</h2>
       <p>The same SellQuanta installer, with a guided two-step optional AI setup. No bundled Ollama installer and no extra SellQuanta edition.</p>
-      <ol class="sq-steps"><li>Install Standard when the approved release is available.</li>
+      <ol class="sq-steps"><li>Install SellQuanta Standard using the official download above.</li>
         <li>Open SellQuanta Settings. If Ollama is already installed, skip reinstalling it. Test Connection to check whether it is running.</li>
         <li>If absent, choose whether to download and run the <a href="https://ollama.com/download/windows" rel="noopener" target="_blank">official Ollama Windows installer</a>. Its installer may start its own local service.</li>
         <li>Only if you want AI scanning, manually run <code>ollama pull qwen2.5vl:3b</code>, then test the connection and a non-sensitive sample label.</li></ol>
@@ -190,7 +190,7 @@ export function sellquantaDownloadPage() {
   </div></section>
   <section class="section sq-section-alt"><div class="container">
     <h2 class="h-4">Safe installation and updates</h2>
-    <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. The candidate checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
+    <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. SellQuanta 1.1.1 checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
     <p>Update checks contact InfoBridgeIndia and GitHub over HTTPS. Business records and labels are not uploaded. The installer replaces app files, not business records.</p>
   </div></section>`;
   return {route:'/sellquanta/download.html',title:'SellQuanta Standard & Optional Ollama Setup | InfoBridge India',exactTitle:true,description:'Free Windows SellQuanta installer and optional guided local Ollama setup.',active:'products',extraHead:EXTRA_HEAD,body};
@@ -211,7 +211,7 @@ export function sellquantaPrivacyPage() {
     ["Data SellQuanta does not collect", "The SellQuanta source code contains no telemetry, analytics, advertising, crash-reporting or tracking code. SellQuanta does not upload your business data, shipping labels or invoices to InfoBridgeIndia or to any other server, and InfoBridgeIndia cannot see your SellQuanta data."],
     ["Shipping labels and PDFs", "Shipping-label and invoice PDFs you select are read on your computer to extract order details. They are processed locally and are not uploaded by SellQuanta."],
     ["Optional Ollama AI integration", "AI-assisted label scanning is optional. When you use it, SellQuanta sends the label image to the Ollama service configured on your computer (by default <code>http://127.0.0.1:11434</code>, which is your own machine). Ollama is separate software that you install and control; SellQuanta does not download AI models. SellQuanta accepts loopback-only Ollama addresses and requires confirmation before starting a service."],
-    ["Network activity", "The Windows desktop candidate checks authenticated update metadata at startup and every six hours over HTTPS with infobridgeindia.online and GitHub. Those providers receive normal connection information such as IP address; no business records or label images are sent. Download and installation require confirmation. Optional AI uses only this PC’s loopback service. External links open in your browser."],
+    ["Network activity", "The Windows desktop application checks authenticated update metadata at startup and every six hours over HTTPS with infobridgeindia.online and GitHub. Those providers receive normal connection information such as IP address; no business records or label images are sent. Download and installation require confirmation. Optional AI uses only this PC’s loopback service. External links open in your browser."],
     ["Files you save", "Excel exports, templates and backups you download are saved to your Windows Downloads folder or your data folder. What you do with those files, and who you share them with, is under your control."],
     ["Your responsibilities", "Because your data never leaves your computer, protecting it is up to you: keep your Windows account secure, keep regular copies of the data folder in a safe place, and delete exports you no longer need. Uninstalling SellQuanta does not delete your data folder; delete it yourself if you want to remove all data."],
     ["Children", "SellQuanta is business software intended for adults and is not directed at children."],

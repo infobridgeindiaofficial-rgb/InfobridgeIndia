@@ -312,22 +312,22 @@
     <a href="/index.html">Home</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><a href="/sellquanta.html">SellQuanta</a><span class="sep"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span><span class="current">Download</span>
   </div>
     <h1 class="h-1">Choose your SellQuanta setup</h1>
-    <p class="text-lead">SellQuanta 1.1.0 candidate · Windows 10/11 64-bit</p>
-    <p class="sq-muted">Local release preview. This version has not been published or approved for production.</p>
+    <p class="text-lead">SellQuanta 1.1.1 · Windows 10/11 64-bit</p>
+    <p class="sq-muted">Official release download.</p>
   </div></section>
   <section class="section"><div class="container grid g-2 sq-split">
     <div class="card sq-download-card"><span class="badge badge-brand">Recommended for normal users</span>
       <h2 class="h-4">Option A — SellQuanta Standard</h2>
       <p>Sales, purchases, warehouse, refunds, wallets, banking, reports and backups. Ollama is optional; no AI installation is required for core business features.</p>
-      <p>Version 1.1.0 · 121.8 MiB (127,719,987 bytes), unsigned candidate · Free / MIT License</p>
-      <div class="sq-download-action"><span class="btn btn-secondary btn-lg" aria-disabled="true">Release candidate — not yet available</span></div>
-      <p class="sq-muted">SHA-256: <code class="sq-hash">98e9f098dbe74ca57b84e0a8d7359446fcc00f4347600e64bfc24d6690428ca8</code></p>
+      <p>Version 1.1.1 · 121.8 MiB (127,719,953 bytes), unsigned · Free / MIT License</p>
+      <div class="sq-download-action"><a class="btn btn-accent btn-lg" href="https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/v1.1.1/SellQuanta-Setup-1.1.1.exe">Download SellQuanta Standard</a></div>
+      <p class="sq-muted">SHA-256: <code class="sq-hash">584edff258ca0d108f47dc6f0991b45353b37e5118c9daa203cc932e6cacacb7</code></p>
       <p class="sq-muted">SellQuanta is currently unsigned. Windows SmartScreen may display an Unknown Publisher warning. Metadata authentication does not make a Windows installer code-signed.</p>
-      <p><a href="https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases" rel="noopener" target="_blank">Published releases and release notes</a></p>
+      <p><a href="https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/tag/v1.1.1" rel="noopener" target="_blank">Published releases and release notes</a></p>
     </div>
     <div class="card sq-download-card"><h2 class="h-4">Option B — SellQuanta + Ollama Setup</h2>
       <p>The same SellQuanta installer, with a guided two-step optional AI setup. No bundled Ollama installer and no extra SellQuanta edition.</p>
-      <ol class="sq-steps"><li>Install Standard when the approved release is available.</li>
+      <ol class="sq-steps"><li>Install SellQuanta Standard using the official download above.</li>
         <li>Open SellQuanta Settings. If Ollama is already installed, skip reinstalling it. Test Connection to check whether it is running.</li>
         <li>If absent, choose whether to download and run the <a href="https://ollama.com/download/windows" rel="noopener" target="_blank">official Ollama Windows installer</a>. Its installer may start its own local service.</li>
         <li>Only if you want AI scanning, manually run <code>ollama pull qwen2.5vl:3b</code>, then test the connection and a non-sensitive sample label.</li></ol>
@@ -338,7 +338,7 @@
   </div></section>
   <section class="section sq-section-alt"><div class="container">
     <h2 class="h-4">Safe installation and updates</h2>
-    <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. The candidate checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
+    <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. SellQuanta 1.1.1 checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
     <p>Update checks contact InfoBridgeIndia and GitHub over HTTPS. Business records and labels are not uploaded. The installer replaces app files, not business records.</p>
   </div></section>
 <footer class="site-footer">
