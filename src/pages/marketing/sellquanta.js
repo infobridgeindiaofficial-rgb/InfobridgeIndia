@@ -188,8 +188,15 @@ export function sellquantaDownloadPage() {
       <p>SellQuanta never silently installs Ollama, downloads a model or starts its service. Starting an installed service from Settings requires confirmation. Communication is restricted to this PC's loopback interface.</p>
     </div>
   </div></section>
-  <section class="section sq-section-alt"><div class="container">
-    <h2 class="h-4">Safe installation and updates</h2>
+  <section class="section sq-section-alt sq-installation" aria-labelledby="sq-installation-title"><div class="container">
+    <h2 class="h-4" id="sq-installation-title">How to Download SellQuanta</h2>
+    <ol class="sq-download-guide" role="list">
+      <li><img src="/images/download-guide/step-1.png" alt="Step 1: Click Download" width="236" height="274" loading="lazy" decoding="async" /></li>
+      <li><img src="/images/download-guide/step-2.png" alt="Step 2: Allow Download in Microsoft Edge" width="248" height="274" loading="lazy" decoding="async" /></li>
+      <li><img src="/images/download-guide/step-3.png" alt="Step 3: Download in Progress" width="229" height="274" loading="lazy" decoding="async" /></li>
+      <li><img src="/images/download-guide/step-4.png" alt="Step 4: Check Downloaded File" width="226" height="274" loading="lazy" decoding="async" /></li>
+    </ol>
+    <h3 class="h-4">Safe installation and updates</h3>
     <ol class="sq-steps"><li>Back up your data before updating and close SellQuanta.</li><li>Use only the official release download and verify its published SHA-256. If Windows blocks or flags a file, stop and ask support; do not disable Defender or security protections.</li><li>The installer retains the existing app identity and business-data path: <code>%APPDATA%\\SellQuanta Data</code>. Keep independent backups.</li><li>v1.0.2 has no auto-updater: upgrade manually once. SellQuanta 1.1.1 checks at startup and every six hours, shows release notes and asks before downloading and installing.</li></ol>
     <p>Update checks contact InfoBridgeIndia and GitHub over HTTPS. Business records and labels are not uploaded. The installer replaces app files, not business records.</p>
   </div></section>`;

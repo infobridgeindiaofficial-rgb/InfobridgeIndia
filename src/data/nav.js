@@ -63,7 +63,6 @@ export const mainNav = [
             { icon: "clock", title: "GST Interest Calculator", desc: "Interest on delayed GST payments", href: "/gst-interest-calculator.html" },
             { icon: "alertCircle", title: "GST Late Fee Calculator", desc: "Late fees for delayed GST returns", href: "/gst-late-fee-calculator.html" },
             { icon: "ecommerce", title: "Marketplace Profit Calculator", desc: "True profit after marketplace fees and costs", href: "/marketplace-profit-calculator.html" },
-            { icon: "workflow", title: "Screen View", desc: "Join and control a secure shared browser session", href: "/screen-view/" },
           ],
         },
         {
@@ -74,6 +73,7 @@ export const mainNav = [
             { icon: "download", title: "Word to PDF", desc: "Convert Word documents into shareable PDFs", href: "/word-to-pdf.html" },
             { icon: "layers", title: "JPG to PDF", desc: "Convert JPG images into a single PDF", href: "/jpg-to-pdf.html" },
             { icon: "workflow", title: "Merge PDF", desc: "Combine multiple PDF files into one", href: "/merge-pdf.html" },
+            { icon: "documents", title: "Crop PDF", desc: "Visually crop PDF pages and save selected areas as separate PDFs.", href: "/crop-pdf.html" },
             { icon: "list", title: "Split PDF", desc: "Split a PDF into separate files or pages", href: "/split-pdf.html" },
           ],
         },

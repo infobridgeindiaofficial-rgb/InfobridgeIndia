@@ -1,0 +1,53 @@
+.tax-country-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 14px;
+  margin: 0 0 18px;
+}
+.tax-country-card {
+  position: relative;
+  min-height: 76px;
+  padding: 16px 18px 16px 52px;
+  text-align: left;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+}
+.tax-country-card:hover { border-color: var(--brand-600); }
+.tax-country-card.selected {
+  color: var(--brand-800);
+  background: var(--brand-50);
+  border-color: var(--brand-600);
+  box-shadow: 0 0 0 2px rgba(13, 124, 104, .08);
+}
+.tax-country-check {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  transform: translateY(-50%);
+  color: #fff;
+  background: var(--brand-600);
+  border: 1px solid var(--brand-600);
+  border-radius: 50%;
+  font-weight: 800;
+}
+.tax-country-card:not(.selected) .tax-country-check {
+  background: #fff;
+  border-color: var(--border-strong);
+}
+.tax-settings-panel { max-width: 960px; }
+.tax-settings-panel [hidden] { display: none; }
+.tax-settings-panel .btn { margin-top: 18px; }
+.tax-save-status { display: inline-block; margin: 18px 0 0 14px; font-weight: 700; }
+.tax-save-status:empty { display: none; }
+.tax-save-status.success { color: var(--success); }
+.tax-save-status.error { color: var(--danger); }
+@media (max-width: 560px) {
+  .tax-country-selector { grid-template-columns: 1fr; }
+}

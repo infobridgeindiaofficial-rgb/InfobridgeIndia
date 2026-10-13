@@ -15,6 +15,14 @@ export function resourcesPage() {
     </div>
   </section>
 
+  <section class="section" id="business-tools"><div class="container">
+    <h2 class="h-3">PDF &amp; Documents</h2><div class="grid g-3">
+    <a class="card" href="/crop-pdf.html"><h3 class="h-4">Crop PDF</h3><p>Visually crop PDF pages and save selected areas as separate PDFs.</p></a>
+    <a class="card" href="/split-pdf.html"><h3 class="h-4">Split PDF</h3><p>Extract pages or split a document into separate PDFs.</p></a>
+    <a class="card" href="/merge-pdf.html"><h3 class="h-4">Merge PDF</h3><p>Combine PDF documents into one file.</p></a>
+    <a class="card" href="/pdf-to-word.html"><h3 class="h-4">PDF to Word</h3><p>Convert PDF documents to editable Word files.</p></a>
+    <a class="card" href="/shipping-label-4in1.html"><h3 class="h-4">Shipping Label 4-in-1 PDF</h3><p>Prepare shipping labels for printing.</p></a>
+    </div></div></section>
   <section class="section" id="guides">
     <div class="container">
       ${sectionHead({ eyebrow: "Guides & playbooks", title: "Set up the right way, the first time" })}

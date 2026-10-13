@@ -31,6 +31,7 @@ import { quotationGeneratorPageHtml } from "./src/pages/marketing/quotation-gene
 import { wordToPdfPageHtml } from "./src/pages/marketing/word-to-pdf.js";
 import { jpgToPdfPageHtml } from "./src/pages/marketing/jpg-to-pdf.js";
 import { mergePdfPageHtml } from "./src/pages/marketing/merge-pdf.js";
+import { cropPdfPageHtml } from "./src/pages/marketing/crop-pdf.js";
 import { splitPdfPageHtml } from "./src/pages/marketing/split-pdf.js";
 import { sellquantaPages } from "./src/pages/marketing/sellquanta.js";
 
@@ -145,6 +146,8 @@ writeRoute("/jpg-to-pdf.html", jpgToPdfPageHtml());
 count++;
 writeRoute("/merge-pdf.html", mergePdfPageHtml());
 count++;
+writeRoute("/crop-pdf.html", cropPdfPageHtml());
+count++;
 writeRoute("/split-pdf.html", splitPdfPageHtml());
 count++;
 
@@ -198,6 +201,9 @@ cpSync(join(__dirname, "node_modules/@supabase/supabase-js/dist/umd/supabase.js"
 // which browsers reject for dynamic module imports. The files remain ES modules.
 cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.min.mjs"), join(DIST, "vendor/pdf.js"));
 cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"), join(DIST, "vendor/pdf.worker.min.js"));
+for (const [folder, target] of [["standard_fonts", "pdfjs-fonts"], ["cmaps", "pdfjs-cmaps"], ["wasm", "pdfjs-wasm"]]) {
+  cpSync(join(__dirname, "node_modules/pdfjs-dist", folder), join(DIST, "vendor", target), { recursive: true });
+}
 // Retain canonical aliases for direct diagnostics and hosts that correctly map .mjs.
 // Banking intentionally imports the .js aliases for broader static-server compatibility.
 cpSync(join(__dirname, "node_modules/pdfjs-dist/build/pdf.min.mjs"), join(DIST, "vendor/pdf.mjs"));
@@ -226,6 +232,7 @@ cpSync(join(__dirname, "src/jpg-to-pdf"), join(DIST, "jpg-to-pdf"), { recursive:
 cpSync(join(__dirname, "node_modules/jspdf/dist/jspdf.umd.min.js"), join(DIST, "vendor/jspdf.umd.min.js"));
 cpSync(join(__dirname, "src/merge-pdf"), join(DIST, "merge-pdf"), { recursive: true });
 cpSync(join(__dirname, "node_modules/pdf-lib/dist/pdf-lib.min.js"), join(DIST, "vendor/pdf-lib.min.js"));
+cpSync(join(__dirname, "src/crop-pdf"), join(DIST, "crop-pdf"), { recursive: true });
 cpSync(join(__dirname, "src/split-pdf"), join(DIST, "split-pdf"), { recursive: true });
 if (existsSync(join(__dirname, "public"))) {
   cpSync(join(__dirname, "public"), DIST, { recursive: true });
