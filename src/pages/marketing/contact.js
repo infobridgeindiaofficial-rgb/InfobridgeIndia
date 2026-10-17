@@ -19,22 +19,17 @@ export function contactPage() {
       .contact-whatsapp-button:focus-visible { outline:3px solid #128c4a; outline-offset:4px; background:#0d703b; }
       @media (max-width:480px) { .contact-whatsapp { margin-top:36px; padding-top:28px; } .contact-whatsapp-button { padding:14px 18px; gap:10px; } }
     </style>`,
-    extraScripts: '<script type="module" src="/scripts/contact.js"></script>',
+    extraScripts: "",
     body: `<section class="section">
       <div class="container" style="max-width:760px;">
         ${breadcrumbs([{ label: "Home", href: "/index.html" }, { label: "Contact", href: "#" }])}
         <h1 class="h-3" style="margin-top:var(--sp-5);">Contact InfoBridgeIndia</h1>
         <p class="text-lead" style="margin-top:var(--sp-3);">Need help with InfoBridgeIndia or our business tools? Send us a message or contact us on WhatsApp.</p>
-        <div class="card" style="margin-top:var(--sp-6);">
-          <form id="contact-form" method="post" aria-label="Contact form">
-            <div class="field"><label for="contact-name">Name</label><input class="input" id="contact-name" name="name" autocomplete="name" maxlength="120" required></div>
-            <div class="field" style="margin-top:var(--sp-4);"><label for="contact-email">Email Address</label><input class="input" id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
-            <div class="field" style="margin-top:var(--sp-4);"><label for="contact-message">Message</label><textarea class="input" id="contact-message" name="message" rows="6" maxlength="5000" required></textarea></div>
-            <p class="text-small" style="margin-top:var(--sp-4);">Please do not include passwords or sensitive business records. See our <a href="/privacy.html">Privacy Policy</a>.</p>
-            <button class="btn btn-primary" type="submit" style="margin-top:var(--sp-5);" disabled>Send Message</button>
-            <p id="contact-status" class="text-small" role="status" aria-live="polite" aria-atomic="true" style="margin-top:var(--sp-4);"></p>
-            <noscript><p class="text-small">Please enable JavaScript to send this form, or contact us on WhatsApp below.</p></noscript>
-          </form>
+        <div class="card" style="margin-top:var(--sp-6); padding:28px;">
+          <h2 style="margin:0 0 12px;">Contact us by email</h2>
+          <p>Send your questions directly to our support inbox.</p>
+          <a class="btn btn-primary" href="mailto:admin@infobridgeindia.online?subject=InfoBridgeIndia%20Enquiry">Email InfoBridgeIndia</a>
+          <p class="text-small" style="margin-top:16px;"><a href="mailto:admin@infobridgeindia.online">admin@infobridgeindia.online</a></p>
         </div>
         <section class="contact-whatsapp" aria-labelledby="email-heading"><h2 id="email-heading">Email Support</h2><p class="text-small">For enquiries, email <a href="mailto:admin@infobridgeindia.online">admin@infobridgeindia.online</a>.</p></section><section class="contact-whatsapp" aria-labelledby="whatsapp-heading">
           <h2 id="whatsapp-heading">Prefer WhatsApp?</h2>
