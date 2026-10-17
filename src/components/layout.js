@@ -179,6 +179,8 @@ export function renderFooter() {
             <img class="brand-logo brand-logo-footer" src="/infobridgeindia-logo.png" alt="InfoBridgeIndia" />
           </a>
           <p>Business platforms, mobile apps, desktop software and websites — built to make everyday work simpler.</p>
+          <p style="margin-top:12px;"><a href="mailto:admin@infobridgeindia.online">admin@infobridgeindia.online</a></p>
+          <p><a href="https://wa.me/919092902790" target="_blank" rel="noopener noreferrer">WhatsApp: +91 90929 02790</a></p>
         </div>
         ${cols}
       </div>
