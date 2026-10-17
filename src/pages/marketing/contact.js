@@ -36,10 +36,10 @@ export function contactPage() {
             <noscript><p class="text-small">Please enable JavaScript to send this form, or contact us on WhatsApp below.</p></noscript>
           </form>
         </div>
-        <section class="contact-whatsapp" aria-labelledby="whatsapp-heading">
+        <section class="contact-whatsapp" aria-labelledby="email-heading"><h2 id="email-heading">Email Support</h2><p class="text-small">For enquiries, email <a href="mailto:admin@infobridgeindia.online">admin@infobridgeindia.online</a>.</p></section><section class="contact-whatsapp" aria-labelledby="whatsapp-heading">
           <h2 id="whatsapp-heading">Prefer WhatsApp?</h2>
           <p class="text-small">For quick questions, you can message us directly on WhatsApp.</p>
-          <a class="contact-whatsapp-button" href="https://wa.me/971521185821?text=Hello%20InfoBridgeIndia%2C%20I%20need%20help%20with%20InfoBridgeIndia." target="_blank" rel="noopener noreferrer">${whatsappIcon}<span>Message us on WhatsApp</span></a>
+          <a class="contact-whatsapp-button" href="https://wa.me/919092902790?text=Hello%20InfoBridgeIndia%2C%20I%20need%20help%20with%20InfoBridgeIndia." target="_blank" rel="noopener noreferrer">${whatsappIcon}<span>Message us on WhatsApp</span></a>
         </section>
       </div>
     </section>`,
