@@ -15,6 +15,8 @@ const states = {
 
 let outputMode = "combined";
 let splitFiles = [];
+let generatedPageCount = 0;
+let generatedFiles = [];
 let items = []; // { id, file, name, size, pageCount, error }
 let resultBlobUrl = null;
 let previewBlobUrl = null;
@@ -117,8 +119,15 @@ function fileRowHtml(item) {
   const metaLine = item.error
     ? `<span class="sl4-file-err-text">${item.error}</span>`
     : item.pageCount == null
-      ? `<span>${formatSize(item.size)} &middot; Readingâ€¦</span>`
+      ? `<span>${formatSize(item.size)} &middot; Reading…</span>`
       : `<span>${formatSize(item.size)} &middot; ${item.pageCount} shipping ${item.pageCount === 1 ? "slip" : "slips"}</span>`;
+  const duplicateControls = item.duplicateOf && !item.duplicateResolved
+    ? `<div class="sl4-duplicate-choice" style="margin-top:10px;padding:10px 12px;border:1px solid #e5ad49;border-radius:8px;background:#fff8e8">
+         <strong>Duplicate PDF detected</strong>
+         <div style="font-size:13px;margin:5px 0">Same PDF content as ${escapeHtml(item.duplicateOf)}. Keep both or remove this copy?</div>
+         <button type="button" class="btn btn-secondary btn-sm sl4-keep-duplicate" data-id="${item.id}">Keep both</button>
+         <button type="button" class="btn btn-ghost btn-sm sl4-drop-duplicate" data-id="${item.id}">Remove duplicate</button>
+       </div>` : "";
   return `
     <div class="sl4-file-row${errorClass}" data-id="${item.id}">
       <div class="sl4-file-icon">
@@ -127,6 +136,7 @@ function fileRowHtml(item) {
       <div class="sl4-file-meta">
         <strong>${escapeHtml(item.name)}</strong>
         ${metaLine}
+        ${duplicateControls}
       </div>
       <button type="button" class="btn btn-ghost btn-sm sl4-remove-btn" data-id="${item.id}">Remove</button>
     </div>`;
@@ -149,15 +159,24 @@ function render() {
     btn.addEventListener("click", () => removeItem(btn.dataset.id));
   }
 
+  for (const btn of $("sl4-file-list").querySelectorAll(".sl4-keep-duplicate")) {
+    btn.addEventListener("click", () => {
+      const item = items.find(it => it.id === btn.dataset.id);
+      if (item) { item.duplicateResolved = true; render(); }
+    });
+  }
+  for (const btn of $("sl4-file-list").querySelectorAll(".sl4-drop-duplicate")) {
+    btn.addEventListener("click", () => removeItem(btn.dataset.id));
+  }
   const t = totals();
   $("sl4-summary-files").textContent = String(t.fileCount);
-  $("sl4-summary-slips").textContent = t.isReading ? "â€¦" : String(t.slipCount);
-  $("sl4-summary-pages").textContent = t.isReading ? "â€¦" : String(t.pageCount);
+  $("sl4-summary-slips").textContent = t.isReading ? "…" : String(t.slipCount);
+  $("sl4-summary-pages").textContent = t.isReading ? "…" : String(t.pageCount);
 
   const genBtn = $("sl4-generate-btn");
   $("sl4-summary-pages").textContent = outputMode === "split" ? String(t.slipCount) : $("sl4-summary-pages").textContent;
-  genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0;
-  genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : outputMode === "split" ? "Create Split PDFs" : "Create 4-in-1 PDF";
+  genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0 || items.some(it => it.duplicateOf && !it.duplicateResolved);
+  genBtn.textContent = items.some(it => it.duplicateOf && !it.duplicateResolved) ? "Resolve duplicates to continue" : t.hasErrors ? "Remove the failed file to continue" : outputMode === "split" ? "Create Split PDFs" : "Create 4-in-1 PDF";
   updatePreview();
 }
 
@@ -189,8 +208,8 @@ async function addFiles(fileList) {
       item.hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
       const duplicate = items.find(other => other.id !== item.id && other.hash === item.hash && !other.error);
       if (duplicate) {
-        const keep = window.confirm(`Duplicate PDF detected!\n${file.name} matches ${duplicate.name}.\n\nOK = Keep both PDFs\nCancel = Remove duplicate`);
-        if (!keep) items = items.filter(other => other.id !== item.id);
+        item.duplicateOf = duplicate.name;
+        item.duplicateResolved = false;
       }
     } catch (err) {
       item.error = err && err.message ? err.message : "Could not read this PDF.";
@@ -203,16 +222,19 @@ function resetAll() {
   items = [];
   revokeResultUrl();
   revokePreviewUrl();
+  generatedFiles = [];
+  generatedPageCount = 0;
+  $("sl4-download-options").hidden = true;
   $("sl4-file-input").value = "";
   render();
 }
 
 async function generate() {
   const t = totals();
-  if (t.hasErrors || t.isReading || t.slipCount === 0) return;
+  if (t.hasErrors || t.isReading || t.slipCount === 0 || items.some(it => it.duplicateOf && !it.duplicateResolved)) return;
 
   showState("converting");
-  $("sl4-progress-text").textContent = "Reading your PDFsâ€¦";
+  $("sl4-progress-text").textContent = "Reading your PDFs…";
 
   try {
     const files = [];
@@ -228,19 +250,25 @@ async function generate() {
       }
       $("sl4-success-meta").textContent = ` ${splitFiles.length} original PDF files ready for separate download.`;
       $("sl4-download-btn").textContent = "Download Separate PDFs";
+      $("sl4-download-options").hidden = true;
       showState("success");
       return;
     }
     $("sl4-download-btn").textContent = "Download PDF";
+    generatedFiles = files;
     const result = await buildFourInOnePdf(files, {
       onProgress: (current, total) => {
-        $("sl4-progress-text").textContent = `Building A4 sheet ${current} of ${total}â€¦`;
+        $("sl4-progress-text").textContent = `Building A4 sheet ${current} of ${total}…`;
       },
     });
 
     revokeResultUrl();
     const blob = new Blob([result.bytes], { type: PDF_MIME });
     resultBlobUrl = URL.createObjectURL(blob);
+    generatedPageCount = result.pageCount;
+    const picker = $("sl4-download-page");
+    picker.innerHTML = `<option value="all">All pages (${result.pageCount})</option>` + Array.from({length: result.pageCount}, (_, i) => `<option value="${i + 1}">Page ${i + 1} only</option>`).join("");
+    $("sl4-download-options").hidden = false;
 
     $("sl4-success-meta").textContent = ` ${result.slipCount} shipping ${result.slipCount === 1 ? "slip" : "slips"} arranged onto ${result.pageCount} A4 ${result.pageCount === 1 ? "page" : "pages"}.`;
 
@@ -294,7 +322,7 @@ function wire() {
   $("sl4-preview-prev").addEventListener("click", () => { previewPage -= 1; showPreviewPage(); });
   $("sl4-preview-next").addEventListener("click", () => { previewPage += 1; showPreviewPage(); });
 
-  $("sl4-download-btn").addEventListener("click", () => {
+  $("sl4-download-btn").addEventListener("click", async () => {
     if (outputMode === "split") {
       for (const entry of splitFiles) {
         const a = document.createElement("a"); a.href = entry.url; a.download = entry.name;
@@ -303,12 +331,31 @@ function wire() {
       return;
     }
     if (!resultBlobUrl) return;
+    const choice = $("sl4-download-page").value;
+    const button = $("sl4-download-btn");
+    let url = resultBlobUrl;
+    let filename = OUTPUT_FILENAME;
+    if (choice !== "all") {
+      button.disabled = true;
+      try {
+        const selected = Number(choice);
+        const result = await buildFourInOnePdf(generatedFiles, { selectedSheets: [selected] });
+        url = URL.createObjectURL(new Blob([result.bytes], { type: PDF_MIME }));
+        filename = `Shipping-Labels-4-in-1-Page-${selected}.pdf`;
+      } catch (err) {
+        alert(err?.message || "Could not create selected page.");
+        button.disabled = false;
+        return;
+      }
+      button.disabled = false;
+    }
     const a = document.createElement("a");
-    a.href = resultBlobUrl;
-    a.download = OUTPUT_FILENAME;
+    a.href = url;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
+    if (url !== resultBlobUrl) setTimeout(() => URL.revokeObjectURL(url), 60000);
   });
 }
 
