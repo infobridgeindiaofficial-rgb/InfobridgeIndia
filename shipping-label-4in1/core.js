@@ -1159,7 +1159,7 @@ async function embedSlipAsForm(builder, sourceCtx, pageDict) {
  * @param {{name:string, bytes:Uint8Array|ArrayBuffer}[]} files
  * @param {{onProgress?: (currentSheet:number, totalSheets:number)=>void}} [opts]
  */
-export async function buildFourInOnePdf(files, { onProgress } = {}) {
+export async function buildFourInOnePdf(files, { onProgress, selectedSheets = null } = {}) {
   if (!files || !files.length) {
     throw Object.assign(new Error("Add at least one shipping-label PDF first."), { code: "NO_FILES" });
   }
@@ -1185,8 +1185,11 @@ export async function buildFourInOnePdf(files, { onProgress } = {}) {
   const pagesNum = builder.reserve();
   const kids = [];
   const totalSheets = Math.ceil(slips.length / 4);
+  const selectedSet = selectedSheets == null ? null : new Set(selectedSheets);
+  if (selectedSet && (![...selectedSet].every(n => Number.isInteger(n) && n >= 1 && n <= totalSheets) || !selectedSet.size)) throw new Error("Invalid page selection.");
 
   for (let i = 0; i < slips.length; i += 4) {
+    if (selectedSet && !selectedSet.has(Math.floor(i / 4) + 1)) continue;
     const group = slips.slice(i, i + 4);
     onProgress?.(Math.floor(i / 4) + 1, totalSheets);
 
