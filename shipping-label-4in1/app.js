@@ -13,6 +13,8 @@ const states = {
   error: $("sl4-state-error"),
 };
 
+let outputMode = "combined";
+let splitFiles = [];
 let items = []; // { id, file, name, size, pageCount, error }
 let resultBlobUrl = null;
 let previewBlobUrl = null;
@@ -37,6 +39,8 @@ function isPdfFile(file) {
 }
 
 function revokeResultUrl() {
+  for (const entry of splitFiles) URL.revokeObjectURL(entry.url);
+  splitFiles = [];
   if (resultBlobUrl) {
     URL.revokeObjectURL(resultBlobUrl);
     resultBlobUrl = null;
@@ -151,8 +155,9 @@ function render() {
   $("sl4-summary-pages").textContent = t.isReading ? "â€¦" : String(t.pageCount);
 
   const genBtn = $("sl4-generate-btn");
+  $("sl4-summary-pages").textContent = outputMode === "split" ? String(t.slipCount) : $("sl4-summary-pages").textContent;
   genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0;
-  genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : "Create 4-in-1 PDF";
+  genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : outputMode === "split" ? "Create Split PDFs" : "Create 4-in-1 PDF";
   updatePreview();
 }
 
@@ -180,6 +185,13 @@ async function addFiles(fileList) {
       const buffer = await file.arrayBuffer();
       item.bytes = new Uint8Array(buffer);
       item.pageCount = await getPageCount(buffer);
+      const digest = await crypto.subtle.digest("SHA-256", buffer);
+      item.hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+      const duplicate = items.find(other => other.id !== item.id && other.hash === item.hash && !other.error);
+      if (duplicate) {
+        const keep = window.confirm(`Duplicate PDF detected!\n${file.name} matches ${duplicate.name}.\n\nOK = Keep both PDFs\nCancel = Remove duplicate`);
+        if (!keep) items = items.filter(other => other.id !== item.id);
+      }
     } catch (err) {
       item.error = err && err.message ? err.message : "Could not read this PDF.";
     }
@@ -208,6 +220,18 @@ async function generate() {
       files.push({ name: item.name, bytes: item.bytes });
     }
 
+    if (outputMode === "split") {
+      revokeResultUrl();
+      for (const item of items) {
+        const url = URL.createObjectURL(new Blob([item.bytes], { type: PDF_MIME }));
+        splitFiles.push({ name: item.name, url });
+      }
+      $("sl4-success-meta").textContent = ` ${splitFiles.length} original PDF files ready for separate download.`;
+      $("sl4-download-btn").textContent = "Download Separate PDFs";
+      showState("success");
+      return;
+    }
+    $("sl4-download-btn").textContent = "Download PDF";
     const result = await buildFourInOnePdf(files, {
       onProgress: (current, total) => {
         $("sl4-progress-text").textContent = `Building A4 sheet ${current} of ${total}â€¦`;
@@ -262,6 +286,7 @@ function wire() {
     e.target.value = "";
   });
 
+  $("sl4-output-mode").addEventListener("change", e => { outputMode = e.target.value; render(); });
   $("sl4-generate-btn").addEventListener("click", generate);
   $("sl4-clear-btn").addEventListener("click", resetAll);
   $("sl4-error-retry-btn").addEventListener("click", () => showState(items.length ? "files" : "idle"));
@@ -270,6 +295,13 @@ function wire() {
   $("sl4-preview-next").addEventListener("click", () => { previewPage += 1; showPreviewPage(); });
 
   $("sl4-download-btn").addEventListener("click", () => {
+    if (outputMode === "split") {
+      for (const entry of splitFiles) {
+        const a = document.createElement("a"); a.href = entry.url; a.download = entry.name;
+        document.body.appendChild(a); a.click(); a.remove();
+      }
+      return;
+    }
     if (!resultBlobUrl) return;
     const a = document.createElement("a");
     a.href = resultBlobUrl;
