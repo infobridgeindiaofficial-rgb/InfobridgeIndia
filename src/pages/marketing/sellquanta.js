@@ -86,6 +86,16 @@ export function sellquantaHomePage() {
     </div>
   </section>
 
+  <section class="section sq-section-alt" aria-labelledby="sellquanta-personal-title">
+    <div class="container">
+      <h2 class="h-2" id="sellquanta-personal-title">SellQuanta Personal</h2>
+      <span class="badge badge-neutral">v1.0.3</span>
+      <div class="sq-actions">
+        <a class="btn btn-accent btn-lg" href="https://github.com/infobridgeindiaofficial-rgb/sellquanta/releases/download/personal-v1.0.3/SellQuanta-Personal-Setup.exe">Download for Windows</a>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container sq-intro">
       ${sectionHead({ eyebrow: "What it is", title: "A Windows desktop app for e-commerce sellers", desc: "SellQuanta is a Windows desktop application designed for e-commerce sellers who manage stock in their own warehouse and sell through online marketplaces. It brings orders, inventory, marketplace SKU mappings, refunds and agent wallets together in one place, and it runs entirely on your own computer." })}
