@@ -7,6 +7,13 @@ dist/
 .env
 .env.*
 *.log
+/.npm-screen-view-cache/
+browser-worker/.env
+!browser-worker/.env.example
 __pycache__/
 *.py[cod]
 /merge_shipping.py
+/tmp/
+/Infobridgeindia website/
+
+/tests/fixtures/shipping-labels/*-real/
