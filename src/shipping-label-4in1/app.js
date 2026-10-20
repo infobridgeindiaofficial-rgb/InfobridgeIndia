@@ -1,4 +1,6 @@
-import { buildFourInOnePdf, getPageCount } from "./core.js";
+import { buildFourInOnePdf, getPageCount } from "./core.js?v=20261021-page-downloads";
+import { extractLabelIdentities, findDuplicateLabels } from "./duplicates.js?v=20261021-couriers";
+import { courierCounts, compareCouriers, UNKNOWN_COURIER } from "./couriers.js";
 
 const $ = (id) => document.getElementById(id);
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 MB
@@ -15,10 +17,57 @@ const states = {
 
 let items = []; // { id, file, name, size, pageCount, error }
 let resultBlobUrl = null;
+let generatedFiles = null;
+let generatedGroupByCourier = false;
+const individualBlobUrls = new Map();
 let previewBlobUrl = null;
 let previewPage = 1;
 let previewPageCount = 0;
 let previewRevision = 0;
+const duplicateDecisions = new Map();
+
+function duplicateReview() {
+  const labels = items.filter(item => !item.error && item.pageCount != null).flatMap(item =>
+    item.identities.map((identity, pageIndex) => ({ ...identity, key: `${item.id}:${pageIndex}`, name: item.name, pageIndex })));
+  const duplicates = findDuplicateLabels(labels).map(pair => ({ ...pair, key: `${pair.original.key}|${pair.duplicate.key}` }));
+  const excluded = new Set(duplicates.filter(pair => duplicateDecisions.get(pair.key) === "remove").map(pair => pair.duplicate.key));
+  return { labels, duplicates, excluded, pending: duplicates.filter(pair => !duplicateDecisions.has(pair.key)).length };
+}
+
+function selectedFiles() {
+  const { excluded } = duplicateReview();
+  return items.filter(item => !item.error && item.pageCount != null && item.bytes).map(item => ({
+    name: item.name, bytes: item.bytes,
+    couriers: item.identities.map(identity => identity.courier),
+    pageIndices: Array.from({ length: item.pageCount }, (_, index) => index).filter(index => !excluded.has(`${item.id}:${index}`)),
+  }));
+}
+
+function renderDuplicateReview() {
+  const summary = $("sl4-duplicate-summary");
+  const { labels, duplicates, excluded, pending } = duplicateReview();
+  summary.hidden = !labels.length;
+  summary.textContent = `${duplicates.length} ${duplicates.length === 1 ? "duplicate" : "duplicates"} found · ${pending} awaiting review${excluded.size ? ` · ${excluded.size} excluded` : ""}`;
+  for (const button of $("sl4-file-list").querySelectorAll("[data-duplicate]")) {
+    button.addEventListener("click", () => {
+      duplicateDecisions.set(duplicates[Number(button.dataset.duplicate)].key, button.dataset.choice);
+      render();
+      const replacement = [...$("sl4-file-list").querySelectorAll("[data-duplicate]")].find(candidate => candidate.dataset.duplicate === button.dataset.duplicate && candidate.dataset.choice === button.dataset.choice);
+      replacement?.focus();
+    });
+  }
+}
+
+function duplicateInfoHtml(pair, index) {
+  const identity = pair.duplicate;
+  return `<div class="sl4-duplicate-info">
+    <span class="sl4-duplicate-badge" title="Original: ${escapeHtml(pair.original.name)} · Page ${pair.original.pageIndex + 1}">Duplicate${identity.pageIndex ? ` · Page ${identity.pageIndex + 1}` : ""}</span>
+    <div class="sl4-duplicate-actions">
+      <button type="button" class="btn btn-ghost btn-sm" data-duplicate="${index}" data-choice="remove" aria-label="Remove duplicate page ${identity.pageIndex + 1}">Remove</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-duplicate="${index}" data-choice="keep" aria-label="Keep duplicate page ${identity.pageIndex + 1}">Keep</button>
+    </div>
+  </div>`;
+}
 
 function showState(name) {
   for (const [key, el] of Object.entries(states)) el.style.display = key === name ? "" : "none";
@@ -37,6 +86,10 @@ function isPdfFile(file) {
 }
 
 function revokeResultUrl() {
+  for (const url of individualBlobUrls.values()) URL.revokeObjectURL(url);
+  individualBlobUrls.clear();
+  generatedFiles = null;
+  $("sl4-download-options").hidden = true;
   if (resultBlobUrl) {
     URL.revokeObjectURL(resultBlobUrl);
     resultBlobUrl = null;
@@ -87,7 +140,7 @@ async function updatePreview() {
   if (reading) return;
 
   try {
-    const result = await buildFourInOnePdf(validItems.map((item) => ({ name: item.name, bytes: item.bytes })));
+    const result = await buildFourInOnePdf(selectedFiles(), { groupByCourier: $("sl4-sort-order").value === "courier" });
     if (revision !== previewRevision) return;
     revokePreviewUrl();
     previewBlobUrl = URL.createObjectURL(new Blob([result.bytes], { type: PDF_MIME }));
@@ -103,36 +156,74 @@ async function updatePreview() {
 
 function totals() {
   const validItems = items.filter((it) => !it.error && it.pageCount != null);
-  const slipCount = validItems.reduce((n, it) => n + it.pageCount, 0);
+  const slipCount = validItems.reduce((n, it) => n + it.pageCount, 0) - duplicateReview().excluded.size;
   const pageCount = slipCount > 0 ? Math.ceil(slipCount / 4) : 0;
-  return { fileCount: items.length, slipCount, pageCount, hasErrors: items.some((it) => it.error), isReading: items.some((it) => it.pageCount == null && !it.error) };
+  const excluded = duplicateReview().excluded;
+  const fileCount = items.filter(item => item.pageCount == null || Array.from({ length: item.pageCount }, (_, index) => index).some(index => !excluded.has(`${item.id}:${index}`))).length;
+  return { fileCount, slipCount, pageCount, hasErrors: items.some((it) => it.error), isReading: items.some((it) => it.pageCount == null && !it.error) };
 }
 
-function fileRowHtml(item) {
+function fileRowHtml(item, review, pageIndex = null) {
   const errorClass = item.error ? " sl4-file-error" : "";
+  const matches = review.duplicates.map((pair, index) => ({ pair, index })).filter(({ pair }) => pageIndex == null ? pair.duplicate.key.startsWith(`${item.id}:`) : pair.duplicate.key === `${item.id}:${pageIndex}`);
+  const selectedCount = item.pageCount == null ? null : Array.from({ length: item.pageCount }, (_, index) => index).filter(index => (pageIndex == null || index === pageIndex) && !review.excluded.has(`${item.id}:${index}`)).length;
+  if (selectedCount === 0 && !item.error) return "";
+  const pendingMatches = matches.filter(({ pair }) => !duplicateDecisions.has(pair.key));
+  const pending = matches.some(({ pair }) => !duplicateDecisions.has(pair.key));
+  const originals = [...new Set(review.duplicates.filter(pair => pair.original.key.startsWith(`${item.id}:`) && (pageIndex == null || pair.original.pageIndex === pageIndex)).map(pair => pair.original.pageIndex + 1))];
+  const unchecked = (item.identities || []).flatMap((identity, index) => identity.comparable || (pageIndex != null && index !== pageIndex) ? [] : [index + 1]);
   const metaLine = item.error
     ? `<span class="sl4-file-err-text">${item.error}</span>`
     : item.pageCount == null
       ? `<span>${formatSize(item.size)} &middot; Readingâ€¦</span>`
-      : `<span>${formatSize(item.size)} &middot; ${item.pageCount} shipping ${item.pageCount === 1 ? "slip" : "slips"}</span>`;
+      : `<span>${formatSize(item.size)} &middot; ${selectedCount} shipping ${selectedCount === 1 ? "slip" : "slips"}${selectedCount < item.pageCount ? " selected" : ""}</span>`;
   return `
-    <div class="sl4-file-row${errorClass}" data-id="${item.id}">
+    <article class="sl4-file-row${errorClass}${pending ? " sl4-file-duplicate" : ""}" data-id="${item.id}"${pageIndex == null ? "" : ` data-page="${pageIndex}"`}>
+      <div class="sl4-file-header">
       <div class="sl4-file-icon">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 01-1 1H7a1 1 0 01-1-1V4.5a1 1 0 011-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/></svg>
       </div>
       <div class="sl4-file-meta">
         <strong>${escapeHtml(item.name)}</strong>
+        ${pageIndex != null && item.pageCount > 1 ? `<span>Page ${pageIndex + 1} of ${item.pageCount}</span>` : ""}
         ${metaLine}
+        <span class="sl4-courier-badges">${courierCounts((item.identities || []).filter((identity, index) => (pageIndex == null || index === pageIndex) && !review.excluded.has(`${item.id}:${index}`))).map(([name, count]) => `<span class="sl4-courier-badge">${escapeHtml(name)}${pageIndex == null && item.pageCount > 1 ? ` · ${count}` : ""}</span>`).join("")}</span>
+        ${matches.length ? `<span>${escapeHtml(matches[0].pair.duplicate.marketplace)} &middot; Order ID: ${escapeHtml(matches[0].pair.duplicate.orderId || "Not available")}</span>` : ""}
+        ${originals.length ? `<span class="sl4-original-label">Original ${originals.length === 1 ? "label · Page" : "labels · Pages"} ${originals.join(", ")}</span>` : ""}
       </div>
-      <button type="button" class="btn btn-ghost btn-sm sl4-remove-btn" data-id="${item.id}">Remove</button>
-    </div>`;
+      </div>
+      ${pendingMatches.length ? `<div class="sl4-card-review">${pendingMatches.map(({ pair, index }) => duplicateInfoHtml(pair, index)).join("")}</div>` : ""}
+      ${unchecked.length ? `<p class="sl4-manual-review">Pages ${unchecked.join(", ")}: shipment identifiers unavailable or conflicting. Kept selected; review manually.</p>` : ""}
+      ${pending ? "" : `<div class="sl4-file-actions"><button type="button" class="btn btn-ghost btn-sm sl4-remove-btn" data-id="${item.id}">Remove file</button></div>`}
+    </article>`;
 }
 
 function escapeHtml(s) {
-  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function selectedLabels(review) {
+  const labels = review.labels.filter(label => !review.excluded.has(label.key));
+  if ($("sl4-sort-order").value === "courier") labels.sort((first, second) => compareCouriers(first.courier || UNKNOWN_COURIER, second.courier || UNKNOWN_COURIER));
+  return labels;
+}
+
+function fileListHtml(review) {
+  if ($("sl4-sort-order").value !== "courier") return items.map(item => fileRowHtml(item, review)).join("");
+  const labels = selectedLabels(review);
+  const groups = courierCounts(labels).map(([courier, count]) => {
+    const cards = labels.filter(label => (label.courier || UNKNOWN_COURIER) === courier).map(label => {
+      const item = items.find(candidate => label.key === `${candidate.id}:${label.pageIndex}`);
+      return fileRowHtml(item, review, label.pageIndex);
+    }).join("");
+    return `<section class="sl4-courier-group"><h3>${escapeHtml(courier)} <span>${count} ${count === 1 ? "label" : "labels"}</span></h3>${cards}</section>`;
+  }).join("");
+  const reading = items.filter(item => item.error || item.pageCount == null).map(item => fileRowHtml(item, review)).join("");
+  return groups + reading;
 }
 
 function render() {
+  revokeResultUrl();
   if (!items.length) {
     showState("idle");
     updatePreview();
@@ -140,7 +231,9 @@ function render() {
   }
   showState("files");
 
-  $("sl4-file-list").innerHTML = items.map(fileRowHtml).join("");
+  const review = duplicateReview();
+  $("sl4-courier-summary").textContent = courierCounts(review.labels.filter(label => !review.excluded.has(label.key))).map(([name, count]) => `${name}: ${count}`).join(" · ");
+  $("sl4-file-list").innerHTML = fileListHtml(review);
   for (const btn of $("sl4-file-list").querySelectorAll(".sl4-remove-btn")) {
     btn.addEventListener("click", () => removeItem(btn.dataset.id));
   }
@@ -150,9 +243,12 @@ function render() {
   $("sl4-summary-slips").textContent = t.isReading ? "â€¦" : String(t.slipCount);
   $("sl4-summary-pages").textContent = t.isReading ? "â€¦" : String(t.pageCount);
 
+  $("sl4-preview-count").textContent = `${t.slipCount} ${t.slipCount === 1 ? "label" : "labels"}`;
   const genBtn = $("sl4-generate-btn");
-  genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0;
-  genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : "Create 4-in-1 PDF";
+  const pending = duplicateReview().pending;
+  genBtn.disabled = t.hasErrors || t.isReading || t.slipCount === 0 || pending > 0;
+  genBtn.textContent = t.hasErrors ? "Remove the failed file to continue" : pending ? "Review duplicate labels to continue" : "Create 4-in-1 PDF";
+  renderDuplicateReview();
   updatePreview();
 }
 
@@ -179,7 +275,14 @@ async function addFiles(fileList) {
       }
       const buffer = await file.arrayBuffer();
       item.bytes = new Uint8Array(buffer);
-      item.pageCount = await getPageCount(buffer);
+      const pageCount = await getPageCount(buffer);
+      try {
+        item.identities = await extractLabelIdentities(item.bytes);
+        if (item.identities.length !== pageCount) throw new Error("Page count mismatch");
+      } catch {
+        item.identities = Array.from({ length: pageCount }, () => ({ marketplace: "Unknown", comparable: false }));
+      }
+      item.pageCount = pageCount;
     } catch (err) {
       item.error = err && err.message ? err.message : "Could not read this PDF.";
     }
@@ -188,7 +291,9 @@ async function addFiles(fileList) {
 }
 
 function resetAll() {
+  $("sl4-sort-order").value = "courier";
   items = [];
+  duplicateDecisions.clear();
   revokeResultUrl();
   revokePreviewUrl();
   $("sl4-file-input").value = "";
@@ -197,26 +302,32 @@ function resetAll() {
 
 async function generate() {
   const t = totals();
-  if (t.hasErrors || t.isReading || t.slipCount === 0) return;
+  if (t.hasErrors || t.isReading || t.slipCount === 0 || duplicateReview().pending) return;
 
   showState("converting");
   $("sl4-progress-text").textContent = "Reading your PDFsâ€¦";
 
   try {
-    const files = [];
-    for (const item of items) {
-      files.push({ name: item.name, bytes: item.bytes });
-    }
+    const files = selectedFiles();
+    const groupByCourier = $("sl4-sort-order").value === "courier";
+    const revision = previewRevision;
 
     const result = await buildFourInOnePdf(files, {
+      groupByCourier,
       onProgress: (current, total) => {
         $("sl4-progress-text").textContent = `Building A4 sheet ${current} of ${total}â€¦`;
       },
     });
 
+    if (revision !== previewRevision) return;
     revokeResultUrl();
     const blob = new Blob([result.bytes], { type: PDF_MIME });
     resultBlobUrl = URL.createObjectURL(blob);
+    generatedFiles = files;
+    generatedGroupByCourier = groupByCourier;
+    $("sl4-download-page").innerHTML = Array.from({ length: result.pageCount }, (_, index) => `<option value="${index + 1}">Page ${index + 1} of ${result.pageCount}</option>`).join("");
+    $("sl4-download-page").value = "1";
+    $("sl4-download-options").hidden = false;
 
     $("sl4-success-meta").textContent = ` ${result.slipCount} shipping ${result.slipCount === 1 ? "slip" : "slips"} arranged onto ${result.pageCount} A4 ${result.pageCount === 1 ? "page" : "pages"}.`;
 
@@ -228,6 +339,34 @@ async function generate() {
 }
 
 function wire() {
+  $("sl4-download-page-btn").addEventListener("click", async () => {
+    if (!generatedFiles || !resultBlobUrl) return;
+    const button = $("sl4-download-page-btn");
+    const files = generatedFiles;
+    const combinedUrl = resultBlobUrl;
+    const page = Number($("sl4-download-page").value);
+    button.disabled = true;
+    $("sl4-download-page-status").textContent = "";
+    try {
+      if (!individualBlobUrls.has(page)) {
+        const result = await buildFourInOnePdf(files, { groupByCourier: generatedGroupByCourier, selectedSheets: [page] });
+        if (combinedUrl !== resultBlobUrl) return;
+        individualBlobUrls.set(page, URL.createObjectURL(new Blob([result.bytes], { type: PDF_MIME })));
+      }
+      const anchor = document.createElement("a");
+      anchor.href = individualBlobUrls.get(page);
+      anchor.download = `Shipping-Labels-4-in-1-Page-${page}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    } catch (error) {
+      $("sl4-download-page-status").textContent = error.message || "Could not download this page.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("sl4-sort-order").value = "courier";
+  $("sl4-sort-order").addEventListener("change", render);
   const dropzone = $("sl4-dropzone");
   const fileInput = $("sl4-file-input");
 
