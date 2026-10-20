@@ -6,6 +6,8 @@
 // an A4 sheet. No external libraries, no rasterization â€” barcodes, QR codes,
 // fonts and text stay exactly as sharp as the source PDF.
 
+import { compareCouriers, UNKNOWN_COURIER } from "./couriers.js";
+
 const BYTE_ENCODING = "windows-1252"; // 1 byte <-> 1 char, safe for structural scanning
 
 // ---------------------------------------------------------------------------
@@ -371,7 +373,7 @@ export async function parsePdfDocument(arrayBuffer) {
   if (!objects.size) throw Object.assign(new Error("No readable content was found in this PDF."), { code: "EMPTY" });
 
   for (const obj of objects.values()) {
-    if (obj.dict && obj.dict["/Type"] === "/Encrypt") {
+    if (obj.dict && (obj.dict["/Type"] === "/Encrypt" || obj.dict["/Encrypt"])) {
       throw Object.assign(new Error("This PDF is password-protected or encrypted and can't be processed in the browser."), { code: "ENCRYPTED" });
     }
   }
@@ -379,6 +381,31 @@ export async function parsePdfDocument(arrayBuffer) {
     throw Object.assign(new Error("This PDF is password-protected or encrypted and can't be processed in the browser."), { code: "ENCRYPTED" });
   }
 
+  for (const obj of [...objects.values()]) {
+    if (obj.dict?.["/Type"] !== "/ObjStm") continue;
+    const content = bytesToLatin1(await decodeStream(bytes, obj));
+    const count = obj.dict["/N"];
+    const first = obj.dict["/First"];
+    if (!Number.isInteger(count) || count < 0 || count > 100000 || !Number.isInteger(first) || first < 0 || first > content.length) {
+      throw Object.assign(new Error("Invalid compressed PDF object stream."), { code: "PARSE_ERROR" });
+    }
+    const header = content.slice(0, first).trim().split(/\s+/).map(Number);
+    if (header.length !== count * 2 || header.some(value => !Number.isSafeInteger(value) || value < 0)) {
+      throw Object.assign(new Error("Invalid compressed PDF object index."), { code: "PARSE_ERROR" });
+    }
+    for (let index = 0; index < count; index++) {
+      const number = header[index * 2];
+      const start = first + header[index * 2 + 1];
+      const end = index + 1 < count ? first + header[index * 2 + 3] : content.length;
+      if (start < first || start >= end || end > content.length) {
+        throw Object.assign(new Error("Invalid compressed PDF object offset."), { code: "PARSE_ERROR" });
+      }
+      if (!objects.has(number)) {
+        const [dict] = parseValue(content.slice(start, end), 0);
+        objects.set(number, { dict, stream: null });
+      }
+    }
+  }
   const pages = collectPages(objects);
   if (!pages.length) throw Object.assign(new Error("No pages could be found in this PDF."), { code: "NO_PAGES" });
 
@@ -1159,7 +1186,7 @@ async function embedSlipAsForm(builder, sourceCtx, pageDict) {
  * @param {{name:string, bytes:Uint8Array|ArrayBuffer}[]} files
  * @param {{onProgress?: (currentSheet:number, totalSheets:number)=>void}} [opts]
  */
-export async function buildFourInOnePdf(files, { onProgress, selectedSheets = null } = {}) {
+export async function buildFourInOnePdf(files, { onProgress, groupByCourier = false, selectedSheets = null } = {}) {
   if (!files || !files.length) {
     throw Object.assign(new Error("Add at least one shipping-label PDF first."), { code: "NO_FILES" });
   }
@@ -1172,25 +1199,34 @@ export async function buildFourInOnePdf(files, { onProgress, selectedSheets = nu
     } catch (err) {
       throw Object.assign(new Error(`"${file.name}": ${err.message}`), { code: err.code || "PARSE_ERROR" });
     }
-    for (const page of doc.pages) {
-      slips.push({ sourceCtx: doc, pageDict: page.dict });
+    if (file.pageIndices !== undefined && (!Array.isArray(file.pageIndices) || file.pageIndices.some(index => !Number.isInteger(index) || index < 0 || index >= doc.pages.length))) {
+      throw Object.assign(new Error(`"${file.name}": Invalid label page selection.`), { code: "INVALID_SELECTION" });
+    }
+    for (const [pageIndex, page] of doc.pages.entries()) {
+      if (file.pageIndices && !file.pageIndices.includes(pageIndex)) continue;
+      slips.push({ sourceCtx: doc, pageDict: page.dict, courier: file.couriers?.[pageIndex] || UNKNOWN_COURIER });
     }
   }
   if (!slips.length) {
     throw Object.assign(new Error("No pages were found in the selected PDFs."), { code: "NO_PAGES" });
   }
 
+  if (groupByCourier) slips.sort((first, second) => compareCouriers(first.courier, second.courier));
   const builder = createBuilder();
   const catalogNum = builder.reserve();
   const pagesNum = builder.reserve();
   const kids = [];
   const totalSheets = Math.ceil(slips.length / 4);
   const selectedSet = selectedSheets == null ? null : new Set(selectedSheets);
-  if (selectedSet && (![...selectedSet].every(n => Number.isInteger(n) && n >= 1 && n <= totalSheets) || !selectedSet.size)) throw new Error("Invalid page selection.");
+  if (selectedSet && (!selectedSet.size || [...selectedSet].some(number => !Number.isInteger(number) || number < 1 || number > totalSheets))) {
+    throw Object.assign(new Error("Invalid A4 page selection."), { code: "INVALID_SELECTION" });
+  }
+  let renderedSlipCount = 0;
 
   for (let i = 0; i < slips.length; i += 4) {
     if (selectedSet && !selectedSet.has(Math.floor(i / 4) + 1)) continue;
     const group = slips.slice(i, i + 4);
+    renderedSlipCount += group.length;
     onProgress?.(Math.floor(i / 4) + 1, totalSheets);
 
     const xobjectDict = {};
@@ -1231,5 +1267,5 @@ export async function buildFourInOnePdf(files, { onProgress, selectedSheets = nu
   builder.setObject(catalogNum, { "/Type": "/Catalog", "/Pages": { ref: pagesNum, gen: 0 } }, null);
 
   const bytes = writePdf(builder, catalogNum);
-  return { bytes, slipCount: slips.length, pageCount: kids.length };
+  return { bytes, slipCount: renderedSlipCount, pageCount: kids.length };
 }
