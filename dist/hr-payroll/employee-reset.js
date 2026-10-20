@@ -24,11 +24,11 @@ export async function verifyEmployeeDataReset(store) {
   return true;
 }
 
-export async function resetEmployeeDataEverywhere({ activeStore, createCloudStore, createFallbackStore }) {
-  if (!activeStore || !createCloudStore || !createFallbackStore) throw new Error("Employee reset storage is unavailable.");
-  const cloudStore = activeStore.offline ? await createCloudStore() : activeStore;
+export async function resetEmployeeDataEverywhere({ authorizeReset, createCloudStore, createFallbackStore }) {
+  if (!authorizeReset || !createCloudStore || !createFallbackStore) throw new Error("Secure HR reset authorization is unavailable.");
+  const authorization = await authorizeReset();
+  if (!authorization || authorization.authorized !== true || authorization.moduleId !== "hr_payroll") throw new Error("Secure HR reset authorization failed.");
   const fallbackStore = createFallbackStore();
-  await resetEmployeeData(cloudStore);
   await resetEmployeeData(fallbackStore);
   const reloadedCloudStore = await createCloudStore();
   const reloadedFallbackStore = createFallbackStore();

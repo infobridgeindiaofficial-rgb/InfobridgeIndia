@@ -42,7 +42,7 @@ test("reset clears cloud and stale fallback, and repository reload stays empty",
   cloud.set("COMPANY-B:hr-payroll:employees", [{ id: "OTHER-EMPLOYEE" }]);
   const activeFallback = scopedStore(fallback, "COMPANY-A", "hr-payroll", true);
   await resetEmployeeDataEverywhere({
-    activeStore: activeFallback,
+    authorizeReset: async () => { for (const collection of EMPLOYEE_RESET_COLLECTIONS) await scopedStore(cloud, "COMPANY-A").clear(collection); return { authorized: true, moduleId: "hr_payroll" }; },
     createCloudStore: async () => scopedStore(cloud, "COMPANY-A"),
     createFallbackStore: () => scopedStore(fallback, "COMPANY-A", "hr-payroll", true),
   });
@@ -57,5 +57,13 @@ test("reset clears cloud and stale fallback, and repository reload stays empty",
 
 test("reset fails verification instead of claiming success when persisted rows survive", async () => {
   const stubborn = { offline: false, async clear() {}, async all(collection) { return collection === "employees" ? [{ id: "E1" }] : []; } };
-  await assert.rejects(() => resetEmployeeDataEverywhere({ activeStore: stubborn, createCloudStore: async () => stubborn, createFallbackStore: () => ({ async clear() {}, async all() { return []; } }) }), /could not be verified.*employees/);
+  await assert.rejects(() => resetEmployeeDataEverywhere({ authorizeReset: async()=>({authorized:true,moduleId:"hr_payroll"}), createCloudStore: async () => stubborn, createFallbackStore: () => ({ async clear() {}, async all() { return []; } }) }), /could not be verified.*employees/);
+});
+
+test("old HR reset path cannot run without scoped server authorization",async()=>{
+  let cleared=false;
+  await assert.rejects(()=>resetEmployeeDataEverywhere({createCloudStore:async()=>({async all(){return[]}}),createFallbackStore:()=>({async clear(){cleared=true},async all(){return[]}})}),/Secure HR reset authorization is unavailable/);
+  assert.equal(cleared,false);
+  await assert.rejects(()=>resetEmployeeDataEverywhere({authorizeReset:async()=>({authorized:true,moduleId:"sales_crm"}),createCloudStore:async()=>({async all(){return[]}}),createFallbackStore:()=>({async clear(){cleared=true},async all(){return[]}})}),/authorization failed/);
+  assert.equal(cleared,false);
 });

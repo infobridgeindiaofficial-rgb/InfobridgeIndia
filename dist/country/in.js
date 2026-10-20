@@ -1,4 +1,4 @@
-import { INDIA_BUSINESS_TYPES, freezeCountryConfig, gstinValid } from "./shared.js";
+import { INDIA_BUSINESS_TYPES, INDIA_STATES, freezeCountryConfig, gstinValid } from "./shared.js";
 
 // These values intentionally mirror the existing Administration behaviour.
 export const indiaCountryConfig = freezeCountryConfig({
@@ -6,12 +6,13 @@ export const indiaCountryConfig = freezeCountryConfig({
   countryName: "India",
   currency: "INR",
   businessTypes: INDIA_BUSINESS_TYPES,
-  jurisdictions: [],
+  jurisdictions: INDIA_STATES,
   jurisdictionLabel: "State",
   jurisdictionCodeLabel: "State code",
   postalCodeLabel: "PIN code",
   tax: {
     system: "GST",
+    strategy: "india-gst",
     statusLabel: "GST status",
     identifier: "GSTIN",
     identifierField: "gstin",
@@ -19,6 +20,13 @@ export const indiaCountryConfig = freezeCountryConfig({
     settingsLabel: "GST & Tax Settings",
     workspaceLabel: "GST Workspace",
     validateIdentifier: gstinValid,
+    labels: { total: "GST", central: "CGST", state: "SGST", integrated: "IGST" },
+    capabilities: {
+      components: ["CGST", "SGST", "IGST"],
+      intraRegionSplit: true,
+      interRegionIntegrated: true,
+      requiresRegionComparison: true,
+    },
   },
   registration: {
     showPan: true,

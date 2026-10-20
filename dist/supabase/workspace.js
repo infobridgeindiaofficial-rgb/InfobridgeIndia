@@ -1,5 +1,4 @@
-import { currentUser, ownedCompany, requireSupabase } from "/supabase/client.js";
-import { resolveCountryConfig } from "/country/registry.js";
+import { resolveCurrentCompanyContext } from "/company/context.js";
 import { DEFAULT_WORKSPACE_BATCH_SIZE, writeInChunks } from "/supabase/workspace-bulk.js";
 
 const KEY_MODULES = {
@@ -13,17 +12,7 @@ const KEY_MODULES = {
 };
 
 async function context() {
-  const user = globalThis.InfoBridgeUser || await currentUser();
-  const activeProfile = globalThis.InfoBridgeCompany;
-  const company = activeProfile?.companyId && activeProfile?.ownerId === user?.id
-    ? { id: activeProfile.companyId, owner_id: activeProfile.ownerId, ...activeProfile }
-    : await ownedCompany();
-  if (!user) throw new Error("Authentication required.");
-  if (!company) throw new Error("Company setup required.");
-  if (company.owner_id !== user.id) throw new Error("Company access denied.");
-  const countryConfig = resolveCountryConfig(company.country);
-  globalThis.InfoBridgeCountryConfig = countryConfig;
-  return { client: requireSupabase(), user, company, countryConfig };
+  return resolveCurrentCompanyContext();
 }
 
 async function encodeValue(value) {

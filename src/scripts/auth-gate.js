@@ -1,6 +1,7 @@
 import { companyToProfile, currentSession, isSupabaseConfigured, ownedCompany, supabase } from "/supabase/client.js";
 import { HOME_ROUTE, clearTemporaryNavigation, destinationAfterAuth, isProtectedRoute, normalizePath, profileDisplayName, saveIntendedDestination, setLastWorkspace } from "/auth/core.js";
 import { currentCompanyName, publishAdministrationCompany } from "/administration-workspace/company.js";
+import { createCountryContext } from "/country/registry.js";
 
 const temporary = sessionStorage;
 const path = `${location.pathname}${location.search}${location.hash}`;
@@ -49,6 +50,8 @@ if (isProtectedRoute(safePath) && companyLoadError) {
     window.InfoBridgeSession = activeSession;
     window.InfoBridgeUser = activeUser;
     window.InfoBridgeCompany = activeProfile;
+    window.InfoBridgeCountryContext = activeProfile ? createCountryContext(activeProfile) : null;
+    window.InfoBridgeCountryConfig = window.InfoBridgeCountryContext?.config || null;
     window.InfoBridgeSupabaseConfigured = isSupabaseConfigured;
 
     document.querySelectorAll("[data-auth-logged-out]").forEach((node) => { node.hidden = Boolean(activeUser); });

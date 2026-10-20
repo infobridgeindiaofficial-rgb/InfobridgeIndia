@@ -1,3 +1,6 @@
+import { normalizeCountryCode } from "../country/registry.js";
+import { companyProfileCountryModel, normalizeCompanyProfileInput } from "../company/profile.js";
+
 export const INTENDED_KEY = "infobridgeindia.auth.intended.v1";
 export const LAST_WORKSPACE_KEY = "infobridgeindia.auth.last-workspace.v1";
 export const HOME_ROUTE = "/index.html";
@@ -5,11 +8,12 @@ export const HOME_ROUTE = "/index.html";
 export const PROTECTED_ROUTES = [
   "/app/finance.html", "/app/sales.html", "/app/purchases.html", "/inventory/index.html", "/hr-payroll/index.html",
   "/app/projects.html", "/app/documents.html", "/app/approvals.html", "/app/banking.html", "/app/reports.html",
-  "/app/admin.html", "/app/gst/index.html", "/app/gst/gstr-1.html", "/app/inventory.html", "/app/import-export.html",
+  "/app/admin.html", "/app/inventory.html", "/app/import-export.html",
   "/app/settings.html", "/app/hr/index.html", "/app/hr/payroll.html",
 ];
 
 export const PUBLIC_TOOL_ROUTES = [
+  "/app/gst/index.html", "/app/gst/gstr-1.html",
   "/gst-calculator.html", "/gst-interest-calculator.html", "/gst-late-fee-calculator.html", "/marketplace-profit-calculator.html",
   "/gst-invoice-generator.html", "/quotation-generator.html", "/pdf-to-word.html", "/word-to-pdf.html", "/shipping-label-4in1.html",
 ];
@@ -49,23 +53,15 @@ export function profileDisplayName(company, user) {
 
 export function currentIndianFinancialYear(date = new Date()) { const year = date.getFullYear(), start = date.getMonth() >= 3 ? year : year - 1; return `${start}-${String(start + 1).slice(-2)}`; }
 export function isValidGstin(value) { return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(String(value || "").trim().toUpperCase()); }
-export function normalizeCountry(value) { return String(value || "").trim().toUpperCase() === "AE" || /UNITED ARAB EMIRATES|UAE/i.test(String(value || "")) ? "AE" : "IN"; }
+export function normalizeCountry(value) { return normalizeCountryCode(value); }
 export function isValidTrn(value) { return /^\d{15}$/.test(String(value || "").trim()); }
 export function validateCompanyProfile(input) {
-  const country = normalizeCountry(input.country);
-  const registered = input.taxRegistered === true || input.taxRegistered === "yes" || (country === "IN" && (input.gstRegistered === true || input.gstRegistered === "yes")) || (country === "AE" && (input.vatRegistered === true || input.vatRegistered === "yes"));
-  const gstin = String(input.gstin || (country === "IN" ? input.taxNumber : "") || "").trim().toUpperCase();
-  const trn = String(input.trn || (country === "AE" ? input.taxNumber : "") || "").trim();
-  const jurisdiction = String(country === "AE" ? input.emirate || "" : input.state || "").trim();
-  const data = { name: String(input.name || "").trim(), businessType: String(input.businessType || "").trim(), state: jurisdiction, country, gstRegistered: country === "IN" && registered, gstin: country === "IN" ? gstin : "", vatRegistered: country === "AE" && registered, trn: country === "AE" ? trn : "", tradeLicenseNumber: country === "AE" ? String(input.tradeLicenseNumber || "").trim() : "", tradeLicenseExpiryDate: country === "AE" ? String(input.tradeLicenseExpiryDate || "").trim() : "", taxSystem: country === "AE" ? "VAT" : "GST", taxNumber: country === "AE" ? trn : gstin, address: String(input.address || "").trim(), logo: String(input.logo || ""), currency: String(input.currency || (country === "AE" ? "AED" : "INR")), dateFormat: String(input.dateFormat || "DD/MM/YYYY"), financialYear: String(input.financialYear || currentIndianFinancialYear()), invoicePrefix: String(input.invoicePrefix || "INV").trim().toUpperCase(), quotationPrefix: String(input.quotationPrefix || "QUO").trim().toUpperCase() };
+  const normalized = normalizeCompanyProfileInput(input), model = companyProfileCountryModel(normalized.country);
+  const data = { ...normalized, name: String(input.name || "").trim(), businessType: String(input.businessType || "").trim(), address: String(input.address || "").trim(), logo: String(input.logo || ""), dateFormat: String(input.dateFormat || "DD/MM/YYYY"), financialYear: String(input.financialYear || currentIndianFinancialYear()), invoicePrefix: String(input.invoicePrefix || "INV").trim().toUpperCase(), quotationPrefix: String(input.quotationPrefix || "QUO").trim().toUpperCase() };
   if (!data.name) throw new Error("Enter the company name.");
   if (!data.businessType) throw new Error("Select a business type.");
-  if (!data.state) throw new Error(country === "AE" ? "Select an emirate." : "Select a state or union territory.");
-  if (data.gstRegistered && !isValidGstin(data.gstin)) throw new Error("Enter a valid GSTIN format.");
-  if (!data.gstRegistered) data.gstin = "";
-  if (data.vatRegistered && !data.trn) throw new Error("Enter the company's TRN.");
-  if (data.trn && !isValidTrn(data.trn)) throw new Error("TRN must contain exactly 15 digits.");
-  if (!data.vatRegistered) data.trn = "";
-  data.taxNumber = data.country === "AE" ? data.trn : data.gstin;
+  if (!data.state) throw new Error(`Select ${model.regionLabel === "State" ? "a state or union territory" : `an ${model.regionLabel.toLowerCase()}`}.`);
+  const registered = data.gstRegistered || data.vatRegistered;
+  if (registered && !model.config.tax.validateIdentifier(data.taxNumber)) throw new Error(model.config.tax.identifier === "TRN" ? "TRN must contain exactly 15 digits." : "Enter a valid GSTIN format.");
   return data;
 }

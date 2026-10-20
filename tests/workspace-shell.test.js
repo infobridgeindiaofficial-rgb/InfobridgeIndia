@@ -29,11 +29,13 @@ test("Administration catches module graph startup failures instead of spinning f
 
 test("workspace startup preloads one owner-scoped module result instead of querying every collection", async () => {
   const source = await read("src/supabase/workspace.js");
+  const context = await read("src/company/context.js");
   assert.match(source, /select\("collection, record_id, data"\)/);
   assert.match(source, /return \[\.\.\.collectionCache\(collection\)\.values\(\)\]/);
   assert.doesNotMatch(source, /base\(\)\.eq\("collection"/);
-  assert.match(source, /globalThis\.InfoBridgeUser/);
-  assert.match(source, /globalThis\.InfoBridgeCompany/);
+  assert.match(source, /resolveCurrentCompanyContext\(\)/);
+  assert.match(context, /globalThis\.InfoBridgeUser/);
+  assert.match(context, /globalThis\.InfoBridgeCompany/);
 });
 
 test("Projects and Documents render non-interactive sidebar brands in source", async () => {

@@ -15,16 +15,27 @@ export const UAE_EMIRATES = Object.freeze([
   "Ras Al Khaimah", "Fujairah",
 ]);
 
+export const INDIA_STATES = Object.freeze([
+  "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh",
+  "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana",
+  "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep",
+  "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry",
+  "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+]);
+
 export const gstinValid = (value) => /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(String(value || "").toUpperCase());
 export const trnValid = (value) => /^\d{15}$/.test(String(value || ""));
 
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
+}
+
 export function freezeCountryConfig(config) {
-  return Object.freeze({
+  return deepFreeze({
     ...config,
-    businessTypes: Object.freeze([...config.businessTypes]),
-    jurisdictions: Object.freeze([...config.jurisdictions]),
-    tax: Object.freeze({ ...config.tax }),
-    registration: Object.freeze({ ...config.registration }),
-    defaults: Object.freeze({ ...config.defaults }),
+    businessTypes: [...config.businessTypes],
+    jurisdictions: [...config.jurisdictions],
   });
 }

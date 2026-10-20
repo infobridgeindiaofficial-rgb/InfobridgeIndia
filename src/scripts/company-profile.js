@@ -1,7 +1,9 @@
 import { companyToProfile, currentUser, ensureDefaultCompany, ownedCompany, saveOwnedCompany } from "/supabase/client.js";
 import { currentIndianFinancialYear, destinationAfterSetup, validateCompanyProfile } from "/auth/core.js";
+import { canEditCompanyCountry, companyProfileCountryModel } from "/company/profile.js";
 
-if (!await currentUser()) location.replace("/login.html");
+const signedInUser=await currentUser();
+if (!signedInUser) location.replace("/login.html");
 
 const form = document.querySelector("[data-company-form]");
 const taxNumberField = form?.querySelector("[data-tax-number-field]");
@@ -22,9 +24,6 @@ function showError(message) {
 
 document.querySelectorAll("[data-financial-year]").forEach((node) => { node.textContent = currentIndianFinancialYear(); });
 
-const indiaBusinessTypes = ["Sole Proprietorship", "Partnership", "LLP", "Private Limited Company", "Public Limited Company", "One Person Company", "Other"];
-const uaeBusinessTypes = ["Sole Establishment / Sole Proprietorship", "Civil Company", "Limited Liability Company (LLC)", "Single Person LLC", "Partnership", "Branch of UAE Company", "Branch of Foreign Company", "Free Zone Company", "Free Zone Establishment", "Other"];
-
 function setOptions(select, placeholder, values, selected = "") {
   select.replaceChildren(new Option(placeholder, ""), ...values.map((value) => new Option(value, value)));
   select.value = values.includes(selected) ? selected : "";
@@ -34,13 +33,14 @@ function updateTaxRegistration({ clearWhenUnregistered = true } = {}) {
   const registered = form.elements.taxRegistered.value === "yes";
   taxNumberField.hidden = !registered;
   taxNumberInput.required = registered;
+  taxNumberInput.disabled = !registered;
   if (!registered && clearWhenUnregistered) taxNumberInput.value = "";
 }
 
 function updateCountry({ preserveValues = false } = {}) {
-  const country = form.elements.country.value === "AE" ? "AE" : "IN";
+  const model = companyProfileCountryModel(form.elements.country.value), country = model.code;
   const businessType = preserveValues ? form.elements.businessType.value : "";
-  setOptions(form.elements.businessType, "Select business type", country === "AE" ? uaeBusinessTypes : indiaBusinessTypes, businessType);
+  setOptions(form.elements.businessType, "Select business type", model.businessTypes, businessType);
   const indiaJurisdiction = form.querySelector("[data-india-jurisdiction]");
   const uaeJurisdiction = form.querySelector("[data-uae-jurisdiction]");
   indiaJurisdiction.hidden = country === "AE";
@@ -49,15 +49,15 @@ function updateCountry({ preserveValues = false } = {}) {
   form.elements.state.required = country !== "AE";
   form.elements.emirate.disabled = country !== "AE";
   form.elements.emirate.required = country === "AE";
-  form.querySelector("[data-tax-registration-label]").textContent = country === "AE" ? "VAT Registered? *" : "GST Registered? *";
-  form.querySelector("[data-tax-number-label]").textContent = country === "AE" ? "TRN *" : "GSTIN *";
-  form.querySelector("[data-tax-number-hint]").textContent = country === "AE" ? "15-digit UAE Tax Registration Number." : "15-character Goods and Services Tax Identification Number.";
-  taxNumberInput.placeholder = country === "AE" ? "100123456700003" : "27ABCDE1234F1Z5";
-  taxNumberInput.inputMode = country === "AE" ? "numeric" : "text";
-  form.querySelectorAll("[data-uae-field]").forEach((field) => { field.hidden = country !== "AE"; });
-  form.querySelector("[data-default-country]").textContent = country === "AE" ? "United Arab Emirates" : "India";
-  form.querySelector("[data-default-currency]").textContent = country === "AE" ? "AED" : "INR";
-  form.querySelector("[data-default-tax]").textContent = country === "AE" ? "VAT" : "GST";
+  form.querySelector("[data-tax-registration-label]").textContent = model.taxRegistrationLabel;
+  form.querySelector("[data-tax-number-label]").textContent = model.taxNumberLabel;
+  form.querySelector("[data-tax-number-hint]").textContent = model.taxNumberHint;
+  taxNumberInput.placeholder = model.taxNumberPlaceholder;
+  taxNumberInput.inputMode = model.taxNumberInputMode;
+  form.querySelectorAll("[data-uae-field]").forEach((field) => { field.hidden = !model.showTradeLicence; field.querySelectorAll("input,select,textarea").forEach(control => { control.disabled = !model.showTradeLicence; }); });
+  form.querySelector("[data-default-country]").textContent = model.name;
+  form.querySelector("[data-default-currency]").textContent = model.currency;
+  form.querySelector("[data-default-tax]").textContent = model.taxSystem;
   if (!preserveValues) {
     form.elements.businessType.value = "";
     form.elements.state.value = "";
@@ -70,15 +70,16 @@ function updateCountry({ preserveValues = false } = {}) {
 
 function fill(profile) {
   if (!profile) return;
-  form.elements.country.value = profile.country === "AE" ? "AE" : "IN";
+  const model = companyProfileCountryModel(profile);
+  form.elements.country.value = model.code;
   updateCountry({ preserveValues: true });
   if (profile.businessType && ![...form.elements.businessType.options].some((option) => option.value === profile.businessType)) form.elements.businessType.add(new Option(profile.businessType, profile.businessType));
   ["name", "businessType", "address", "tradeLicenseNumber", "tradeLicenseExpiryDate"].forEach((key) => { if (form.elements[key]) form.elements[key].value = profile[key] || ""; });
-  if (profile.country === "AE") form.elements.emirate.value = profile.state || "";
+  if (model.code === "AE") form.elements.emirate.value = profile.state || "";
   else form.elements.state.value = profile.state || "";
-  const registered = profile.country === "AE" ? profile.vatRegistered : profile.gstRegistered;
+  const registered = model.code === "AE" ? profile.vatRegistered : profile.gstRegistered;
   form.elements.taxRegistered.value = registered ? "yes" : "no";
-  taxNumberInput.value = profile.country === "AE" ? profile.trn || "" : profile.gstin || "";
+  taxNumberInput.value = model.code === "AE" ? profile.trn || "" : profile.gstin || "";
   logo = profile.logo || "";
   if (logo) {
     const preview = form.querySelector("[data-logo-preview]");
@@ -86,6 +87,10 @@ function fill(profile) {
     preview.hidden = false;
   }
   updateTaxRegistration({ clearWhenUnregistered: false });
+  const editable = canEditCompanyCountry(profile);
+  form.elements.country.disabled = !editable;
+  form.querySelector("[data-country-lock-hint]").hidden = editable;
+  const securityLink=form.querySelector("[data-company-security]");if(securityLink)securityLink.hidden=profile.ownerId!==signedInUser?.id;
 }
 
 form?.elements.country?.addEventListener("change", () => updateCountry());
@@ -104,6 +109,7 @@ form?.addEventListener("submit", async (event) => {
   event.preventDefault(); clearMessages();
   try {
     const data = Object.fromEntries(new FormData(form));
+    data.country = form.elements.country.value;
     const clean = validateCompanyProfile({ ...data, taxRegistered: data.taxRegistered === "yes", logo });
     const profile = companyToProfile(await saveOwnedCompany({ ...clean, legalName: clean.name }));
     window.InfoBridgeCompany = profile;

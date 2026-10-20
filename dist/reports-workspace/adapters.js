@@ -1,4 +1,6 @@
-import { createWorkspaceStore } from "/supabase/workspace.js";
+import { createWorkspaceStore } from "../supabase/workspace.js";
+import { resolveCountryConfig } from "../country/registry.js";
+import { vatAnalyticsReport } from "./statutory.js";
 const storage = () => globalThis.InfoBridgeWorkspaceStorage || globalThis.localStorage;
 const read = (key) => { try { return JSON.parse(storage().getItem(key) || "null"); } catch { return null; } };
 const available = (module, data, route) => ({ module, available: true, route, refreshedAt: new Date().toISOString(), ...data });
@@ -17,5 +19,8 @@ export const inventoryAnalyticsAdapter = () => cloudAdapter("inventory", "Invent
 export const gstAnalyticsAdapter = () => cloudAdapter("gst", "GST", ["setup", "rows", "uploads", "mappings", "settings"], "/app/gst/index.html");
 export const hrAnalyticsAdapter = () => cloudAdapter("hr-payroll", "HR & Payroll", ["employees", "payrollRuns", "attendance", "leaveTransactions", "settings"], "/hr-payroll/index.html");
 export function financeAnalyticsAdapter() { const x = read("infobridgeindia.finance.v1"); return x ? available("Finance", { journals: x.journals || [], accounts: x.accounts || [], audit: x.audit || [] }, "/app/finance.html") : unavailable("Finance", "Finance has no saved workspace data.", "/app/finance.html"); }
-export async function loadAnalyticsSources() { const [sales, purchases, banking, approvals, inventory, gst, hr] = await Promise.all([salesAnalyticsAdapter(), purchaseAnalyticsAdapter(), bankingAnalyticsAdapter(), approvalsAnalyticsAdapter(), inventoryAnalyticsAdapter(), gstAnalyticsAdapter(), hrAnalyticsAdapter()]); return { sales, purchases, banking, approvals, inventory, gst, hr, finance: financeAnalyticsAdapter() }; }
+export function vatAnalyticsAdapter({ sales, purchases }, company = globalThis.InfoBridgeCompany) {
+  const report=vatAnalyticsReport({sales,purchases},company);return report.available?available("VAT",report,report.route):unavailable("VAT",report.reason,report.route);
+}
+export async function loadAnalyticsSources() { const [sales, purchases, banking, approvals, inventory, gst, hr] = await Promise.all([salesAnalyticsAdapter(), purchaseAnalyticsAdapter(), bankingAnalyticsAdapter(), approvalsAnalyticsAdapter(), inventoryAnalyticsAdapter(), gstAnalyticsAdapter(), hrAnalyticsAdapter()]), sources={ sales, purchases, banking, approvals, inventory, gst, hr, finance: financeAnalyticsAdapter() }; sources.statutory=resolveCountryConfig(globalThis.InfoBridgeCompany).country==="AE"?vatAnalyticsAdapter(sources):gst; return sources; }
 export function auditAnalyticsAdapter(data) { const rows = []; for (const value of Object.values(data)) for (const item of value?.audit || []) rows.push({ ...item, module: value.module, sourceRoute: value.route }); return { module: "Audit", available: rows.length > 0, rows: rows.sort((a, b) => String(b.timestamp || b.createdAt).localeCompare(String(a.timestamp || a.createdAt))), reason: rows.length ? "" : "No source audit events are available." }; }

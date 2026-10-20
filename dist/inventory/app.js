@@ -1,5 +1,6 @@
 import { createMovement, createTransfer, currentInventory, inventoryMetrics, parseCsv, productStock, stockMap, toCsv, uid } from "./core.js";
 import { createWorkspaceStore } from "/supabase/workspace.js";
+import { formatCountryMoney } from "/country/registry.js";
 
 const STORES = ["settings", "warehouses", "products", "movements", "counts"];
 const BUSINESS_TYPES = ["Retail", "Wholesale", "Distributor", "Garments / Fashion", "Grocery / FMCG", "Electronics", "Hardware", "Pharmacy", "Restaurant / Hotel", "Manufacturing", "Construction", "E-commerce", "Import / Export", "Multi-warehouse", "Other / Custom"];
@@ -41,7 +42,7 @@ async function reload() {
   state.counts = counts;
 }
 
-function money(value) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(Number(value || 0)); }
+function money(value) { return formatCountryMoney(value, globalThis.InfoBridgeCompany); }
 function dateTime(value) { return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)); }
 function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char])); }
 function product(id) { return state.products.find((p) => p.id === id); }

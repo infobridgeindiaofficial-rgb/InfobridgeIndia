@@ -1,4 +1,4 @@
-import { resolveCountryConfig } from "../country/registry.js";
+import { formatCountryMoney, resolveCountryConfig } from "../country/registry.js";
 import { payrollForEmployee as sharedPayrollForEmployee } from "./core.js";
 
 export const UAE_EMPLOYMENT_TYPES = Object.freeze([
@@ -27,7 +27,7 @@ export function resolveHrCountryConfig(company) {
 
 export function formatHrMoney(value, company) {
   const config = resolveHrCountryConfig(company);
-  return new Intl.NumberFormat(config.defaults.locale, { style: "currency", currency: config.currency, maximumFractionDigits: 2 }).format(Number(value || 0));
+  return formatCountryMoney(value, config.country);
 }
 
 export function prepareEmployeeRecord(existing, values, company, createId) {
