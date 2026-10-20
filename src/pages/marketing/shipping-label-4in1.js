@@ -33,6 +33,7 @@ export function shippingLabel4in1PageHtml() {
         </div>
 
         <div id="sl4-state-files" style="display:none;">
+          <p id="sl4-duplicate-summary" class="sl4-duplicate-summary" role="status" aria-live="polite" hidden></p>
           <div class="sl4-file-list" id="sl4-file-list"></div>
 
           <div class="sl4-summary">
@@ -68,6 +69,14 @@ export function shippingLabel4in1PageHtml() {
             <button type="button" class="btn btn-accent" id="sl4-download-btn">Download PDF</button>
             <button type="button" class="btn btn-secondary" id="sl4-start-over-btn">Clear / Start Over</button>
           </div>
+          <div id="sl4-download-options" class="sl4-page-download" hidden>
+            <label for="sl4-download-page">Download an individual A4 page</label>
+            <div class="row-gap-3">
+              <select id="sl4-download-page" aria-label="A4 page to download"></select>
+              <button type="button" class="btn btn-secondary" id="sl4-download-page-btn">Download Page</button>
+            </div>
+            <p id="sl4-download-page-status" role="status" aria-live="polite"></p>
+          </div>
         </div>
 
         <div id="sl4-state-error" style="display:none;">
@@ -85,6 +94,11 @@ export function shippingLabel4in1PageHtml() {
           <div class="sl4-preview-header">
             <div><span class="eyebrow">Live preview</span><h2 id="sl4-preview-title">A4 output</h2></div>
             <span class="sl4-preview-count" id="sl4-preview-count"></span>
+          </div>
+          <div class="sl4-courier-controls">
+            <label for="sl4-sort-order">Label order</label>
+            <select id="sl4-sort-order"><option value="courier" selected>Group by Delivery Partner</option><option value="original">Original Upload Order</option></select>
+            <p id="sl4-courier-summary" role="status" aria-live="polite"></p>
           </div>
           <div class="sl4-preview-stage">
             <p class="sl4-preview-status" id="sl4-preview-status">Preparing preview&hellip;</p>
@@ -117,7 +131,7 @@ ${renderHeader("solutions")}
 ${body}
 ${renderFooter()}
 ${renderClientScript()}
-<script type="module" src="/shipping-label-4in1/app.js"></script>
+<script type="module" src="/shipping-label-4in1/app.js?v=20261021-page-downloads"></script>
 </body>
 </html>`;
 }
